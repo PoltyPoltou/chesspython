@@ -1,0 +1,71 @@
+#:kivy 1.11.1
+#:import c colors
+<Tile>:
+    row : self.yBoard if self.reverseOrder else 9-self.yBoard
+    column : self.xBoard if self.reverseOrder else chr(ord('a')+ord('h')-ord(self.xBoard))
+    canvas:
+        Rectangle:
+            pos:self.pos
+            size:self.size
+<WhiteTile@Tile>:
+    couleur : c.WHITE
+    canvas.before:
+        Color:
+            rgb : root.couleur
+<BlackTile@Tile>:
+    couleur : c.BLACK
+    canvas.before:
+        Color:
+            rgb : root.couleur
+
+<CoordLabel@Label>:
+    w : 1
+    color : 0,0,0
+    coord : None
+    markup : True
+    text:'[b][size='+str(int(self.w/4))+'][color='+c.constantToHexStr(self.color)+']' + str(self.coord) + '[/size][/color][/b]'
+    size_hint : 0.3,0.3
+
+<FirstColomnTile@Tile>:
+    row : 1
+    anchor_x : 'left'
+    anchor_y : 'top'
+    CoordLabel:
+        w : root.width
+        coord : root.row
+        color : c.WHITE if root.couleur == c.BLACK else c.BLACK
+
+<FirstRowTile@Tile>:
+    column : 'a'
+    anchor_x : 'right'
+    anchor_y : 'bottom'
+    CoordLabel:
+        w : root.width
+        coord : root.column
+        color : c.WHITE if root.couleur == c.BLACK else c.BLACK
+
+<CornerTile@Tile>:
+    row : 1
+    column : 'a'
+    AnchorLayout:
+        anchor_x:'right'
+        anchor_y:'bottom'
+        CoordLabel:
+            w : root.width
+            coord : root.column
+            color : c.WHITE if root.couleur == c.BLACK else c.BLACK
+    AnchorLayout:
+        anchor_x:'left'
+        anchor_y:'top'
+        CoordLabel:
+            w : root.width
+            coord : root.row
+            color : c.WHITE if root.couleur == c.BLACK else c.BLACK
+
+
+<BCornerTile@BlackTile+CornerTile>:
+<WCornerTile@WhiteTile+CornerTile>:
+<BFirstRowTile@BlackTile+FirstRowTile>:
+<WFirstRowTile@WhiteTile+FirstRowTile>:
+<BFirstColomnTile@BlackTile+FirstColomnTile>:
+<WFirstColomnTile@WhiteTile+FirstColomnTile>:

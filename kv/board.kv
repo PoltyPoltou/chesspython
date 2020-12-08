@@ -1,0 +1,133 @@
+#:kivy 1.11.1
+#:include kv/tiles.kv
+<Row>:
+    cols : 8
+<FirstRowEven@Row>:
+    BCornerTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'a'
+    WFirstRowTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'b'
+    BFirstRowTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'c'
+    WFirstRowTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'd'
+    BFirstRowTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'e'
+    WFirstRowTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'f'
+    BFirstRowTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'g'
+    WFirstRowTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'h'
+
+<RowEven@Row>:
+    BFirstColomnTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'a'
+    WhiteTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'b'
+    BlackTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'c'
+    WhiteTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'd'
+    BlackTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'e'
+    WhiteTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'f'
+    BlackTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'g'
+    WhiteTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'h'
+
+<RowUneven@Row>:
+    WFirstColomnTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'a'
+    BlackTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'b'
+    WhiteTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'c'
+    BlackTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'd'
+    WhiteTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'e'
+    BlackTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'f'
+    WhiteTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'g'
+    BlackTile:
+        reverseOrder : root.reverseOrder
+        yBoard : root.rowNumber
+        xBoard : 'h'
+
+<BoardWidget>:
+    rows : 8
+    pov : 'WHITE'
+    RowUneven:
+        rowNumber : 8
+        reverseOrder : root.pov == 'WHITE'
+    RowEven:
+        rowNumber : 7
+        reverseOrder : root.pov == 'WHITE'
+    RowUneven:
+        rowNumber : 6
+        reverseOrder : root.pov == 'WHITE'
+    RowEven:
+        rowNumber : 5
+        reverseOrder : root.pov == 'WHITE'
+    RowUneven:
+        rowNumber : 4
+        reverseOrder : root.pov == 'WHITE'
+    RowEven:
+        rowNumber : 3
+        reverseOrder : root.pov == 'WHITE'
+    RowUneven:
+        rowNumber : 2
+        reverseOrder : root.pov == 'WHITE'
+    FirstRowEven:
+        rowNumber : 1
+        reverseOrder : root.pov == 'WHITE'

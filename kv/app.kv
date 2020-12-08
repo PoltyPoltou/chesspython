@@ -1,0 +1,41 @@
+#:kivy 1.11.1
+#: include kv/board.kv 
+<WindowLayout>:
+    orientation : 'horizontal'
+    padding : (10,10)
+    spacing : 10
+    boardGUI : boardGUI
+    canvas:
+        Color:
+            rgb : self.couleurBg
+        Rectangle:
+            pos : self.pos
+            size : self.size
+    Label:
+        canvas.before:
+            Color:
+                rgb : (0.5,0.5,0.5)
+            Rectangle:
+                pos : self.pos
+                size : self.size
+        text:"Left for what ?"
+        size_hint : (0.1,1)
+
+    FloatLayout:
+        size_hint : (0.8,1)
+        id : container
+        BoardWidget:
+            id : boardGUI
+            size_hint : (None,None)
+            size : min(container.size), min(container.size)
+            pos_hint: {'center_x' : 0.5, 'center_y' : 0.5}
+
+    Label:
+        canvas.before:
+            Color:
+                rgb : (0.5,0.5,0.5)
+            Rectangle:
+                pos : self.pos
+                size : self.size
+        text:"Right for what ?"
+        size_hint : (0.1,1)
