@@ -3,6 +3,8 @@
 <Tile>:
     row : self.yBoard if self.reverseOrder else 9-self.yBoard
     column : self.xBoard if self.reverseOrder else chr(ord('a')+ord('h')-ord(self.xBoard))
+    coords : self.column + str(self.row)
+    square : (self.row-1) * 8 + ord(self.column) - ord('a')
     canvas:
         Rectangle:
             pos:self.pos
