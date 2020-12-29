@@ -9,6 +9,7 @@ from kivy.clock import *
 class EvaluationBar(Widget):
     bgColor = ObjectProperty((0, 0, 0))
     barColor = ObjectProperty((0, 0, 0))
+    displayedEval = NumericProperty(0.00)
     eval = NumericProperty(0.00)
     textEval = StringProperty(0.00)
     pov = StringProperty("WHITE")
@@ -51,11 +52,17 @@ class EvaluationBar(Widget):
         return (eval, textEval)
 
     def checkEval(self, dt):
+        speedLimit = 4
         if(self.evalThread.hasAnalysis()):
             povScore: chess.engine.PovScore = self.evalThread.getEngineAnalysis()[
                 "score"]
             self.eval, self.textEval = self.parseEval(
                 povScore.pov(chess.WHITE))
-        pass
+        speed = (self.displayedEval - self.eval)/10
+        if(abs(speed) < speedLimit and speed != 0):
+            speed = speed/abs(speed) * speedLimit
+        self.displayedEval -= dt*speed
+        if(abs(self.displayedEval - self.eval) < 0.1):
+            self.displayedEval = self.eval
 
     pass
