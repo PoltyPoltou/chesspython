@@ -1,24 +1,42 @@
-#:kivy 1.11.1
+#:kivy 2.0.0
 #:import c colors
 <Tile>:
     row : self.yBoard if self.reverseOrder else 9-self.yBoard
     column : self.xBoard if self.reverseOrder else chr(ord('a')+ord('h')-ord(self.xBoard))
     coords : self.column + str(self.row)
     square : (self.row-1) * 8 + ord(self.column) - ord('a')
+    pieceSourceImg : ''
+    img : img
+    selected : False
+    movableTo : False
+    played : False
+    color : (0,0,0)
+    bgColor : c.darkerColor(self.color) if self.selected else self.color
+    displayedColor : c.baricenterColor(self.bgColor, c.YELLOW, 0.4,0.6) if self.played else self.bgColor
+    circleColor : c.darkerColor(self.color,0.90) if self.movableTo else self.displayedColor
+    circleSize : 0.3
     canvas:
+        Color:
+            rgb : root.displayedColor
         Rectangle:
             pos:self.pos
             size:self.size
+        Color:
+            rgb : self.circleColor
+        Ellipse:
+            pos: (self.x + self.width/2-self.width * root.circleSize/2, self.y + self.height/2 - self.width * root.circleSize/2)
+            size: (self.width*root.circleSize, self.width*root.circleSize)
+            segments: 300
+    Image:
+        id:img
+        source:root.pieceSourceImg
+        size:root.size
+
+
 <WhiteTile@Tile>:
-    couleur : c.WHITE
-    canvas.before:
-        Color:
-            rgb : root.couleur
+    color : c.WHITE
 <BlackTile@Tile>:
-    couleur : c.BLACK
-    canvas.before:
-        Color:
-            rgb : root.couleur
+    color : c.BLACK
 
 <CoordLabel@Label>:
     w : 1
@@ -35,7 +53,7 @@
     CoordLabel:
         w : root.width
         coord : root.row
-        color : c.WHITE if root.couleur == c.BLACK else c.BLACK
+        color : c.WHITE if root.color == c.BLACK else c.BLACK
 
 <FirstRowTile@Tile>:
     column : 'a'
@@ -44,7 +62,7 @@
     CoordLabel:
         w : root.width
         coord : root.column
-        color : c.WHITE if root.couleur == c.BLACK else c.BLACK
+        color : c.WHITE if root.color == c.BLACK else c.BLACK
 
 <CornerTile@Tile>:
     row : 1
@@ -55,14 +73,14 @@
         CoordLabel:
             w : root.width
             coord : root.column
-            color : c.WHITE if root.couleur == c.BLACK else c.BLACK
+            color : c.WHITE if root.color == c.BLACK else c.BLACK
     AnchorLayout:
         anchor_x:'left'
         anchor_y:'top'
         CoordLabel:
             w : root.width
             coord : root.row
-            color : c.WHITE if root.couleur == c.BLACK else c.BLACK
+            color : c.WHITE if root.color == c.BLACK else c.BLACK
 
 
 <BCornerTile@BlackTile+CornerTile>:
