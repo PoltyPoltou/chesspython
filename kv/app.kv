@@ -1,5 +1,6 @@
-#:kivy 1.11.1
+#:kivy 2.0.0
 #: include kv/board.kv 
+#: include kv/analysis.kv
 <WindowLayout>:
     orientation : 'horizontal'
     padding : (10,10)
@@ -18,17 +19,26 @@
             Rectangle:
                 pos : self.pos
                 size : self.size
-        text:"Left for what ?"
+        text:"left for what ?"
         size_hint : (0.1,1)
 
     FloatLayout:
         size_hint : (0.8,1)
         id : container
+        spacing : 10
+        evalWidth : bar.width + self.spacing
+        
+        EvaluationBar:
+            id : bar 
+            size_hint : (None, None)
+            size : (35, boardGUI.height)
+            pos_hint : {'center_y' : 0.5}
+            right : boardGUI.right - boardGUI.width - container.spacing
         BoardWidget:
             id : boardGUI
             size_hint : (None,None)
-            size : min(container.size), min(container.size)
-            pos_hint: {'center_x' : 0.5, 'center_y' : 0.5}
+            size : min(container.width - container.evalWidth, container.height), min(container.width - container.evalWidth, container.height)
+            pos_hint: {'center_x' : 0.5 + container.evalWidth/container.width/2, 'center_y' : 0.5}
 
     Label:
         canvas.before:

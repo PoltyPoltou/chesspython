@@ -1,0 +1,13 @@
+#:kivy 2.0.0
+#:import c colors
+<EvaluationBar>:
+    eval : 0
+    pov : "WHITE"
+    bgColor : (0,0,0) if self.pov == 'WHITE' else (1,1,1)
+    canvas:
+        Color:
+            rgb:self.bgColor
+        Rectangle:
+            pos:self.pos
+            size:self.size
+            
