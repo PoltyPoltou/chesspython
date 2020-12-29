@@ -2,12 +2,33 @@
 #:import c colors
 <EvaluationBar>:
     eval : 0
+    textEval : "0"
     pov : "WHITE"
     bgColor : (0,0,0) if self.pov == 'WHITE' else (1,1,1)
-    canvas:
+    barColor : (1,1,1) if self.bgColor == (0,0,0) else (0,0,0)
+    sign : ((self.pov == "WHITE") - (self.pov!="WHITE"))
+    canvas.before:
         Color:
             rgb:self.bgColor
         Rectangle:
             pos:self.pos
             size:self.size
+    canvas:
+        Color:
+            rgb:self.barColor
+        Rectangle:
+            pos:self.pos
+            size:self.width, 0.5 * self.height * (1 + self.sign * self.eval/10)
+    Label:
+        canvas:"after"
+        color : (0,0,0) if root.eval > 0 else (1,1,1)
+        text:root.textEval
+        font_size:'12sp'
+        bold: True
+        halign:"center"
+        pos:(root.x,root.top - self.height - (root.sign * root.eval > 0) * (root.height - self.height))
+        size:(root.width,20)
+
+
+        
             

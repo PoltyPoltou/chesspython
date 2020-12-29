@@ -31,14 +31,16 @@
         EvaluationBar:
             id : bar 
             size_hint : (None, None)
-            size : (35, boardGUI.height)
+            size : (40, boardGUI.height)
             pos_hint : {'center_y' : 0.5}
             right : boardGUI.right - boardGUI.width - container.spacing
+            pov : boardGUI.pov
         BoardWidget:
             id : boardGUI
             size_hint : (None,None)
             size : min(container.width - container.evalWidth, container.height), min(container.width - container.evalWidth, container.height)
             pos_hint: {'center_x' : 0.5 + container.evalWidth/container.width/2, 'center_y' : 0.5}
+            evalWidget: bar
 
     Label:
         canvas.before:
