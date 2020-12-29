@@ -20,8 +20,15 @@ class MyChessApp(App):
         return WindowLayout()
 
     def on_start(self):
-        self.root.boardGUI.board = chess.Board()
-        pass
+        return super().on_start()
+
+    def on_stop(self):
+        self.stopThreads()
+        return super().on_stop()
+
+    def stopThreads(self):
+        if(self.root.boardGUI.hasEval()):
+            self.root.boardGUI.stopEval()
 
 
 if __name__ == '__main__':

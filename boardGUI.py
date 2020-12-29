@@ -12,6 +12,7 @@ from kivy.uix.image import *
 from kivy.base import Builder
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
 from tile import Tile
+from analysisWidgets import EvaluationBar
 
 
 class Row(GridLayout):
@@ -21,17 +22,35 @@ class Row(GridLayout):
 
 class BoardWidget(GridLayout, KeyboardListener):
     pov = StringProperty('WHITE')
-    board: Optional[chess.Board] = ObjectProperty(None, True)
     imageDir = "images/"
     imageStyleDir = "std/"
     imageDict = {"r": "br.webp", "n": "bn.webp", "b": "bb.webp", "k": "bk.webp", "q": "bq.webp", "p": "bp.webp",
                  "R": "wr.webp", "N": "wn.webp", "B": "wb.webp", "K": "wk.webp", "Q": "wq.webp", "P": "wp.webp"}
     selectedTile: Optional[Tile] = None
+    board: Optional[chess.Board] = ObjectProperty(None, True)
+    evalWidget: Optional[EvaluationBar] = ObjectProperty(None, True)
 
     def __init__(self, **kwargs):
         self.initKeyboard()
         self.bind_key('r', self.rotate)
         super().__init__(**kwargs)
+
+    def on_kv_post(self, base_widget):
+        self.board = chess.Board()
+        if(self.evalWidget != None):
+            self.startEval()
+        return super().on_kv_post(base_widget)
+
+    def hasEval(self):
+        return self.evalWidget != None
+
+    def startEval(self):
+        self.evalWidget.start(self.board)
+        pass
+
+    def stopEval(self):
+        self.evalWidget.stop()
+        pass
 
     def rotate(self, key, modifiers):
         if(self.pov == 'WHITE'):

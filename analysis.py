@@ -15,6 +15,7 @@ class BoardAnalysisWrapper():
             self.stopFlag = False
             self.threads = 1
             self.setDaemon(True)
+            print("Eval thread Launched")
 
         def run(self):
             while(not self.wrapper.board.is_game_over() and not self.stopFlag):
@@ -31,13 +32,17 @@ class BoardAnalysisWrapper():
                     while(not self.stopFlag and self.wrapper.board.fen() == boardCopy.fen()):
                         time.sleep(0.1)
             self.wrapper.engine.quit()
+            print("Eval thread Killed")
         pass
 
-    def __init__(self, engineStr, board):
+    def __init__(self, board, engineStr="./engines/stockfish12.exe"):
         self.board: chess.Board = board
         self.engine: chess.engine.SimpleEngine = chess.engine.SimpleEngine.popen_uci(
             engineStr)
         self.evalThread = self.ThreadContinuousEvaluation(self)
+
+    def start(self):
+        self.evalThread.start()
 
     def hasAnalysis(self):
         return self.evalThread.infoMove != None
