@@ -34,6 +34,7 @@ class EvaluationBar(Widget):
             self.evalThread = None
 
     def update(self, board):
+        self.board = board
         self.evalThread.update(board)
 
     def parseEval(self, povScore: chess.engine.PovScore):
