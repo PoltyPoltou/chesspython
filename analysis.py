@@ -60,7 +60,7 @@ class BoardAnalysisWrapper():
         return self.evalThread.infoMove.copy()
 
     def bestMove(self):
-        return self.evalThread.infoMove.get('pv')[0].copy()
+        return self.evalThread.infoMove.get('pv')[0]
 
     def bestVariant(self):
         return self.evalThread.infoMove.get('pv').copy()

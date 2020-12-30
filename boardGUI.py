@@ -35,6 +35,7 @@ class BoardWidget(GridLayout, KeyboardListener):
     def __init__(self, **kwargs):
         self.initKeyboard()
         self.bind_key('r', self.rotate)
+        self.bind_key('p', self.computerPlay)
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -61,12 +62,18 @@ class BoardWidget(GridLayout, KeyboardListener):
             self.pov = 'WHITE'
         self.update_board()
 
+    def computerPlay(self, key, modifiers):
+        if(self.evalWidget != None):
+            bestMove = self.evalWidget.evalThread.bestMove()
+            if(self.board.is_legal(bestMove)):
+                self.playMove(bestMove)
+
     def playMove(self, move: chess.Move):
         if(self.moveList != None):
             self.moveList.add_move(self.board.turn, self.board.san(
                 move), self.board.fullmove_number)
-        self.update_board()
         self.board.push(move)
+        self.update_board()
 
     def on_touch_down(self, touch):
         for row in self.children:
