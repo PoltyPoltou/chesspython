@@ -22,13 +22,22 @@ class MoveLabel(AnchorLayout):
 
 class MoveList(ScrollView):
     gridLayoutRef = ObjectProperty(None)
+    textHeight = 20
 
     def add_move(self, color: chess.Color, san: str, fullMoveCount: int):
         if(color == chess.WHITE):
             self.gridLayoutRef.add_widget(
                 MoveLabel(str(fullMoveCount) + ". ", "center"))
-            self.gridLayoutRef.size = (0, self.gridLayoutRef.size[1]+20)
+            self.gridLayoutRef.size = (
+                0, self.gridLayoutRef.size[1]+self.textHeight)
         self.gridLayoutRef.add_widget(MoveLabel(san, "left"))
         if(self.gridLayoutRef.height > self.height):
             self.scroll_y = 0
+
+    def remove_move(self):
+        if(len(self.gridLayoutRef.children) % 3 == 2):
+            self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
+            self.gridLayoutRef.size = (
+                0, self.gridLayoutRef.size[1]-self.textHeight)
+        self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
     pass
