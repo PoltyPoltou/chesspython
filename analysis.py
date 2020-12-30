@@ -21,7 +21,7 @@ class BoardAnalysisWrapper():
 
         def run(self):
             while(not self.stopFlag):
-                boardCopy = self.wrapper.board.copy()
+                boardCopy = self.wrapper.board
                 with self.wrapper.engine.analysis(boardCopy, self.limit, options={"threads": self.threads}) as analysis:
                     self.finished = False
                     for info in analysis:
@@ -48,31 +48,36 @@ class BoardAnalysisWrapper():
         self.board: chess.Board = board
         self.engine: chess.engine.SimpleEngine = chess.engine.SimpleEngine.popen_uci(
             engineStr)
-        self.evalThread = self.ThreadContinuousEvaluation(self)
+        self._evalThread = self.ThreadContinuousEvaluation(self)
+
+    def update(self, board):
+        self.board = board
 
     def start(self):
-        self.evalThread.start()
+        self._evalThread.start()
 
     def hasAnalysis(self):
-        return self.evalThread.infoMove != None
+        return self._evalThread.infoMove != None
 
     def getEngineAnalysis(self):
-        return self.evalThread.infoMove.copy()
+        return self._evalThread.infoMove.copy()
 
     def bestMove(self):
-        return self.evalThread.infoMove.get('pv')[0]
+        if 'pv' in self._evalThread.infoMove:
+            return self._evalThread.infoMove.get('pv')[0]
+        return None
 
     def bestVariant(self):
-        return self.evalThread.infoMove.get('pv').copy()
+        return self._evalThread.infoMove.get('pv').copy()
 
     def depth(self):
-        return self.evalThread.infoMove.get('depth')
+        return self._evalThread.infoMove.get('depth')
 
     def setLimitDepth(self, depth: int):
-        self.evalThread.limit = chess.engine.Limit(depth=depth)
+        self._evalThread.limit = chess.engine.Limit(depth=depth)
 
     def stop(self):
-        self.evalThread.stopFlag = True
+        self._evalThread.stopFlag = True
 
     def hasFinished(self):
-        return self.evalThread.finished
+        return self._evalThread.finished

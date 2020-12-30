@@ -1,6 +1,7 @@
 from movelist import MoveList
 from typing import List, Optional
 import chess
+import chess.pgn
 from kivy.uix.widget import Widget
 from keyboard import KeyboardListener
 from colors import *
@@ -29,6 +30,7 @@ class BoardWidget(GridLayout, KeyboardListener):
                  "R": "wr.webp", "N": "wn.webp", "B": "wb.webp", "K": "wk.webp", "Q": "wq.webp", "P": "wp.webp"}
     selectedTile: Optional[Tile] = None
     board: Optional[chess.Board] = ObjectProperty(None, True)
+    game: Optional[chess.pgn.Game] = ObjectProperty(None, True)
     evalWidget: Optional[EvaluationBar] = ObjectProperty(None, True)
     moveList: Optional[MoveList] = ObjectProperty(None)
 
@@ -36,10 +38,13 @@ class BoardWidget(GridLayout, KeyboardListener):
         self.initKeyboard()
         self.bind_key('r', self.rotate)
         self.bind_key('p', self.computerPlay)
+        self.bind_key('j', self.prevNode)
+        self.bind_key('l', self.nextNode)
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
-        self.board = chess.Board()
+        self.game = chess.pgn.Game()
+        self.board = self.game.board()
         if(self.evalWidget != None):
             self.startEval()
         return super().on_kv_post(base_widget)
@@ -68,12 +73,25 @@ class BoardWidget(GridLayout, KeyboardListener):
             if(self.board.is_legal(bestMove)):
                 self.playMove(bestMove)
 
+    def prevNode(self, key, modifiers):
+        if(self.game.parent != None):
+            self.game = self.game.parent
+            self.board = self.game.board()
+            self.moveList
+
+    def nextNode(self, key, modifiers):
+        if(self.game.next() != None):
+            self.game = self.game.next()
+            self.board = self.game.board()
+
     def playMove(self, move: chess.Move):
         if(self.moveList != None):
             self.moveList.add_move(self.board.turn, self.board.san(
                 move), self.board.fullmove_number)
-        self.board.push(move)
+        self.game = self.game.add_main_variation(move)
+        self.board = self.game.board()
         self.update_board()
+        self.evalWidget.update(self.board)
 
     def on_touch_down(self, touch):
         for row in self.children:

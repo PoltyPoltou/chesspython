@@ -33,6 +33,10 @@ class EvaluationBar(Widget):
             self.evalThread.stop()
             self.evalThread = None
 
+    def update(self, board):
+        self.board = board
+        self.evalThread.update(board)
+
     def parseEval(self, povScore: chess.engine.PovScore):
         engineEval = povScore.white()
         if(self.board != None and self.board.is_game_over(claim_draw=True)):
