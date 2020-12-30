@@ -1,3 +1,4 @@
+from movelist import MoveList
 from typing import List, Optional
 import chess
 from kivy.uix.widget import Widget
@@ -29,6 +30,7 @@ class BoardWidget(GridLayout, KeyboardListener):
     selectedTile: Optional[Tile] = None
     board: Optional[chess.Board] = ObjectProperty(None, True)
     evalWidget: Optional[EvaluationBar] = ObjectProperty(None, True)
+    moveList: Optional[MoveList] = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         self.initKeyboard()
@@ -60,8 +62,11 @@ class BoardWidget(GridLayout, KeyboardListener):
         self.update_board()
 
     def playMove(self, move: chess.Move):
-        self.board.push(move)
+        if(self.moveList != None):
+            self.moveList.add_move(self.board.turn, self.board.san(
+                move), self.board.fullmove_number)
         self.update_board()
+        self.board.push(move)
 
     def on_touch_down(self, touch):
         for row in self.children:

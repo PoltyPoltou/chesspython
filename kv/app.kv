@@ -1,6 +1,7 @@
 #:kivy 2.0.0
 #: include kv/board.kv 
 #: include kv/analysis.kv
+#: include kv/movelist.kv
 <WindowLayout>:
     orientation : 'horizontal'
     padding : (10,10)
@@ -41,13 +42,7 @@
             size : min(container.width - container.evalWidth, container.height), min(container.width - container.evalWidth, container.height)
             pos_hint: {'center_x' : 0.5 + container.evalWidth/container.width/2, 'center_y' : 0.5}
             evalWidget: bar
-
-    Label:
-        canvas.before:
-            Color:
-                rgb : (0.5,0.5,0.5)
-            Rectangle:
-                pos : self.pos
-                size : self.size
-        text:"Right for what ?"
+            moveList: mvlst
+    MoveList:
+        id:mvlst
         size_hint : (0.1,1)
