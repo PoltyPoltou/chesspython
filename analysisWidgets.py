@@ -18,9 +18,11 @@ class EvaluationBar(Widget):
 
     def __init__(self, **kwargs):
         self.evalThread = None
+        self.board = None
         super().__init__(**kwargs)
 
     def start(self, board):
+        self.board = board
         self.evalThread = analysis.BoardAnalysisWrapper(board)
         self.evalThread.start()
         self.evalEvent = Clock.schedule_interval(self.checkEval, 1/60)
@@ -31,7 +33,8 @@ class EvaluationBar(Widget):
             self.evalThread.stop()
             self.evalThread = None
 
-    def parseEval(self, engineEval: chess.engine.Score):
+    def parseEval(self, povScore: chess.engine.PovScore):
+        engineEval = povScore.white()
         if(engineEval.score() is not None):
             eval = engineEval.score() / 100
             textEval = str(eval)
@@ -39,17 +42,20 @@ class EvaluationBar(Widget):
                 eval = 10
             if(eval < -10):
                 eval = -10
-        elif(engineEval.score() == chess.engine.MateGiven):
-            eval = 10
-            textEval = "1-0"
-        elif(engineEval.score() == -chess.engine.MateGiven):
-            eval = -10
-            textEval = "0-1"
-        else:
-            sign = abs(engineEval.mate())/engineEval.mate()
-            lst = {-1: "-", 1: "+"}
-            eval = sign * 10
-            textEval = lst[sign] + "M" + str(abs(engineEval.mate()))
+        elif(self.board != None and self.board.is_game_over()):
+            textEval = self.board.result(claim_draw=True)
+            if(povScore.is_mate()):
+                eval = 10 if textEval == "1-0" else -10
+            else:
+                eval = 0
+        elif(povScore.is_mate()):
+            if(engineEval.mate() > 0):
+                eval = 10
+                textEval = "+M" + str(abs(engineEval.mate()))
+            else:
+                eval = -10
+                textEval = "-M" + str(abs(engineEval.mate()))
+
         return (eval, textEval)
 
     def checkEval(self, dt):
@@ -57,8 +63,7 @@ class EvaluationBar(Widget):
         if(self.evalThread.hasAnalysis()):
             povScore: chess.engine.PovScore = self.evalThread.getEngineAnalysis()[
                 "score"]
-            evalLinear, self.textEval = self.parseEval(
-                povScore.pov(chess.WHITE))
+            evalLinear, self.textEval = self.parseEval(povScore)
             self.eval = 10*math.tanh(evalLinear/4)
         speed = (self.displayedEval - self.eval)/3
         if(abs(speed) < speedLimit and speed != 0):
