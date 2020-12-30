@@ -1,3 +1,4 @@
+import math
 from typing import Optional
 import chess
 import analysis
@@ -22,7 +23,7 @@ class EvaluationBar(Widget):
     def start(self, board):
         self.evalThread = analysis.BoardAnalysisWrapper(board)
         self.evalThread.start()
-        self.evalEvent = Clock.schedule_interval(self.checkEval, 1/120)
+        self.evalEvent = Clock.schedule_interval(self.checkEval, 1/60)
 
     def stop(self):
         if(self.evalThread != None):
@@ -52,17 +53,18 @@ class EvaluationBar(Widget):
         return (eval, textEval)
 
     def checkEval(self, dt):
-        speedLimit = 4
+        speedLimit = 2
         if(self.evalThread.hasAnalysis()):
             povScore: chess.engine.PovScore = self.evalThread.getEngineAnalysis()[
                 "score"]
-            self.eval, self.textEval = self.parseEval(
+            evalLinear, self.textEval = self.parseEval(
                 povScore.pov(chess.WHITE))
-        speed = (self.displayedEval - self.eval)/10
+            self.eval = 10*math.tanh(evalLinear/4)
+        speed = (self.displayedEval - self.eval)/3
         if(abs(speed) < speedLimit and speed != 0):
             speed = speed/abs(speed) * speedLimit
         self.displayedEval -= dt*speed
-        if(abs(self.displayedEval - self.eval) < 0.1):
+        if(abs(self.displayedEval - self.eval) < 0.01):
             self.displayedEval = self.eval
 
     pass
