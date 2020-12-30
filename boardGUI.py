@@ -38,6 +38,8 @@ class BoardWidget(GridLayout, KeyboardListener):
         self.initKeyboard()
         self.bind_key('r', self.rotate)
         self.bind_key('p', self.computerPlay)
+        self.bind_key('j', self.prevNode)
+        self.bind_key('l', self.nextNode)
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -70,6 +72,17 @@ class BoardWidget(GridLayout, KeyboardListener):
             bestMove = self.evalWidget.evalThread.bestMove()
             if(self.board.is_legal(bestMove)):
                 self.playMove(bestMove)
+
+    def prevNode(self, key, modifiers):
+        if(self.game.parent != None):
+            self.game = self.game.parent
+            self.board = self.game.board()
+            self.moveList
+
+    def nextNode(self, key, modifiers):
+        if(self.game.next() != None):
+            self.game = self.game.next()
+            self.board = self.game.board()
 
     def playMove(self, move: chess.Move):
         if(self.moveList != None):
