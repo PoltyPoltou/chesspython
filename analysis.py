@@ -20,7 +20,7 @@ class BoardAnalysisWrapper():
             print("Eval thread Launched")
 
         def run(self):
-            while(not self.wrapper.board.is_game_over() and not self.stopFlag):
+            while(not self.stopFlag):
                 boardCopy = self.wrapper.board.copy()
                 with self.wrapper.engine.analysis(boardCopy, self.limit, options={"threads": self.threads}) as analysis:
                     self.finished = False
@@ -71,34 +71,8 @@ class BoardAnalysisWrapper():
     def setLimitDepth(self, depth: int):
         self.evalThread.limit = chess.engine.Limit(depth=depth)
 
-    def stopThread(self):
+    def stop(self):
         self.evalThread.stopFlag = True
 
     def hasFinished(self):
         return self.evalThread.finished
-
-
-class ThreadGameAnalysis(threading.Thread):
-    def __init__(self, game: chess.Board, pv=3, threads=3, limit=chess.engine.Limit(depth=18)):
-        super().__init__(self)
-        self.engine.configure({"threads": threads})
-        self.threads = threads
-        self.limit = limit
-        self.moveStack = list(game.move_stack)
-        self.root: chess.Board = game.root()
-        self.analyseList: list[chess.engine.InfoDict] = []
-        self.pv = pv
-        self.setDaemon(True)
-
-    def run(self):
-        self.time = time.time()
-        wrapper = BoardAnalysisWrapper(self.root)
-        wrapper.start()
-        for move in self.moveStack:
-            self.root.push(move)
-            while(not wrapper.hasFinished()):
-                time.sleep(0.2)
-            self.analyseList.append(wrapper.getEngineAnalysis())
-            self.progress.set(100 * self.root.ply() / len(self.moveStack))
-        self.time = time.time() - self.time
-        self.engine.quit()

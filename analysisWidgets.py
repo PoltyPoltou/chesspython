@@ -28,7 +28,7 @@ class EvaluationBar(Widget):
     def stop(self):
         if(self.evalThread != None):
             self.evalEvent.cancel()
-            self.evalThread.stopThread()
+            self.evalThread.stop()
             self.evalThread = None
 
     def parseEval(self, engineEval: chess.engine.Score):
