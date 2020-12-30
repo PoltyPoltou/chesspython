@@ -35,19 +35,19 @@ class EvaluationBar(Widget):
 
     def parseEval(self, povScore: chess.engine.PovScore):
         engineEval = povScore.white()
-        if(engineEval.score() is not None):
+        if(self.board != None and self.board.is_game_over(claim_draw=True)):
+            textEval = self.board.result(claim_draw=True)
+            if(povScore.is_mate()):
+                eval = 10 if textEval == "1-0" else -10
+            else:
+                eval = 0
+        elif(engineEval.score() is not None):
             eval = engineEval.score() / 100
             textEval = str(eval)
             if(eval > 10):
                 eval = 10
             if(eval < -10):
                 eval = -10
-        elif(self.board != None and self.board.is_game_over()):
-            textEval = self.board.result(claim_draw=True)
-            if(povScore.is_mate()):
-                eval = 10 if textEval == "1-0" else -10
-            else:
-                eval = 0
         elif(povScore.is_mate()):
             if(engineEval.mate() > 0):
                 eval = 10

@@ -94,7 +94,7 @@ class BoardWidget(GridLayout, KeyboardListener):
             else:
                 move = chess.Move.from_uci(
                     self.selectedTile.coords + tile.coords)
-                if(self.board.is_legal(move) and not self.board.is_game_over()):
+                if(self.board.is_legal(move) and not self.board.is_game_over(claim_draw=True)):
                     self.playMove(move)
                     self.unselectCase()
                 else:
