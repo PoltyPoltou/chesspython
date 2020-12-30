@@ -21,7 +21,7 @@ class BoardAnalysisWrapper():
 
         def run(self):
             while(not self.stopFlag):
-                boardCopy = self.wrapper.board.copy()
+                boardCopy = self.wrapper.board
                 with self.wrapper.engine.analysis(boardCopy, self.limit, options={"threads": self.threads}) as analysis:
                     self.finished = False
                     for info in analysis:
