@@ -14,6 +14,7 @@ from tile import Tile
 from typing import List, Optional
 import chess
 import chess.pgn
+import gamecontroller
 
 class Row(GridLayout):
     rowNumber = NumericProperty(0)
@@ -28,38 +29,35 @@ class BoardWidget(GridLayout):
                  "R": "wr.webp", "N": "wn.webp", "B": "wb.webp", "K": "wk.webp", "Q": "wq.webp", "P": "wp.webp"}
     selectedTile: Optional[Tile] = None
     board: Optional[chess.Board] = ObjectProperty(None, True)
-    game: Optional[chess.pgn.Game] = ObjectProperty(None, True)
     evalWidget: Optional[EvaluationBar] = ObjectProperty(None, True)
     moveList: Optional[MoveList] = ObjectProperty(None)
+    controller : Optional[gamecontroller.GameController] = None
 
     def __init__(self, **kwargs):
+        self.board = None
         super().__init__(**kwargs)
 
-    def on_kv_post(self, base_widget):
-        self.game = chess.pgn.Game()
-        self.board = self.game.board()
-        if(self.evalWidget != None):
+    def setup(self, controller):
+        self.controller = controller
+        self.evalWidget.evalWrapper = controller.evalWrapper
+        self.changeBoard(self.controller.board)
+
+    def changeBoard(self, board):
+        self.board = board
+        if(self.hasEval() and not self.evalWidget.isStarted()):
             self.startEval()
-        return super().on_kv_post(base_widget)
+        self.evalWidget.update(self.board)
 
     def hasEval(self):
         return self.evalWidget != None
 
     def startEval(self):
-        self.evalWidget.start(self.board)
+        self.evalWidget.start()
         pass
 
     def stopEval(self):
         self.evalWidget.stop()
         pass
-
-    def playMove(self, move: chess.Move):
-        if(self.moveList != None):
-            self.moveList.add_move(self.board.turn, self.board.san(
-                move), self.board.fullmove_number)
-        self.game = self.game.add_main_variation(move)
-        self.board = self.game.board()
-        self.evalWidget.update(self.board)
 
     def on_touch_down(self, touch):
         for row in self.children:
@@ -81,7 +79,7 @@ class BoardWidget(GridLayout):
                 move = chess.Move.from_uci(
                     self.selectedTile.coords + tile.coords)
                 if(self.board.is_legal(move) and not self.board.is_game_over(claim_draw=True)):
-                    self.playMove(move)
+                    self.controller.playMove(move)
                     self.unselectCase()
                 else:
                     self.unselectCase()

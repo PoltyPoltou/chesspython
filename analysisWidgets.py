@@ -17,25 +17,27 @@ class EvaluationBar(Widget):
     sign = BooleanProperty(False)
 
     def __init__(self, **kwargs):
-        self.evalThread = None
+        self.evalWrapper = None
         self.board = None
+        self.started = False
         super().__init__(**kwargs)
 
-    def start(self, board):
-        self.board = board
-        self.evalThread = analysis.BoardAnalysisWrapper(board)
-        self.evalThread.start()
-        self.evalEvent = Clock.schedule_interval(self.checkEval, 1/60)
+    def isStarted(self):
+        return self.evalWrapper is not None and self.started
+
+    def start(self):
+        if(self.evalWrapper != None):
+            self.started = True
+            self.evalEvent = Clock.schedule_interval(self.checkEval, 1/60)
 
     def stop(self):
-        if(self.evalThread != None):
+        if(self.evalWrapper != None and self.started):
             self.evalEvent.cancel()
-            self.evalThread.stop()
-            self.evalThread = None
+            self.evalWrapper = None
+            self.started = False
 
     def update(self, board):
         self.board = board
-        self.evalThread.update(board)
 
     def parseEval(self, povScore: chess.engine.PovScore):
         engineEval = povScore.white()
@@ -64,8 +66,8 @@ class EvaluationBar(Widget):
 
     def checkEval(self, dt):
         speedLimit = 2
-        if(self.evalThread.hasAnalysis()):
-            povScore: chess.engine.PovScore = self.evalThread.getEngineAnalysis()[
+        if(self.evalWrapper.hasAnalysis()):
+            povScore: chess.engine.PovScore = self.evalWrapper.getEngineAnalysis()[
                 "score"]
             evalLinear, self.textEval = self.parseEval(povScore)
             self.eval = 10*math.tanh(evalLinear/4)

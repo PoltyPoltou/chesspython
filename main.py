@@ -20,7 +20,7 @@ class MyChessApp(App):
     def stopThreads(self):
         if(self.root.boardGUI.hasEval()):
             self.root.boardGUI.stopEval()
-
+        self.root.controller.evalWrapper.stop()
 
 if __name__ == '__main__':
     MyChessApp().run()
