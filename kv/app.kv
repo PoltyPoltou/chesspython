@@ -1,7 +1,9 @@
 #:kivy 2.0.0
-#: include kv/board.kv 
+#: include kv/board.kv
 #: include kv/analysis.kv
 #: include kv/movelist.kv
+#: include kv/loader.kv
+
 <WindowLayout>:
     orientation : 'horizontal'
     padding : (10,10)
@@ -13,24 +15,20 @@
         Rectangle:
             pos : self.pos
             size : self.size
-    Label:
-        canvas.before:
-            Color:
-                rgb : (0.5,0.5,0.5)
-            Rectangle:
-                pos : self.pos
-                size : self.size
-        text:"left for what ?"
+    BoxLayout:
         size_hint : (0.1,1)
+        Button:
+            text: 'Load'
+            on_release: boardGUI.show_load()
 
     FloatLayout:
         size_hint : (0.75,1)
         id : container
         spacing : 10
         evalWidth : bar.width + self.spacing
-        
+
         EvaluationBar:
-            id : bar 
+            id : bar
             size_hint : (None, None)
             size : (40, boardGUI.height)
             pos_hint : {'center_y' : 0.5}

@@ -13,10 +13,17 @@ from kivy.uix.behaviors import *
 from kivy.uix.image import *
 from kivy.base import Builder
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.popup import Popup
 from tile import Tile
 from analysisWidgets import EvaluationBar
 from analysis import GameAnalysis
+import os
 
+class LoadDialog(FloatLayout):
+    load = ObjectProperty(None)
+    cancel = ObjectProperty(None)
+    path = ObjectProperty(None)
 
 class Row(GridLayout):
     rowNumber = NumericProperty(0)
@@ -42,6 +49,7 @@ class BoardWidget(GridLayout):
         self.keyboard.bind_key('j', self.prevNode)
         self.keyboard.bind_key('l', self.nextNode)
         self.keyboard.bind_key('a', self.analyseFullGame)
+        self.keyboard.bind_key('o', self.show_load)
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -99,6 +107,28 @@ class BoardWidget(GridLayout):
         self.board = self.game.board()
         self.update_board()
         self.evalWidget.update(self.board)
+
+    def show_load(self):
+        content = LoadDialog(load=self.load, cancel=self.dismiss_popup, path=os.curdir)
+        self._popup = Popup(title="Load file", content=content,
+                            size_hint=(0.9, 0.9))
+        self._popup.open()
+
+    def load(self, path, filename):
+        pgn = open(os.path.join(path, filename[0]))
+
+        first_game = chess.pgn.read_game(pgn)
+        if first_game is not None:
+            analysis = GameAnalysis()
+            analysis.game = first_game.game()
+            analysis.start()
+            self.game = first_game
+            self.board = self.game.board()
+
+        self.dismiss_popup()
+
+    def dismiss_popup(self):
+        self._popup.dismiss()
 
     def on_touch_down(self, touch):
         for row in self.children:
