@@ -21,6 +21,8 @@ class MyChessApp(App):
         if(self.root.boardGUI.hasEval()):
             self.root.boardGUI.stopEval()
         self.root.controller.evalWrapper.stop()
+        for analysis in self.root.controller.listAnalysis:
+            analysis.stop()
 
 if __name__ == '__main__':
     MyChessApp().run()

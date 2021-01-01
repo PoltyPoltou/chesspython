@@ -122,21 +122,23 @@ class GameAnalysis(threading.Thread):
     def __init__(self):
         super().__init__()
         self.game = None
+        self.stopFlag = False
+        self.wrapper = None
 
     def analyseGame(self, game : chess.pgn.Game):
         evalList = []
         curGame = game
         board = curGame.board()
-        wrapper = BoardAnalysisWrapper(board)
-        wrapper.start()
-        while curGame is not None:
-            wrapper.update(curGame.board())
-            while not wrapper.hasFinished():
+        self.wrapper = BoardAnalysisWrapper(board)
+        self.wrapper.start()
+        while curGame is not None and not self.stopFlag:
+            self.wrapper.update(curGame.board())
+            while not self.wrapper.hasFinished() and not self.stopFlag:
                 time.sleep(0.1)
-            if(wrapper.bestMove() is not None):
-                evalList.append((curGame.move, wrapper.getEngineAnalysis()))
+            if(self.wrapper.bestMove() is not None):
+                evalList.append((curGame.move, self.wrapper.getEngineAnalysis()))
             curGame = curGame.next()
-        wrapper.stop()
+        self.wrapper.stop()
         return evalList
 
     def analyseMoves(self, evalList):
@@ -163,8 +165,12 @@ class GameAnalysis(threading.Thread):
         return moveQualityList
 
     def run(self):
-        analysis = GameAnalysis()
-        evalList = analysis.analyseGame(self.game.game())
-        moveQuality = analysis.analyseMoves(evalList)
+        evalList = self.analyseGame(self.game.game())
+        moveQuality = self.analyseMoves(evalList)
         for quality in moveQuality:
             print(quality.move," ", quality)
+
+    def stop(self):
+        self.stopFlag = True
+        if self.wrapper is not None:
+            self.wrapper.stop()

@@ -8,6 +8,8 @@ class GameController():
     moveList: Optional[MoveList] = None
     boardGUI = None
 
+    listAnalysis = []
+
     def __init__(self):
         self.game = chess.pgn.Game()
         self.board = self.game.board()
@@ -23,6 +25,7 @@ class GameController():
         analysis = GameAnalysis()
         analysis.game = game.game()
         analysis.start()
+        self.listAnalysis.append(analysis)
         self.updateCurrentNode(game)
         self.moveList.clearList()
 
@@ -47,6 +50,7 @@ class GameController():
         analysis = GameAnalysis()
         analysis.game = self.game.game()
         analysis.start()
+        self.listAnalysis.append(analysis)
 
     def updateCurrentNode(self, game):
         self.game = game
