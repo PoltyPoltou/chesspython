@@ -125,6 +125,7 @@ class BoardWidget(GridLayout):
             analysis.start()
             self.game = first_game
             self.board = self.game.board()
+            self.moveList.clearList()
 
         self.dismiss_popup()
 

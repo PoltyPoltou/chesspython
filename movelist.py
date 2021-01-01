@@ -41,3 +41,7 @@ class MoveList(ScrollView):
                 0, self.gridLayoutRef.size[1]-self.textHeight)
         self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
     pass
+
+    def clearList(self):
+        self.gridLayoutRef.clear_widgets()
+        self.gridLayoutRef.size = (0, 0)
