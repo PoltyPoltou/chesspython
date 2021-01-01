@@ -27,9 +27,6 @@ class MyKeyboardListener(Widget):
         self._bindings[textKey].append(callback)
 
     def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
-        print('The key', keycode, 'have been pressed')
-        print(' - text is %r' % text)
-        print(' - modifiers are %r' % modifiers)
         for f in self._bindings.get(keycode[1], []):
             f()
         # Keycode is composed of an integer + a string
