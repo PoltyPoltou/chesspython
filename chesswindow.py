@@ -60,10 +60,10 @@ class ChessWindow(BoxLayout):
         analysis.start()
 
     def show_load(self):
-        content = LoadDialog(load=self.boardGUI.load, cancel=self.boardGUI.dismiss_popup, path=os.curdir)
-        self.boardGUI._popup = Popup(title="Load file", content=content,
+        content = LoadDialog(load=self.load, cancel=self.dismiss_popup, path=os.curdir)
+        self._popup = Popup(title="Load file", content=content,
                             size_hint=(0.9, 0.9))
-        self.boardGUI._popup.open()
+        self._popup.open()
 
     def load(self, path, filename):
         pgn = open(os.path.join(path, filename[0]))
@@ -77,7 +77,7 @@ class ChessWindow(BoxLayout):
             self.boardGUI.board = self.boardGUI.game.board()
             self.boardGUI.moveList.clearList()
 
-        self.boardGUI.dismiss_popup()
+        self.dismiss_popup()
 
     def dismiss_popup(self):
-        self.boardGUI._popup.dismiss()
+        self._popup.dismiss()
