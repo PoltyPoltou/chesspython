@@ -87,10 +87,12 @@ class BoardWidget(GridLayout):
         if(self.game.parent != None):
             self.game = self.game.parent
             self.board = self.game.board()
-            self.moveList
+            self.moveList.remove_move()
 
     def nextNode(self):
         if(self.game.next() != None):
+            self.moveList.add_move(self.board.turn, self.board.san(
+                self.game.next().move), self.board.fullmove_number)
             self.game = self.game.next()
             self.board = self.game.board()
 
@@ -105,7 +107,6 @@ class BoardWidget(GridLayout):
                 move), self.board.fullmove_number)
         self.game = self.game.add_main_variation(move)
         self.board = self.game.board()
-        self.update_board()
         self.evalWidget.update(self.board)
 
     def show_load(self):
