@@ -3,7 +3,7 @@ from typing import List, Optional
 import chess
 import chess.pgn
 from kivy.uix.widget import Widget
-from keyboard import KeyboardListener
+from keyboard import MyKeyboardListener
 from colors import *
 from kivy.graphics import *
 from kivy.uix.gridlayout import *
@@ -22,7 +22,7 @@ class Row(GridLayout):
     reverseOrder = BooleanProperty(False)
 
 
-class BoardWidget(GridLayout, KeyboardListener):
+class BoardWidget(GridLayout):
     pov = StringProperty('WHITE')
     imageDir = "images/"
     imageStyleDir = "std/"
@@ -35,11 +35,11 @@ class BoardWidget(GridLayout, KeyboardListener):
     moveList: Optional[MoveList] = ObjectProperty(None)
 
     def __init__(self, **kwargs):
-        self.initKeyboard()
-        self.bind_key('r', self.rotate)
-        self.bind_key('p', self.computerPlay)
-        self.bind_key('j', self.prevNode)
-        self.bind_key('l', self.nextNode)
+        self.keyboard: MyKeyboardListener = MyKeyboardListener()
+        self.keyboard.bind_key('r', self.rotate)
+        self.keyboard.bind_key('p', self.computerPlay)
+        self.keyboard.bind_key('left', self.prevNode)
+        self.keyboard.bind_key('right', self.nextNode)
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -60,26 +60,26 @@ class BoardWidget(GridLayout, KeyboardListener):
         self.evalWidget.stop()
         pass
 
-    def rotate(self, key, modifiers):
+    def rotate(self):
         if(self.pov == 'WHITE'):
             self.pov = 'BLACK'
         else:
             self.pov = 'WHITE'
         self.update_board()
 
-    def computerPlay(self, key, modifiers):
+    def computerPlay(self):
         if(self.evalWidget != None):
             bestMove = self.evalWidget.evalThread.bestMove()
             if(self.board.is_legal(bestMove)):
                 self.playMove(bestMove)
 
-    def prevNode(self, key, modifiers):
+    def prevNode(self):
         if(self.game.parent != None):
             self.game = self.game.parent
             self.board = self.game.board()
             self.moveList
 
-    def nextNode(self, key, modifiers):
+    def nextNode(self):
         if(self.game.next() != None):
             self.game = self.game.next()
             self.board = self.game.board()
