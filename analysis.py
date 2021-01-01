@@ -104,6 +104,20 @@ class GameAnalysis(threading.Thread):
         def isBlunder(self):
             return self.quality < -150
 
+        def __str__(self):
+            if(self.isPerfect()):
+                return "Perfect"
+            if(self.isGood()):
+                return "Good"
+            if(self.isOk()):
+                return "Ok"
+            if(self.isImprecision()):
+                return "Imprecision"
+            if(self.isError()):
+                return "Error"
+            if(self.isBlunder()):
+                return "Blunder"
+
     def __init__(self):
         super().__init__()
         self.game = None
@@ -152,4 +166,4 @@ class GameAnalysis(threading.Thread):
         evalList = analysis.analyseGame(self.game.game())
         moveQuality = analysis.analyseMoves(evalList)
         for quality in moveQuality:
-            print(quality.move," ", quality.quality)
+            print(quality.move," ", quality)
