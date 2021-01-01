@@ -15,6 +15,7 @@ from kivy.base import Builder
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
 from tile import Tile
 from analysisWidgets import EvaluationBar
+from analysis import GameAnalysis
 
 
 class Row(GridLayout):
@@ -38,8 +39,9 @@ class BoardWidget(GridLayout):
         self.keyboard: MyKeyboardListener = MyKeyboardListener()
         self.keyboard.bind_key('r', self.rotate)
         self.keyboard.bind_key('p', self.computerPlay)
-        self.keyboard.bind_key('left', self.prevNode)
-        self.keyboard.bind_key('right', self.nextNode)
+        self.keyboard.bind_key('j', self.prevNode)
+        self.keyboard.bind_key('l', self.nextNode)
+        self.keyboard.bind_key('a', self.analyseFullGame)
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -83,6 +85,11 @@ class BoardWidget(GridLayout):
         if(self.game.next() != None):
             self.game = self.game.next()
             self.board = self.game.board()
+
+    def analyseFullGame(self):
+        analysis = GameAnalysis()
+        analysis.game = self.game.game()
+        analysis.start()
 
     def playMove(self, move: chess.Move):
         if(self.moveList != None):

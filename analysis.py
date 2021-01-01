@@ -11,8 +11,7 @@ class BoardAnalysisWrapper():
             super().__init__()
             self.wrapper: BoardAnalysisWrapper = wrapper
             self.infoMove: chess.engine.InfoDict = None
-            self.limit: chess.engine.Limit = chess.engine.Limit(depth=30)
-            self.restartAnalysis = False
+            self.depth = 18
             self.stopFlag = False
             self.threads = 1
             self.setDaemon(True)
@@ -22,18 +21,16 @@ class BoardAnalysisWrapper():
         def run(self):
             while(not self.stopFlag):
                 boardCopy = self.wrapper.board
-                with self.wrapper.engine.analysis(boardCopy, self.limit, options={"threads": self.threads}) as analysis:
-                    self.finished = False
+                with self.wrapper.engine.analysis(boardCopy, chess.engine.Limit(self.depth), options={"threads": self.threads}) as analysis:
                     for info in analysis:
-                        if(info.get('score') != None):
+                        if(info.get('score') is not None):
                             self.infoMove = info
                         time.sleep(0.05)
-                        if(self.stopFlag or (self.restartAnalysis or self.wrapper.board.fen() != boardCopy.fen())):
-                            self.restartAnalysis = False
+                        if(self.stopFlag or self.wrapper.board.fen() != boardCopy.fen()):
                             break
+                        self.finished = self.wrapper.board.fen() == boardCopy.fen()
                     # on dors si l'analyse est finie (limit atteinte)
                     while(not self.stopFlag and self.wrapper.board.fen() == boardCopy.fen()):
-                        self.finished = True
                         time.sleep(0.1)
             self.wrapper.engine.quit()
             print("Eval thread Killed")
@@ -52,12 +49,13 @@ class BoardAnalysisWrapper():
 
     def update(self, board):
         self.board = board
+        self._evalThread.finished = False
 
     def start(self):
         self._evalThread.start()
 
     def hasAnalysis(self):
-        return self._evalThread.infoMove != None
+        return self._evalThread.infoMove is not None
 
     def getEngineAnalysis(self):
         return self._evalThread.infoMove.copy()
@@ -81,3 +79,91 @@ class BoardAnalysisWrapper():
 
     def hasFinished(self):
         return self._evalThread.finished
+
+class GameAnalysis(threading.Thread):
+    class MoveQuality():
+        def __init__(self, move, quality):
+            self.move = move
+            self.quality = quality
+
+        def isPerfect(self):
+            return self.quality >= 0
+
+        def isGood(self):
+            return self.quality >= -10 and self.quality < 0
+
+        def isOk(self):
+            return self.quality >= -25 and self.quality < -10
+
+        def isImprecision(self):
+            return self.quality >= -50 and self.quality < -25
+
+        def isError(self):
+            return self.quality >= -150 and self.quality < -50
+
+        def isBlunder(self):
+            return self.quality < -150
+
+        def __str__(self):
+            if(self.isPerfect()):
+                return "Perfect"
+            if(self.isGood()):
+                return "Good"
+            if(self.isOk()):
+                return "Ok"
+            if(self.isImprecision()):
+                return "Imprecision"
+            if(self.isError()):
+                return "Error"
+            if(self.isBlunder()):
+                return "Blunder"
+
+    def __init__(self):
+        super().__init__()
+        self.game = None
+
+    def analyseGame(self, game : chess.pgn.Game):
+        evalList = []
+        curGame = game
+        board = curGame.board()
+        wrapper = BoardAnalysisWrapper(board)
+        wrapper.start()
+        while curGame is not None:
+            wrapper.update(curGame.board())
+            while not wrapper.hasFinished():
+                time.sleep(0.1)
+            if(wrapper.bestMove() is not None):
+                evalList.append((curGame.move, wrapper.getEngineAnalysis()))
+            curGame = curGame.next()
+        wrapper.stop()
+        return evalList
+
+    def analyseMoves(self, evalList):
+        moveQualityList = []
+        evalPrev = None
+        color = chess.BLACK
+        for move, eval in evalList:
+            if evalPrev is not None and move == evalPrev.get('pv')[0]:
+                moveQualityList.append(GameAnalysis.MoveQuality(move, 0))
+            elif evalPrev is not None:
+                score = eval["score"].white() if color else eval["score"].black()
+                prevScore = evalPrev["score"].white() if color else evalPrev["score"].black()
+                if score.score() is not None and prevScore.score() is not None:
+                    moveQualityList.append(GameAnalysis.MoveQuality(move, score.score() - prevScore.score()))
+                elif prevScore.is_mate() != score.is_mate():
+                    moveQualityList.append(GameAnalysis.MoveQuality(move, -100))
+                elif prevScore.is_mate() and score.is_mate():
+                    if prevScore.mate() <= score.mate():
+                        moveQualityList.append(GameAnalysis.MoveQuality(move, -0.5))
+                    if prevScore.mate() > score.mate():
+                        moveQualityList.append(GameAnalysis.MoveQuality(move, 0))
+            color = not color
+            evalPrev = eval
+        return moveQualityList
+
+    def run(self):
+        analysis = GameAnalysis()
+        evalList = analysis.analyseGame(self.game.game())
+        moveQuality = analysis.analyseMoves(evalList)
+        for quality in moveQuality:
+            print(quality.move," ", quality)
