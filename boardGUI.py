@@ -1,29 +1,19 @@
+from analysisWidgets import EvaluationBar
+from colors import *
+from kivy.base import Builder
+from kivy.graphics import *
+from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
+from kivy.uix.anchorlayout import *
+from kivy.uix.behaviors import *
+from kivy.uix.boxlayout import *
+from kivy.uix.gridlayout import *
+from kivy.uix.image import *
+from kivy.uix.widget import Widget
 from movelist import MoveList
+from tile import Tile
 from typing import List, Optional
 import chess
 import chess.pgn
-from kivy.uix.widget import Widget
-from keyboard import MyKeyboardListener
-from colors import *
-from kivy.graphics import *
-from kivy.uix.gridlayout import *
-from kivy.uix.boxlayout import *
-from kivy.uix.anchorlayout import *
-from kivy.uix.behaviors import *
-from kivy.uix.image import *
-from kivy.base import Builder
-from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
-from kivy.uix.floatlayout import FloatLayout
-from kivy.uix.popup import Popup
-from tile import Tile
-from analysisWidgets import EvaluationBar
-from analysis import GameAnalysis
-import os
-
-class LoadDialog(FloatLayout):
-    load = ObjectProperty(None)
-    cancel = ObjectProperty(None)
-    path = ObjectProperty(None)
 
 class Row(GridLayout):
     rowNumber = NumericProperty(0)
@@ -43,13 +33,6 @@ class BoardWidget(GridLayout):
     moveList: Optional[MoveList] = ObjectProperty(None)
 
     def __init__(self, **kwargs):
-        self.keyboard: MyKeyboardListener = MyKeyboardListener()
-        self.keyboard.bind_key('r', self.rotate)
-        self.keyboard.bind_key('p', self.computerPlay)
-        self.keyboard.bind_key('j', self.prevNode)
-        self.keyboard.bind_key('l', self.nextNode)
-        self.keyboard.bind_key('a', self.analyseFullGame)
-        self.keyboard.bind_key('o', self.show_load)
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -70,37 +53,6 @@ class BoardWidget(GridLayout):
         self.evalWidget.stop()
         pass
 
-    def rotate(self):
-        if(self.pov == 'WHITE'):
-            self.pov = 'BLACK'
-        else:
-            self.pov = 'WHITE'
-        self.update_board()
-
-    def computerPlay(self):
-        if(self.evalWidget != None):
-            bestMove = self.evalWidget.evalThread.bestMove()
-            if(self.board.is_legal(bestMove)):
-                self.playMove(bestMove)
-
-    def prevNode(self):
-        if(self.game.parent != None):
-            self.game = self.game.parent
-            self.board = self.game.board()
-            self.moveList.remove_move()
-
-    def nextNode(self):
-        if(self.game.next() != None):
-            self.moveList.add_move(self.board.turn, self.board.san(
-                self.game.next().move), self.board.fullmove_number)
-            self.game = self.game.next()
-            self.board = self.game.board()
-
-    def analyseFullGame(self):
-        analysis = GameAnalysis()
-        analysis.game = self.game.game()
-        analysis.start()
-
     def playMove(self, move: chess.Move):
         if(self.moveList != None):
             self.moveList.add_move(self.board.turn, self.board.san(
@@ -108,29 +60,6 @@ class BoardWidget(GridLayout):
         self.game = self.game.add_main_variation(move)
         self.board = self.game.board()
         self.evalWidget.update(self.board)
-
-    def show_load(self):
-        content = LoadDialog(load=self.load, cancel=self.dismiss_popup, path=os.curdir)
-        self._popup = Popup(title="Load file", content=content,
-                            size_hint=(0.9, 0.9))
-        self._popup.open()
-
-    def load(self, path, filename):
-        pgn = open(os.path.join(path, filename[0]))
-
-        first_game = chess.pgn.read_game(pgn)
-        if first_game is not None:
-            analysis = GameAnalysis()
-            analysis.game = first_game.game()
-            analysis.start()
-            self.game = first_game
-            self.board = self.game.board()
-            self.moveList.clearList()
-
-        self.dismiss_popup()
-
-    def dismiss_popup(self):
-        self._popup.dismiss()
 
     def on_touch_down(self, touch):
         for row in self.children:

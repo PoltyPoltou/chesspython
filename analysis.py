@@ -1,5 +1,6 @@
 import threading
 import chess
+import chess.pgn
 import chess.engine
 import time
 import os
