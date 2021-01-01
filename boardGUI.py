@@ -39,8 +39,8 @@ class BoardWidget(GridLayout):
         self.keyboard: MyKeyboardListener = MyKeyboardListener()
         self.keyboard.bind_key('r', self.rotate)
         self.keyboard.bind_key('p', self.computerPlay)
-        self.keyboard.bind_key('left', self.prevNode)
-        self.keyboard.bind_key('right', self.nextNode)
+        self.keyboard.bind_key('j', self.prevNode)
+        self.keyboard.bind_key('l', self.nextNode)
         self.keyboard.bind_key('a', self.analyseFullGame)
         super().__init__(**kwargs)
 
