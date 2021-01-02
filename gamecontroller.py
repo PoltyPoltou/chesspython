@@ -51,13 +51,4 @@ class GameController():
         self.board = self.game.board()
         self.boardGUI.changeBoard(self.board)
         self.evalWrapper.update(self.board)
-        self.refreshFullMoveList()
-
-    def refreshFullMoveList(self):
-        # recreate move list
-        self.moveList.clearList()
-        curGame = self.game.game().next()
-        while curGame is not None:
-            self.moveList.add_move(curGame, self)
-            curGame = curGame.next()
-
+        self.moveList.update_moves(self)
