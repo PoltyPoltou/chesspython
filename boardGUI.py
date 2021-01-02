@@ -60,17 +60,22 @@ class BoardWidget(GridLayout):
         self.evalWidget.stop()
         pass
 
-    def on_touch_down(self, touch):
-        print(touch.pos[0], touch.pos[1])
+    def findTileTouched(self, touch: MotionEvent) -> Tuple[Tile, Widget]:
         for row in self.children:
             for tile in row.children:
                 if(tile.collide_point(touch.pos[0], touch.pos[1])):
-                    print(tile.coords, self.children.index(row), row.children.index(tile), "WHITE" *
-                          self.board.turn + "BLACK" * (not self.board.turn))
-                    if(touch.button == "left"):
-                        self.handleSelection(tile)
-                    else:
-                        self.unselectCase()
+                    return (tile, row)
+        return None, None
+
+    def on_touch_down(self, touch: MotionEvent):
+        tileTouched, row = self.findTileTouched(touch)
+        if(tileTouched != None and row != None):
+            if(touch.button == "left"):
+                print(tileTouched.coords, self.children.index(row), row.children.index(tileTouched), "WHITE" *
+                      self.board.turn + "BLACK" * (not self.board.turn))
+                self.handleSelection(tileTouched)
+            else:
+                self.unselectCase()
         return super().on_touch_down(touch)
 
     def handleSelection(self, tile: Tile):
