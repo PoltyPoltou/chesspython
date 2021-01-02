@@ -1,4 +1,4 @@
-from arrow import Arrow
+from arrow import arrow_factory
 from analysisWidgets import EvaluationBar
 from colors import *
 from kivy.base import Builder
@@ -90,9 +90,8 @@ class BoardWidget(GridLayout):
             tileTouched, row = self.findTileTouched(touch)
             touch.ungrab(self)
             if(tileTouched != None and row != None):
-                arrowToDraw: Arrow = Arrow()
-                arrowToDraw.setTiles(self.lastTouchedTile, tileTouched)
-                if(arrowToDraw.isValid()):
+                arrowToDraw = arrow_factory(self.lastTouchedTile, tileTouched)
+                if(arrowToDraw != None):
                     self.arrowList.append(arrowToDraw)
                     self.parent.add_widget(arrowToDraw)
         return super().on_touch_up(touch)

@@ -11,29 +11,19 @@ class Arrow(Widget):
     # defines the angles function of the horizontal and vertical flip (in this order)
     diagonalAngle = [[45, -45], [135, 225]]
 
-    def setTiles(self, tileFrom, tileTo) -> None:
-        if(tileTo.column == tileFrom.column):
-            self.vertical = True
-            self.horizontal = False
-            self.diagonal = False
-            self.tileTo = tileTo
-            self.tileFrom = tileFrom
-        elif(tileTo.row == tileFrom.row):
-            self.vertical = False
-            self.horizontal = True
-            self.diagonal = False
-            self.tileTo = tileTo
-            self.tileFrom = tileFrom
-        elif(abs(tileTo.row - tileFrom.row) == abs(ord(tileTo.column) - ord(tileFrom.column))):
-            self.vertical = False
-            self.horizontal = False
-            self.diagonal = True
-            self.tileTo = tileTo
-            self.tileFrom = tileFrom
-        else:  # No matching pattern found for the arrow so we delete affectation
-            self.vertical = False
-            self.horizontal = False
-            self.diagonal = False
 
-    def isValid(self) -> bool:
-        return self.vertical or self.horizontal or self.diagonal
+def arrow_factory(tileFrom, tileTo) -> Arrow:
+    vertical = tileTo.column == tileFrom.column
+    horizontal = tileTo.row == tileFrom.row
+    diagonal = (abs(tileTo.row - tileFrom.row) ==
+                abs(ord(tileTo.column) - ord(tileFrom.column)))
+    if(not (tileFrom.coords == tileTo.coords) and (vertical or horizontal or diagonal)):
+        arr = Arrow()
+        arr.vertical = vertical
+        arr.horizontal = horizontal
+        arr.diagonal = diagonal
+        arr.tileFrom = tileFrom
+        arr.tileTo = tileTo
+        return arr
+    else:  # No matching pattern found for the arrow so we delete affectation
+        return None
