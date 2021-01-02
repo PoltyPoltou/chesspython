@@ -6,31 +6,40 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
 
+def print_it(instance, value):
+    if value == "move" and instance.node is not None and instance.controller is not None:
+        instance.controller.updateCurrentNode(instance.node)
 
-class MoveLabel(AnchorLayout):
-    lbl_ref = ObjectProperty(None)
-
-    def __init__(self, text, pos, **kwargs):
+class MoveLabel(Label):
+    def __init__(self, text, node, controller, **kwargs):
         super().__init__(**kwargs)
-        self.lbl_ref.text = text
-        self.anchor_x = pos
+        self.text = text
+        self.node = node
+        self.controller = controller
 
     def on_kv_post(self, base_widget):
         return super().on_kv_post(base_widget)
     pass
 
-
 class MoveList(ScrollView):
     gridLayoutRef = ObjectProperty(None)
     textHeight = 20
 
-    def add_move(self, color: chess.Color, san: str, fullMoveCount: int):
+    def add_move(self, gameNode, controller):
+        board = gameNode.parent.board()
+        color = board.turn
+        move = gameNode.move
+        san = board.san(move)
+        fullMoveCount = board.fullmove_number
+
         if(color == chess.WHITE):
             self.gridLayoutRef.add_widget(
-                MoveLabel(str(fullMoveCount) + ". ", "center"))
+                MoveLabel(str(fullMoveCount) + ". ", None, controller, markup=True))
             self.gridLayoutRef.size = (
                 0, self.gridLayoutRef.size[1]+self.textHeight)
-        self.gridLayoutRef.add_widget(MoveLabel(san, "left"))
+        moveWidget = MoveLabel("[ref=move]"+san+"[ref=move]", gameNode, controller, markup=True)
+        moveWidget.bind(on_ref_press=print_it)
+        self.gridLayoutRef.add_widget(moveWidget)
         if(self.gridLayoutRef.height > self.height):
             self.scroll_y = 0
 

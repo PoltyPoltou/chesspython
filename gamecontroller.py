@@ -17,8 +17,6 @@ class GameController():
         self.evalWrapper.start()
 
     def playMove(self, move: chess.Move):
-        self.moveList.add_move(self.board.turn, self.board.san(
-            move), self.board.fullmove_number)
         self.updateCurrentNode(self.game.add_main_variation(move))
 
     def loadGame(self, game):
@@ -27,7 +25,6 @@ class GameController():
         analysis.start()
         self.listAnalysis.append(analysis)
         self.updateCurrentNode(game)
-        self.moveList.clearList()
 
     def computerPlay(self):
         if(self.evalWrapper != None):
@@ -38,12 +35,9 @@ class GameController():
     def prevNode(self):
         if(self.game.parent != None):
             self.updateCurrentNode(self.game.parent)
-            self.moveList.remove_move()
 
     def nextNode(self):
         if(self.game.next() != None):
-            self.moveList.add_move(self.board.turn, self.board.san(
-                self.game.next().move), self.board.fullmove_number)
             self.updateCurrentNode(self.game.next())
 
     def analyseFullGame(self):
@@ -57,3 +51,13 @@ class GameController():
         self.board = self.game.board()
         self.boardGUI.changeBoard(self.board)
         self.evalWrapper.update(self.board)
+        self.refreshFullMoveList()
+
+    def refreshFullMoveList(self):
+        # recreate move list
+        self.moveList.clearList()
+        curGame = self.game.game().next()
+        while curGame is not None:
+            self.moveList.add_move(curGame, self)
+            curGame = curGame.next()
+
