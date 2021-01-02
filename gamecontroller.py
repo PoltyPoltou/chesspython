@@ -20,7 +20,7 @@ class GameController():
         self.updateCurrentNode(self.game.add_main_variation(move))
 
     def loadGame(self, game):
-        analysis = GameAnalysis()
+        analysis = GameAnalysis(self)
         analysis.game = game.game()
         analysis.start()
         self.listAnalysis.append(analysis)
@@ -41,7 +41,7 @@ class GameController():
             self.updateCurrentNode(self.game.next())
 
     def analyseFullGame(self):
-        analysis = GameAnalysis()
+        analysis = GameAnalysis(self)
         analysis.game = self.game.game()
         analysis.start()
         self.listAnalysis.append(analysis)
@@ -52,3 +52,7 @@ class GameController():
         self.boardGUI.changeBoard(self.board)
         self.evalWrapper.update(self.board)
         self.moveList.update_moves(self)
+
+    def postAnalysis(self, game, moveQualityList):
+        self.updateCurrentNode(game.end())
+        self.moveList.postAnalysis(moveQualityList)

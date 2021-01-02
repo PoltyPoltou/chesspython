@@ -119,11 +119,12 @@ class GameAnalysis(threading.Thread):
             if(self.isBlunder()):
                 return "Blunder"
 
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
         self.game = None
         self.stopFlag = False
         self.wrapper = None
+        self.controller = controller
 
     def analyseGame(self, game : chess.pgn.Game):
         evalList = []
@@ -169,6 +170,7 @@ class GameAnalysis(threading.Thread):
         moveQuality = self.analyseMoves(evalList)
         for quality in moveQuality:
             print(quality.move," ", quality)
+        self.controller.postAnalysis(self.game.game(), moveQuality)
 
     def stop(self):
         self.stopFlag = True
