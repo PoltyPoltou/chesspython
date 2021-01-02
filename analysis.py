@@ -94,16 +94,16 @@ class GameAnalysis(threading.Thread):
             return self.quality >= -10 and self.quality < 0
 
         def isOk(self):
-            return self.quality >= -25 and self.quality < -10
+            return self.quality >= -50 and self.quality < -10
 
         def isImprecision(self):
-            return self.quality >= -50 and self.quality < -25
-
-        def isError(self):
             return self.quality >= -150 and self.quality < -50
 
+        def isError(self):
+            return self.quality >= -400 and self.quality < -150
+
         def isBlunder(self):
-            return self.quality < -150
+            return self.quality < -400
 
         def __str__(self):
             if(self.isPerfect()):
@@ -119,11 +119,12 @@ class GameAnalysis(threading.Thread):
             if(self.isBlunder()):
                 return "Blunder"
 
-    def __init__(self):
+    def __init__(self, controller):
         super().__init__()
         self.game = None
         self.stopFlag = False
         self.wrapper = None
+        self.controller = controller
 
     def analyseGame(self, game : chess.pgn.Game):
         evalList = []
@@ -169,6 +170,7 @@ class GameAnalysis(threading.Thread):
         moveQuality = self.analyseMoves(evalList)
         for quality in moveQuality:
             print(quality.move," ", quality)
+        self.controller.postAnalysis(self.game.game(), moveQuality)
 
     def stop(self):
         self.stopFlag = True

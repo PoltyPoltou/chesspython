@@ -3,7 +3,7 @@
     font_size:'15sp'
     size:self.texture_size
     text_size: self.size
-    bold: True
+    bold: False
     halign:"left"
     valign:"middle"
 
@@ -17,7 +17,7 @@
         cols_minimum: {0:30, 1:50, 2:50}
         size_hint:(1, None)
         size:(0,0)
-        canvas.after:
+        canvas.before:
             Color:
                 rgba : (1,1,1,0.5)
             Rectangle:

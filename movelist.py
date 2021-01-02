@@ -28,6 +28,8 @@ class MoveList(ScrollView):
 
     def update_moves(self, controller):
         if str(controller.game.game()) == self.gameStr:
+            for child in self.gridLayoutRef.children:
+                child.bold = child.node == controller.game
             return
         self.gameStr =str(controller.game.game())
         curGame = controller.game.game().next()
@@ -47,6 +49,9 @@ class MoveList(ScrollView):
                 self.gridLayoutRef.children[index].node = curGame
                 san = prevBoard.san(curGame.move)
                 self.gridLayoutRef.children[index].text = "[ref=move]"+san+"[ref=move]"
+                self.gridLayoutRef.children[index].color = (1,1,1,1)
+            # check boldness
+            self.gridLayoutRef.children[index].bold = self.gridLayoutRef.children[index].node == controller.game
             index -= 1
             curGame = curGame.next()
             prevBoard = board
@@ -84,3 +89,27 @@ class MoveList(ScrollView):
     def clearList(self):
         self.gridLayoutRef.clear_widgets()
         self.gridLayoutRef.size = (0, 0)
+
+    def postAnalysis(self, moveQualityList):
+        index = len(self.gridLayoutRef.children)-1
+        color = chess.WHITE
+        for quality in moveQualityList:
+            # skip move count when playing white
+            if color == chess.WHITE:
+                index -= 1
+            if index >= 0:
+                label = self.gridLayoutRef.children[index]
+                if quality.isPerfect():
+                    label.color = (50/256, 161/256, 144/256,1)
+                elif quality.isGood():
+                    label.color = (105/256, 163/256, 38/256,1)
+                elif quality.isOk():
+                    label.color = (1,1,1,1)
+                elif quality.isImprecision():
+                    label.color = (255/256, 213/256, 0,1)
+                elif quality.isError():
+                    label.color = (214/256, 137/256, 4/256,1)
+                elif quality.isBlunder():
+                    label.color = (105/256, 15/256, 12/256,1)
+            index -= 1
+            color = not color
