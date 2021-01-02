@@ -94,16 +94,16 @@ class GameAnalysis(threading.Thread):
             return self.quality >= -10 and self.quality < 0
 
         def isOk(self):
-            return self.quality >= -25 and self.quality < -10
+            return self.quality >= -50 and self.quality < -10
 
         def isImprecision(self):
-            return self.quality >= -50 and self.quality < -25
-
-        def isError(self):
             return self.quality >= -150 and self.quality < -50
 
+        def isError(self):
+            return self.quality >= -400 and self.quality < -150
+
         def isBlunder(self):
-            return self.quality < -150
+            return self.quality < -400
 
         def __str__(self):
             if(self.isPerfect()):
