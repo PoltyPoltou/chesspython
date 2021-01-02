@@ -24,13 +24,13 @@ class MoveLabel(Label):
 class MoveList(ScrollView):
     gridLayoutRef = ObjectProperty(None)
     textHeight = 20
-    game = None
+    gameStr = ""
 
     def update_moves(self, controller):
-        if str(controller.game.game()) == str(self.game):
+        if str(controller.game.game()) == self.gameStr:
             return
-        self.game = controller.game.game()
-        curGame = self.game.next()
+        self.gameStr =str(controller.game.game())
+        curGame = controller.game.game().next()
         index = len(self.gridLayoutRef.children)-1
         prevBoard = controller.game.game().board()
         while curGame is not None:
