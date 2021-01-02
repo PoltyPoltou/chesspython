@@ -59,5 +59,5 @@ class GameController():
         self.moveList.update_moves(self)
 
     def postAnalysis(self, game, moveQualityList):
-        self.updateCurrentNode(game.end())
+        self.updateCurrentNode(game.game())
         self.moveList.postAnalysis(moveQualityList)

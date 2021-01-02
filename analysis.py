@@ -14,7 +14,7 @@ class BoardAnalysisWrapper():
             self.infoMove: chess.engine.InfoDict = None
             self.depth = 18
             self.stopFlag = False
-            self.threads = 1
+            self.threads = 3
             self.setDaemon(True)
             self.finished = False
             print("Eval thread Launched")
@@ -22,14 +22,14 @@ class BoardAnalysisWrapper():
         def run(self):
             while(not self.stopFlag):
                 boardCopy = self.wrapper.board
-                with self.wrapper.engine.analysis(boardCopy, chess.engine.Limit(self.depth), options={"threads": self.threads}) as analysis:
+                with self.wrapper.engine.analysis(boardCopy, chess.engine.Limit(depth=self.depth), multipv=1, options={"threads": self.threads}) as analysis:
                     for info in analysis:
                         if(info.get('score') is not None):
                             self.infoMove = info
                         time.sleep(0.05)
                         if(self.stopFlag or self.wrapper.board.fen() != boardCopy.fen()):
                             break
-                        self.finished = self.wrapper.board.fen() == boardCopy.fen()
+                    self.finished = self.wrapper.board.fen() == boardCopy.fen()
                     # on dors si l'analyse est finie (limit atteinte)
                     while(not self.stopFlag and self.wrapper.board.fen() == boardCopy.fen()):
                         time.sleep(0.1)
@@ -91,13 +91,13 @@ class GameAnalysis(threading.Thread):
             return self.quality >= 0
 
         def isGood(self):
-            return self.quality >= -10 and self.quality < 0
+            return self.quality >= -20 and self.quality < 0
 
         def isOk(self):
-            return self.quality >= -50 and self.quality < -10
+            return self.quality >= -75 and self.quality < -20
 
         def isImprecision(self):
-            return self.quality >= -150 and self.quality < -50
+            return self.quality >= -150 and self.quality < -75
 
         def isError(self):
             return self.quality >= -400 and self.quality < -150
