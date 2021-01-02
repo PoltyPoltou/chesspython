@@ -5,16 +5,19 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.popup import Popup
 import boardGUI
+import arrow
 import chess.pgn
 import gamecontroller
 import os
 from movelist import MoveList
 from typing import List, Optional
 
+
 class LoadDialog(FloatLayout):
     load = ObjectProperty(None)
     cancel = ObjectProperty(None)
     path = ObjectProperty(None)
+
 
 class ChessWindow(BoxLayout):
     couleurBg = BACKGROUND
@@ -48,7 +51,8 @@ class ChessWindow(BoxLayout):
         self.boardGUI.update_board()
 
     def show_load(self):
-        content = LoadDialog(load=self.load, cancel=self.dismiss_popup, path=os.curdir)
+        content = LoadDialog(
+            load=self.load, cancel=self.dismiss_popup, path=os.curdir)
         self._popup = Popup(title="Load file", content=content,
                             size_hint=(0.9, 0.9))
         self._popup.open()

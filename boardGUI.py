@@ -16,6 +16,7 @@ import chess
 import chess.pgn
 import gamecontroller
 
+
 class Row(GridLayout):
     rowNumber = NumericProperty(0)
     reverseOrder = BooleanProperty(False)
@@ -31,7 +32,7 @@ class BoardWidget(GridLayout):
     board: Optional[chess.Board] = ObjectProperty(None, True)
     evalWidget: Optional[EvaluationBar] = ObjectProperty(None, True)
     moveList: Optional[MoveList] = ObjectProperty(None)
-    controller : Optional[gamecontroller.GameController] = None
+    controller: Optional[gamecontroller.GameController] = None
 
     def __init__(self, **kwargs):
         self.board = None
@@ -60,11 +61,12 @@ class BoardWidget(GridLayout):
         pass
 
     def on_touch_down(self, touch):
+        print(touch.pos[0], touch.pos[1])
         for row in self.children:
             for tile in row.children:
                 if(tile.collide_point(touch.pos[0], touch.pos[1])):
-                    print(tile.coords, tile.square,
-                          self.board.piece_at(tile.square), tile.pieceSourceImg, "WHITE" * self.board.turn + "BLACK" * (not self.board.turn))
+                    print(tile.coords, self.children.index(row), row.children.index(tile), "WHITE" *
+                          self.board.turn + "BLACK" * (not self.board.turn))
                     if(touch.button == "left"):
                         self.handleSelection(tile)
                     else:

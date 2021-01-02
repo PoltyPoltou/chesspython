@@ -1,0 +1,80 @@
+#:kivy 2.0.0
+#:import m math
+#:import ar arrow
+<MeshTest@Widget>:
+    canvas.after:
+        Color:
+            rgba:1,1,1,0.5
+        Mesh:
+            vertices : [self.x, self.y,  0,0,self.x, self.y +15, 0,0, self.x+15, self.y, 0,0]
+            indices : [0,1,2]
+            mode:"triangle"
+
+<RectangleForArrow@Widget>:
+    clr : (0,0,0,0.5)
+    tileSize : 0
+    longueur: 0
+    rotationAngle: 0
+    canvas:
+        Rotate:
+            angle:self.rotationAngle
+            axis:0,0,1
+            origin:self.x + self.tileSize/2,self.y + self.tileSize/2
+        Color:
+            rgba:self.clr
+        Rectangle:
+            pos:self.x - self.longueur + 0.13 * self.tileSize, self.y + self.tileSize * 0.4
+            size:self.longueur, self.tileSize * 0.2
+        Rotate:
+            angle:-self.rotationAngle
+            axis:0,0,1
+            origin:self.x + self.tileSize/2,self.y + self.tileSize/2
+
+# arrow to the right
+<ArrowPoint@Widget>:
+    clr : (0,0,0,0.5)
+    tileSize : 90
+    #rotation to be applied to the Arrow begin horizontal to the left
+    rotationAngle : 0
+    canvas.after:
+        Rotate:
+            angle:self.rotationAngle
+            axis:0,0,1
+            origin:self.x + self.tileSize/2, self.y + self.tileSize/2
+        Color:
+            rgba:self.clr
+        Triangle:
+            points:self.x + 0.13 * self.tileSize, self.y + self.tileSize/4, self.x + self.tileSize/2, self.y + self.tileSize/2, self.x + 0.13 * self.tileSize, self.y + 3*self.tileSize/4
+        Rotate:
+            angle:-self.rotationAngle
+            axis:0,0,1
+            origin:self.x + self.tileSize/2, self.y + self.tileSize/2
+<Arrow>:
+    clr : (1,170/255,0,0.8)
+    pos: self.tileTo.pos if self.nullTest else (0,0)
+    size: self.tileTo.size if self.nullTest else (0,0)
+    tileFrom : None
+    tileTo : None
+    horizontal: True
+    vertical : False
+    diagonal : not self.horizontal and not self.vertical
+    horizontalFlip : (self.tileFrom.x > self.tileTo.x) if self.nullTest else False
+    verticalFlip : (self.tileFrom.y > self.tileTo.y) if self.nullTest else False
+    flipped : self.horizontalFlip * self.horizontal +  self.verticalFlip * self.vertical
+    nullTest : self.tileFrom != None and self.tileTo != None
+    tileSize : self.tileFrom.width if self.nullTest else 0
+    delta_x : abs(self.tileFrom.x - self.tileTo.x) if self.nullTest else 0
+    delta_y : abs(self.tileFrom.y - self.tileTo.y) if self.nullTest else 0
+    longueur : self.delta_x if self.horizontal else (self.delta_y if self.vertical else (m.sqrt(2)*self.delta_x))
+    #must be the same canvas context as arrowPoint and RectangleForArrow
+    ArrowPoint:
+        clr : root.clr
+        pos:root.pos
+        tileSize : root.tileSize
+        rotationAngle: 90 * root.vertical + 180 * root.flipped + root.diagonal * ar.Arrow.diagonalAngle[root.horizontalFlip][root.verticalFlip]
+    RectangleForArrow:
+        clr: root.clr
+        pos: root.pos
+        tileSize : root.tileSize
+        longueur : 0.13 * root.tileSize * 2 + root.longueur - root.tileSize
+        rotationAngle: 90 * root.vertical + 180 * root.flipped + root.diagonal * ar.Arrow.diagonalAngle[root.horizontalFlip][root.verticalFlip]
