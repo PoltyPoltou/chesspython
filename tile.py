@@ -39,8 +39,7 @@ class Tile(AnchorLayout):
         for child in self.children:
             if isinstance(child, Image):
                 imgWidget = child
-        if imgWidget != None:
-            self.remove_widget(imgWidget)
+                self.remove_widget(imgWidget)
         children = list(self.children)
         self.clear_widgets()
         for elmt in children:
