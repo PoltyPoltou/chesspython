@@ -29,76 +29,94 @@ class MoveList(ScrollView):
     def update_moves(self, controller):
         if str(controller.game.game()) == self.gameStr:
             for child in self.gridLayoutRef.children:
-                child.bold = child.node == controller.game
+                for childOfChild in child.children:
+                    childOfChild.bold = childOfChild.node == controller.game
             return
+
         self.gameStr =str(controller.game.game())
-        curGame = controller.game.game().next()
-        index = len(self.gridLayoutRef.children)-1
-        prevBoard = controller.game.game().board()
+
+        lastGame = controller.game.game()
+        curGame = lastGame.next()
+        prevBoard = lastGame.board()
+        # Track if we need to delete the last entry black move
+        lastEntryComplete = False
         while curGame is not None:
             board = curGame.board()
-            # skip move count when playing white
-            if prevBoard.turn == chess.WHITE:
-                index -= 1
-            if(index < 0):
-                # add move when not enough chidlren
-                self.add_move(curGame, controller)
-                index += 2 if prevBoard.turn == chess.WHITE else 1
-            elif self.gridLayoutRef.children[index].node != curGame:
+            # We need to get the full move number BEFORE the move was done
+            fullmove_number = prevBoard.fullmove_number
+            if len(self.gridLayoutRef.children) < fullmove_number:
+                self.addMainFullMoveEntry(fullmove_number)
+            entry = self.gridLayoutRef.children[-fullmove_number]
+
+            index = 2 if prevBoard.turn == chess.WHITE else 3
+            # create new move
+            if len(entry.children) < index :
+                self.add_move_in_entry(curGame, controller, entry)
+            elif entry.children[-index].node != curGame:
                 # otherwise update directly the widget
-                self.gridLayoutRef.children[index].node = curGame
+                entry.children[-index].node = curGame
                 san = prevBoard.san(curGame.move)
-                self.gridLayoutRef.children[index].text = "[ref=move]"+san+"[ref=move]"
-                self.gridLayoutRef.children[index].color = (1,1,1,1)
+                entry.children[-index].text = "[ref=move]"+san+"[ref=move]"
+                entry.children[-index].color = (1,1,1,1)
+            # last entry is complete iif its black who has played
+            lastEntryComplete = index == 3
+
             # check boldness
-            self.gridLayoutRef.children[index].bold = self.gridLayoutRef.children[index].node == controller.game
-            index -= 1
+            entry.children[-index].bold = entry.children[-index].node == controller.game
+            lastGame = curGame
             curGame = curGame.next()
             prevBoard = board
+
         # remove all unused indexes
-        while index > -1:
+        fullmove_number = prevBoard.fullmove_number
+        while len(self.gridLayoutRef.children) > fullmove_number:
             self.remove_move()
-            index -= 1
+
+        # remove last entry black move if incomplete
+        if not lastEntryComplete :
+            entry = self.gridLayoutRef.children[0]
+            if len(entry.children) > 2:
+                entry.remove_widget(entry.children[0])
 
     def add_move(self, gameNode, controller):
         board = gameNode.parent.board()
         color = board.turn
-        move = gameNode.move
-        san = board.san(move)
-        fullMoveCount = board.fullmove_number
 
         if(color == chess.WHITE):
-            self.gridLayoutRef.add_widget(
-                MoveLabel(str(fullMoveCount) + ". ", None, controller, markup=True))
-            self.gridLayoutRef.size = (
-                0, self.gridLayoutRef.size[1]+self.textHeight)
+            self.addMainFullMoveEntry(board.fullmove_number)
+        entry = self.gridLayoutRef.children[0]
+        self.add_move_in_entry(gameNode, controller, entry)
+
+
+    def add_move_in_entry(self, gameNode, controller, entry):
+        board = gameNode.parent.board()
+        move = gameNode.move
+        san = board.san(move)
+
         moveWidget = MoveLabel("[ref=move]"+san+"[ref=move]", gameNode, controller, markup=True)
         moveWidget.bind(on_ref_press=loadNode)
-        self.gridLayoutRef.add_widget(moveWidget)
+        entry.add_widget(moveWidget)
         if(self.gridLayoutRef.height > self.height):
             self.scroll_y = 0
 
     def remove_move(self):
-        if(len(self.gridLayoutRef.children) % 3 == 2):
-            self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
-            self.gridLayoutRef.size = (
-                0, self.gridLayoutRef.size[1]-self.textHeight)
         self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
-    pass
 
     def clearList(self):
         self.gridLayoutRef.clear_widgets()
         self.gridLayoutRef.size = (0, 0)
 
     def postAnalysis(self, moveQualityList):
-        index = len(self.gridLayoutRef.children)-1
+        full_move = len(self.gridLayoutRef.children)
+        index = 2
         color = chess.WHITE
         for quality in moveQualityList:
             # skip move count when playing white
             if color == chess.WHITE:
-                index -= 1
+                full_move -= 1
+                index = len(self.gridLayoutRef.children[full_move].children) - 2
             if index >= 0:
-                label = self.gridLayoutRef.children[index]
+                label = self.gridLayoutRef.children[full_move].children[index]
                 if quality.isPerfect():
                     label.color = (50/256, 161/256, 144/256,1)
                 elif quality.isGood():
@@ -113,3 +131,10 @@ class MoveList(ScrollView):
                     label.color = (105/256, 15/256, 12/256,1)
             index -= 1
             color = not color
+
+    def addMainFullMoveEntry(self, fullMoveCount):
+        entry = GridLayout(cols=3, cols_minimum={0:30, 1:50, 2:50})
+        entry.add_widget(MoveLabel(str(fullMoveCount) + ". ", None, None, markup=True))
+        self.gridLayoutRef.add_widget(entry)
+        self.gridLayoutRef.size = (0, self.gridLayoutRef.size[1]+self.textHeight)
+        return entry

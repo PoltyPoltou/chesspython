@@ -17,7 +17,12 @@ class GameController():
         self.evalWrapper.start()
 
     def playMove(self, move: chess.Move):
-        self.updateCurrentNode(self.game.add_main_variation(move))
+        if self.game.next() is None:
+            self.updateCurrentNode(self.game.add_main_variation(move))
+        elif self.game.has_variation(move):
+            self.updateCurrentNode(self.game.variation(move))
+        else:
+            self.updateCurrentNode(self.game.add_variation(move))
 
     def loadGame(self, game):
         analysis = GameAnalysis(self)
