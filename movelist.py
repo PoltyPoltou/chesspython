@@ -28,6 +28,8 @@ class MoveList(ScrollView):
 
     def update_moves(self, controller):
         if str(controller.game.game()) == self.gameStr:
+            for child in self.gridLayoutRef.children:
+                child.bold = child.node == controller.game
             return
         self.gameStr =str(controller.game.game())
         curGame = controller.game.game().next()
@@ -47,6 +49,8 @@ class MoveList(ScrollView):
                 self.gridLayoutRef.children[index].node = curGame
                 san = prevBoard.san(curGame.move)
                 self.gridLayoutRef.children[index].text = "[ref=move]"+san+"[ref=move]"
+            # check boldness
+            self.gridLayoutRef.children[index].bold = self.gridLayoutRef.children[index].node == controller.game
             index -= 1
             curGame = curGame.next()
             prevBoard = board
