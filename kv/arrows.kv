@@ -15,7 +15,7 @@
     tileSize : 0
     longueur: 0
     rotationAngle: 0
-    canvas:
+    canvas.after:
         Rotate:
             angle:self.rotationAngle
             axis:0,0,1
@@ -24,7 +24,7 @@
             rgba:self.clr
         Rectangle:
             pos:self.x - self.longueur + 0.13 * self.tileSize, self.y + self.tileSize * 0.4
-            size:self.longueur, self.tileSize * 0.2
+            size:self.longueur, self.tileSize * 0.20
         Rotate:
             angle:-self.rotationAngle
             axis:0,0,1
@@ -49,32 +49,32 @@
             angle:-self.rotationAngle
             axis:0,0,1
             origin:self.x + self.tileSize/2, self.y + self.tileSize/2
+
 <Arrow>:
-    clr : (1,170/255,0,0.8)
+    clr : (1,2/3,0,0.8)
+    nullTest : self.tileFrom != None and self.tileTo != None
     pos: self.tileTo.pos if self.nullTest else (0,0)
     size: self.tileTo.size if self.nullTest else (0,0)
     tileFrom : None
     tileTo : None
-    horizontal: True
+    horizontal: False
     vertical : False
-    diagonal : not self.horizontal and not self.vertical
+    diagonal : False
     horizontalFlip : (self.tileFrom.x > self.tileTo.x) if self.nullTest else False
     verticalFlip : (self.tileFrom.y > self.tileTo.y) if self.nullTest else False
     flipped : self.horizontalFlip * self.horizontal +  self.verticalFlip * self.vertical
-    nullTest : self.tileFrom != None and self.tileTo != None
     tileSize : self.tileFrom.width if self.nullTest else 0
     delta_x : abs(self.tileFrom.x - self.tileTo.x) if self.nullTest else 0
     delta_y : abs(self.tileFrom.y - self.tileTo.y) if self.nullTest else 0
     longueur : self.delta_x if self.horizontal else (self.delta_y if self.vertical else (m.sqrt(2)*self.delta_x))
-    #must be the same canvas context as arrowPoint and RectangleForArrow
     ArrowPoint:
         clr : root.clr
-        pos:root.pos
+        pos: root.pos if root.nullTest else (0,0)
         tileSize : root.tileSize
         rotationAngle: 90 * root.vertical + 180 * root.flipped + root.diagonal * ar.Arrow.diagonalAngle[root.horizontalFlip][root.verticalFlip]
     RectangleForArrow:
         clr: root.clr
-        pos: root.pos
+        pos: root.pos if root.nullTest else (0,0)
         tileSize : root.tileSize
         longueur : 0.13 * root.tileSize * 2 + root.longueur - root.tileSize
         rotationAngle: 90 * root.vertical + 180 * root.flipped + root.diagonal * ar.Arrow.diagonalAngle[root.horizontalFlip][root.verticalFlip]

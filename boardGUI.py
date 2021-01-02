@@ -1,3 +1,4 @@
+from arrow import Arrow
 from analysisWidgets import EvaluationBar
 from colors import *
 from kivy.base import Builder
@@ -9,6 +10,7 @@ from kivy.uix.boxlayout import *
 from kivy.uix.gridlayout import *
 from kivy.uix.image import *
 from kivy.uix.widget import Widget
+from kivy.input.motionevent import MotionEvent
 from movelist import MoveList
 from tile import Tile
 from typing import List, Optional
@@ -36,6 +38,7 @@ class BoardWidget(GridLayout):
 
     def __init__(self, **kwargs):
         self.board = None
+        self.arrowList = []
         super().__init__(**kwargs)
 
     def setup(self, controller):
@@ -74,9 +77,25 @@ class BoardWidget(GridLayout):
                 print(tileTouched.coords, self.children.index(row), row.children.index(tileTouched), "WHITE" *
                       self.board.turn + "BLACK" * (not self.board.turn))
                 self.handleSelection(tileTouched)
+                self.removeArrows()
             else:
                 self.unselectCase()
+            if(touch.button == 'right'):
+                touch.grab(self)
+                self.lastTouchedTile = tileTouched
         return super().on_touch_down(touch)
+
+    def on_touch_up(self, touch: MotionEvent):
+        if(touch.button == "right" and touch.grab_current is self):
+            tileTouched, row = self.findTileTouched(touch)
+            touch.ungrab(self)
+            if(tileTouched != None and row != None):
+                arrowToDraw: Arrow = Arrow()
+                arrowToDraw.setTiles(self.lastTouchedTile, tileTouched)
+                if(arrowToDraw.isValid()):
+                    self.arrowList.append(arrowToDraw)
+                    self.parent.add_widget(arrowToDraw)
+        return super().on_touch_up(touch)
 
     def handleSelection(self, tile: Tile):
         if(self.selectedTile != None):
@@ -113,6 +132,11 @@ class BoardWidget(GridLayout):
                 if(tile.coords != t.coords):
                     t.movableTo = self.board.is_legal(
                         chess.Move.from_uci(tile.coords + t.coords))
+
+    def removeArrows(self):
+        for arr in self.arrowList:
+            self.parent.remove_widget(arr)
+        self.arrowList = []
 
     def update_board(self):
         self.on_board(self, self.board)
