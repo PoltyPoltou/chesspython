@@ -2,6 +2,7 @@ from colors import BACKGROUND
 from keyboard import MyKeyboardListener
 from kivy.properties import ObjectProperty
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.popup import Popup
 import boardGUI
@@ -19,7 +20,7 @@ class LoadDialog(FloatLayout):
     path = ObjectProperty(None)
 
 
-class ChessWindow(BoxLayout):
+class ChessWindow(GridLayout):
     couleurBg = BACKGROUND
     boardGUI = ObjectProperty(None)
     moveList: Optional[MoveList] = ObjectProperty(None)

@@ -5,7 +5,7 @@
 #: include kv/loader.kv
 #: include kv/arrows.kv
 <ChessWindow>:
-    orientation : 'horizontal'
+    cols : 2
     padding : (10,10)
     spacing : 10
     boardGUI : boardGUI
@@ -16,14 +16,8 @@
         Rectangle:
             pos : self.pos
             size : self.size
-    BoxLayout:
-        size_hint : (0.1,1)
-        Button:
-            text: 'Load'
-            on_release: root.show_load()
-
     FloatLayout:
-        size_hint : (0.75,1)
+        size_hint : (0.75,0.9)
         id : container
         spacing : 10
         evalWidth : bar.width + self.spacing
@@ -44,4 +38,10 @@
             moveList: mvlst
     MoveList:
         id:mvlst
-        size_hint : (0.15,1)
+        size_hint : (0.25,1)
+    BoxLayout:
+        size_hint : (0.1,0.1)
+        Button:
+            text: 'Load'
+            on_release: root.show_load()
+

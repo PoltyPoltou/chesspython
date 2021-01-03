@@ -1,12 +1,37 @@
 #:kivy 2.0.0
 <MoveLabel>:
+    size_hint:(0.33, None)
     font_size:'15sp'
     size:self.texture_size
     text_size: self.size
+    bold: True
+    halign:"left"
+    valign:"middle"
+    moveColor : (0.75,0.75,0.75,1)
+    highlighted : False
+    color : self.moveColor if not self.highlighted else (1,1,1,1)
+    canvas.before:
+        Color:
+            rgba : self.moveColor if self.highlighted else (0,0,0,0)
+        Rectangle:
+            pos : self.pos
+            size : self.size
+
+
+<VariationLabel>:
+    font_size:'15sp'
+    size:self.texture_size
     bold: False
     halign:"left"
     valign:"middle"
-
+    old_y:0
+    size_hint:(1, None)
+    canvas.before:
+        Color:
+            rgba : (0.25,0.25,0.25,1)
+        Rectangle:
+            pos : self.pos
+            size : self.size
 
 <MoveList>:
     gridLayoutRef:gridref
@@ -18,7 +43,7 @@
         size:(0,0)
         canvas.before:
             Color:
-                rgba : (1,1,1,0.5)
+                rgba : (0.45,0.45,0.45,1)
             Rectangle:
                 pos : self.pos
                 size : self.size
