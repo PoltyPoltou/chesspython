@@ -1,16 +1,18 @@
+import threading
 from analysis import GameAnalysis, BoardAnalysisWrapper
 import chess.pgn
 from movelist import MoveList
 from typing import List, Optional
 import boardGUI
 
+
 class GameController():
     moveList: Optional[MoveList] = None
     boardGUI = None
-
     listAnalysis = []
 
     def __init__(self):
+        self.lock = threading.Lock()
         self.game = chess.pgn.Game()
         self.board = self.game.board()
         self.evalWrapper = BoardAnalysisWrapper(self.board)
@@ -52,12 +54,13 @@ class GameController():
         self.listAnalysis.append(analysis)
 
     def updateCurrentNode(self, game):
-        self.game = game
-        self.board = self.game.board()
-        self.boardGUI.changeBoard(self.board)
-        self.evalWrapper.update(self.board)
-        self.moveList.update_moves(self)
+        with self.lock:
+            self.game = game
+            self.board = self.game.board()
+            self.boardGUI.changeBoard(self.board)
+            self.evalWrapper.update(self.board)
+            self.moveList.update_moves(self)
 
     def postAnalysis(self, game, moveQualityList):
-        self.updateCurrentNode(game.game())
+        self.updateCurrentNode(game.end())
         self.moveList.postAnalysis(moveQualityList)
