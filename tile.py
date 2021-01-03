@@ -25,7 +25,7 @@ class Tile(AnchorLayout):
     yBoard = NumericProperty(1)
     row = NumericProperty(1)
     square = NumericProperty(0)  # index of tile from a1 (0) to h8 (63)
-    img = ObjectProperty(None)
+    img = ObjectProperty(None, rebind=True)
 
     def on_pieceSourceImg(self, instance, value):
         if(self.pieceSourceImg == ''):
@@ -33,6 +33,7 @@ class Tile(AnchorLayout):
             self.img.height = '0dp'
         else:
             self.img.size_hint = (1, 1)
+            self.img.keep_data = True
 
     def reorder_widgets(self):
         imgWidget = None

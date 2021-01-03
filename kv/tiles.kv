@@ -11,7 +11,7 @@
     movableTo : False
     played : False
     color : (0,0,0)
-    bgColor : c.darkerColor(self.color) if self.selected else self.color
+    bgColor : c.baricenterColor(self.color, c.YELLOW, 0.4,0.6) if self.selected else self.color
     displayedColor : c.baricenterColor(self.bgColor, c.YELLOW, 0.4,0.6) if self.played else self.bgColor
     circleColor : c.darkerColor(self.color,0.90) if self.movableTo else self.displayedColor
     circleSize : 0.3
