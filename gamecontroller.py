@@ -52,10 +52,12 @@ class GameController():
             self.updateCurrentNode(self.game.next())
 
     def analyseFullGame(self):
-        analysis = GameAnalysis(self)
-        analysis.game = self.game.game()
-        analysis.start()
-        self.listAnalysis.append(analysis)
+        if not self.analysisRunning():
+            analysis = GameAnalysis(self)
+            analysis.game = self.game.game()
+            analysis.start()
+            self.listAnalysis.append(analysis)
+            self.chessWindow.lockLoad()
 
     def updateCurrentNode(self, game):
         with self.lock:
@@ -69,3 +71,9 @@ class GameController():
         self.updateCurrentNode(game.end())
         self.moveList.postAnalysis(moveQualityList)
         self.chessWindow.unlockLoad()
+
+    def analysisRunning(self):
+        for analysis in self.listAnalysis:
+            if analysis.running:
+                return True
+        return False

@@ -125,6 +125,7 @@ class GameAnalysis(threading.Thread):
         self.stopFlag = False
         self.wrapper = None
         self.controller = controller
+        self.running = False
 
     def analyseGame(self, game: chess.pgn.Game):
         evalList = []
@@ -178,11 +179,13 @@ class GameAnalysis(threading.Thread):
         return moveQualityList
 
     def run(self):
+        self.running = True
         evalList = self.analyseGame(self.game.game())
         moveQuality = self.analyseMoves(evalList)
         for quality in moveQuality:
             print(quality.move, " ", quality)
         self.controller.postAnalysis(self.game.game(), moveQuality)
+        self.running = False
 
     def stop(self):
         self.stopFlag = True

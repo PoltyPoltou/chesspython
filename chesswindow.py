@@ -34,10 +34,7 @@ class ChessWindow(GridLayout):
         self.keyboard: MyKeyboardListener = MyKeyboardListener()
         self.keyboard.bind_key('r', self.rotate)
         self.keyboard.bind_key('p', self.controller.computerPlay)
-        self.keyboard.bind_key('j', self.controller.prevNode)
-        self.keyboard.bind_key('l', self.controller.nextNode)
         self.keyboard.bind_key('a', self.controller.analyseFullGame)
-        self.keyboard.bind_key('o', self.show_load)
 
         super().__init__(**kwargs)
 
