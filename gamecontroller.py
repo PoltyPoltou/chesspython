@@ -65,7 +65,7 @@ class GameController():
             self.board = self.game.board()
             self.boardGUI.changeBoard(self.board)
             self.evalWrapper.update(self.board)
-            self.moveList.update_moves(self)
+            self.moveList.new_move(self.game, self)
 
     def postAnalysis(self, game, moveQualityList):
         self.updateCurrentNode(game.end())

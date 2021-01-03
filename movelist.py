@@ -34,29 +34,42 @@ class MoveLabel(Label):
 
 class VariationLabel(Label):
 
-    def __init__(self, controller, **kwargs):
+    def __init__(self, controller, rootNode, **kwargs):
         super().__init__(**kwargs)
         self.mapNodes = {}
         self.controller = controller
-
+        self.rootNode = rootNode
 
 class MoveList(ScrollView):
     gridLayoutRef = ObjectProperty(None)
     textHeight = 20
-    gameStr = ""
-    listFullMoveEntry = []
-    mapVariationPerEntry = {}
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.reset()
+
+    def reset(self):
+        self.gameStr = ""
+        self.game = None
+        self.listFullMoveEntry = []
+        self.mapVariationPerEntry = {}
+        self.mapMove = {}
+        self.oldMove = None
 
     def update_moves(self, controller):
         if str(controller.game.game()) == self.gameStr:
             for entry in self.listFullMoveEntry:
                 for child in entry.children:
                     child.highlighted = child.node is controller.game
+                    self.oldMove = child
             return
 
-        self.gameStr = str(controller.game.game())
+        self.reset()
+        self.clearList()
+        self.game = controller.game.game()
+        self.gameStr = str(self.game)
 
-        lastGame = controller.game.game()
+        lastGame = self.game
         curGame = lastGame.next()
         prevBoard = lastGame.board()
         # Track if we need to delete the last entry black move
@@ -69,18 +82,10 @@ class MoveList(ScrollView):
                 self.addMainFullMoveEntry(fullmove_number, controller)
             entry = self.getFullMoveEntry(fullmove_number)
 
-            index = 2 if prevBoard.turn == chess.WHITE else 3
             # create new move
-            if len(entry.children) < index:
-                self.add_move_in_entry(curGame, controller, entry)
-            elif entry.children[-index].node is not curGame:
-                # otherwise update directly the widget
-                entry.children[-index].node = curGame
-                san = prevBoard.san(curGame.move)
-                entry.children[-index].text = "[ref=move]"+san+"[ref=move]"
-                entry.children[-index].moveColor = (0.75, 0.75, 0.75, 1)
+            widget = self.add_move_in_entry(curGame, controller, entry)
             # last entry is complete iif its black who has played
-            lastEntryComplete = index == 3
+            lastEntryComplete = prevBoard.turn == chess.BLACK
 
             self.remove_all_variation(fullmove_number, lastEntryComplete)
             # Check for variation
@@ -91,7 +96,9 @@ class MoveList(ScrollView):
                         fullmove_number, lastEntryComplete, variation, controller)
 
             # check highlightedness
-            entry.children[-index].highlighted = entry.children[-index].node is controller.game
+            widget.highlighted = widget.node is controller.game
+            if widget.highlighted:
+                self.oldMove = widget
             lastGame = curGame
             curGame = curGame.next()
             prevBoard = board
@@ -107,6 +114,58 @@ class MoveList(ScrollView):
             if len(entry.children) > 2:
                 entry.remove_widget(entry.children[0])
 
+    def new_move(self, gameNode, controller):
+        # if game is completely different we update every move
+        if self.game is None or self.game.game() is not gameNode.game():
+            self.update_moves(controller)
+            return
+
+        if gameNode is gameNode.game():
+            return
+
+        widget = self.mapMove.get(gameNode, None)
+
+        # check if game node is not already registered
+        if widget is None:
+            # Otherwise we need to add it
+            # check if mainline
+            if gameNode.is_mainline():
+
+                board = gameNode.board()
+                color = not board.turn
+                fullMoveCount = board.fullmove_number - 1 if color == chess.WHITE else board.fullmove_number - 2
+
+                if color == chess.WHITE:
+                    # add entry
+                    self.addMainFullMoveEntry(fullMoveCount, controller)
+                entry = self.getFullMoveEntry(fullMoveCount)
+                self.add_move_in_entry(gameNode, controller, entry)
+            # else
+            else:
+                rootNode = gameNode
+                # find variation from parent
+                variation = self.mapMove.get(gameNode.parent, None)
+                if variation is not None and not gameNode.starts_variation():
+                    rootNode = variation.rootNode
+                    self.remove_variation(variation)
+
+                if (gameNode.parent.is_mainline() and gameNode.starts_variation()) \
+                    or (variation is not None and not gameNode.starts_variation()):
+                    board = rootNode.board()
+                    color = not board.turn
+                    fullMoveCount = board.fullmove_number - 1 if color == chess.WHITE else board.fullmove_number - 2
+
+                    self.add_variation(fullMoveCount, color == chess.WHITE, rootNode, controller)
+            if self.mapMove.get(gameNode, None) is not None:
+                widget = self.mapMove[gameNode]
+
+        # update highlight
+        if self.oldMove is not None:
+            self.oldMove.highlighted = False
+        if widget is not None:
+            self.oldMove = widget
+            self.oldMove.highlighted = True
+
     def add_move_in_entry(self, gameNode, controller, entry):
         san = ""
         if gameNode is not None:
@@ -120,6 +179,8 @@ class MoveList(ScrollView):
         entry.add_widget(moveWidget)
         if(self.gridLayoutRef.height > self.height):
             self.scroll_y = 0
+        self.mapMove[gameNode] = moveWidget
+        return moveWidget
 
     def remove_move(self):
         self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
@@ -169,8 +230,6 @@ class MoveList(ScrollView):
         self.gridLayoutRef.size = (
             0, self.gridLayoutRef.size[1]+self.textHeight)
         self.listFullMoveEntry.append(entry)
-        self.add_move_in_entry(None, controller, entry)
-        self.add_move_in_entry(None, controller, entry)
         return entry
 
     def remove_all_variation(self, fullmove_number, lastEntryComplete):
@@ -179,20 +238,23 @@ class MoveList(ScrollView):
         varList = self.mapVariationPerEntry.get(variationKey, [])
         if varList is not None:
             for var in varList:
-                self.gridLayoutRef.size = (
-                    0, self.gridLayoutRef.size[1]-var.size[1])
-                self.gridLayoutRef.remove_widget(var)
+                self.remove_variation(var)
         self.mapVariationPerEntry[variationKey] = None
+
+    def remove_variation(self, var):
+        self.gridLayoutRef.size = (
+            0, self.gridLayoutRef.size[1]-var.size[1])
+        self.gridLayoutRef.remove_widget(var)
 
     def add_variation(self, fullmove_number, lastEntryComplete, variation, controller):
         variationKey = str(fullmove_number) + \
             ("black" if lastEntryComplete else "white")
-        if self.mapVariationPerEntry[variationKey] is None:
+        if self.mapVariationPerEntry.get(variationKey, None) is None:
             self.mapVariationPerEntry[variationKey] = []
         listVar = self.mapVariationPerEntry[variationKey]
 
         varLabel = VariationLabel(
-            controller, markup=True, text_size=(self.size[0]-10, None))
+            controller, variation, markup=True, text_size=(self.size[0]-10, None))
         varLabel.bind(on_ref_press=loadVariationNode)
 
         curGame = variation
@@ -213,6 +275,7 @@ class MoveList(ScrollView):
             ref = str(index)
             text += "[ref="+ref+"]"+san+"[ref="+ref+"] "
             varLabel.mapNodes[ref] = curGame
+            self.mapMove[curGame] = varLabel
 
             curGame = curGame.next()
             prevBoard = board
@@ -228,6 +291,7 @@ class MoveList(ScrollView):
         self.gridLayoutRef.size = (
             0, self.gridLayoutRef.size[1]+varLabel.texture_size[1])
         listVar.append(varLabel)
+        return varLabel
 
     def getFullMoveEntry(self, fullMoveCount):
         return self.listFullMoveEntry[fullMoveCount]
