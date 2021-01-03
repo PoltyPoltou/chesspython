@@ -25,9 +25,11 @@ class ChessWindow(GridLayout):
     boardGUI = ObjectProperty(None)
     progressBar = ObjectProperty(None)
     moveList: Optional[MoveList] = ObjectProperty(None)
+    loadButton = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         self.controller = gamecontroller.GameController()
+        self.controller.chessWindow = self
 
         self.keyboard: MyKeyboardListener = MyKeyboardListener()
         self.keyboard.bind_key('r', self.rotate)
@@ -71,3 +73,10 @@ class ChessWindow(GridLayout):
 
     def dismiss_popup(self):
         self._popup.dismiss()
+
+    def lockLoad(self):
+        self.loadButton.disabled = True
+
+    def unlockLoad(self):
+        self.loadButton.disabled = False
+

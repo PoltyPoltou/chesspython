@@ -31,16 +31,6 @@ class VariationLabel(Label):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-
-    #def on_size(self, instance, value):
-    #    if self.parent is None:
-    #        return
-    #    self.parent.y += self.y - self.old_y
-    #    print("self.old_y = ",self.old_y)
-    #    print("self.y = ",self.y)
-    #    self.old_y = self.y
-
-
     def on_texture_size(self, instance, value):
         if self.parent is None:
             return
@@ -156,7 +146,7 @@ class MoveList(ScrollView):
                 elif quality.isGood():
                     label.moveColor = (105/256, 163/256, 38/256,1)
                 elif quality.isOk():
-                    label.moveColor = (1,1,1,1)
+                    label.moveColor = (0.75,0.75,0.75,1)
                 elif quality.isImprecision():
                     label.moveColor = (255/256, 213/256, 0,1)
                 elif quality.isError():
@@ -208,6 +198,7 @@ class MoveList(ScrollView):
             san = prevBoard.san(curGame.move)
             ref = str(index)
             text += "[ref="+ref+"]"+san+"[ref="+ref+"] "
+            varLabel.mapNodes[ref] = curGame
 
 
             curGame = curGame.next()

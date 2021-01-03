@@ -10,6 +10,7 @@ class GameController():
     moveList: Optional[MoveList] = None
     boardGUI = None
     progressBar = None
+    chessWindow = None
 
     listAnalysis = []
 
@@ -32,6 +33,7 @@ class GameController():
         analysis = GameAnalysis(self)
         analysis.game = game.game()
         analysis.start()
+        self.chessWindow.lockLoad()
         self.listAnalysis.append(analysis)
         self.updateCurrentNode(game)
 
@@ -66,3 +68,4 @@ class GameController():
     def postAnalysis(self, game, moveQualityList):
         self.updateCurrentNode(game.end())
         self.moveList.postAnalysis(moveQualityList)
+        self.chessWindow.unlockLoad()

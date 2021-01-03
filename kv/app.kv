@@ -11,6 +11,7 @@
     boardGUI : boardGUI
     moveList : mvlst
     progressBar : progress
+    loadButton : button
     canvas:
         Color:
             rgb : self.couleurBg
@@ -48,5 +49,6 @@
     BoxLayout:
         size_hint : (0.1,0.1)
         Button:
+            id : button
             text: 'Load'
             on_release: root.show_load()
