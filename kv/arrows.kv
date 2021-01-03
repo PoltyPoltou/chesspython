@@ -15,7 +15,8 @@
     tileSize : 0
     longueur: 0
     rotationAngle: 0
-    canvas.after:
+    offset : 0
+    canvas:
         Rotate:
             angle:self.rotationAngle
             axis:0,0,1
@@ -23,7 +24,7 @@
         Color:
             rgba:self.clr
         Rectangle:
-            pos:self.x - self.longueur + 0.13 * self.tileSize, self.y + self.tileSize * 0.4
+            pos:self.x - self.longueur + 0.13 * self.tileSize + self.offset, self.y + self.tileSize * 0.4
             size:self.longueur, self.tileSize * 0.20
         Rotate:
             angle:-self.rotationAngle
@@ -36,7 +37,7 @@
     tileSize : 90
     #rotation to be applied to the Arrow begin horizontal to the left
     rotationAngle : 0
-    canvas.after:
+    canvas:
         Rotate:
             angle:self.rotationAngle
             axis:0,0,1
@@ -69,12 +70,65 @@
     longueur : self.delta_x if self.horizontal else (self.delta_y if self.vertical else (m.sqrt(2)*self.delta_x))
     ArrowPoint:
         clr : root.clr
-        pos: root.pos if root.nullTest else (0,0)
+        pos: root.pos
         tileSize : root.tileSize
         rotationAngle: 90 * root.vertical + 180 * root.flipped + root.diagonal * ar.Arrow.diagonalAngle[root.horizontalFlip][root.verticalFlip]
     RectangleForArrow:
         clr: root.clr
-        pos: root.pos if root.nullTest else (0,0)
+        pos: root.pos
         tileSize : root.tileSize
         longueur : 0.13 * root.tileSize * 2 + root.longueur - root.tileSize
         rotationAngle: 90 * root.vertical + 180 * root.flipped + root.diagonal * ar.Arrow.diagonalAngle[root.horizontalFlip][root.verticalFlip]
+
+<RotationZWidget@Widget>:
+    rotationAngle : 0
+    canvas:
+        Rotate:
+            angle:self.rotationAngle
+            axis:0,0,1
+            origin:self.pos
+
+<ArrowKnight>:
+    clr : (1,2/3,0,0.8)
+    nullTest : self.tileFrom != None and self.tileTo != None
+    pos: self.tileTo.pos if self.nullTest else (0,0)
+    size: self.tileTo.size if self.nullTest else (0,0)
+    tileFrom : None
+    tileTo : None
+    horizontalFlip : (self.tileFrom.x > self.tileTo.x) if self.nullTest else False
+    verticalFlip : (self.tileFrom.y > self.tileTo.y) if self.nullTest else False
+    tileSize : self.tileFrom.width if self.nullTest else 0
+    delta_x : ord(self.tileTo.column) - ord(self.tileFrom.column) if self.nullTest else 0
+    delta_y : self.tileTo.row - self.tileFrom.row if self.nullTest else 0
+    canvas.before:
+        Rotate:
+            angle:+ar.ArrowKnight.angleDict.get((self.delta_x,self.delta_y),0)
+            origin:(self.x + self.tileSize/2, self.y + self.tileSize/2) if self.nullTest else (0,0,0)
+            axis:(0,0,1)
+        Scale:
+            origin:(self.x + self.tileSize/2, self.y + self.tileSize/2) if self.nullTest else (0,0,0)
+            xyz:(-1 if ar.ArrowKnight.flipDict.get((self.delta_x,self.delta_y),False) else 1), 1, 1
+    canvas.after:
+        Scale:
+            origin:(self.x + self.tileSize/2, self.y + self.tileSize/2) if self.nullTest else (0,0,0)
+            xyz:(-1 if ar.ArrowKnight.flipDict.get((self.delta_x,self.delta_y),False) else 1), 1, 1
+        Rotate:
+            angle:-ar.ArrowKnight.angleDict.get((self.delta_x,self.delta_y),0)
+            origin:(self.x + self.tileSize/2, self.y + self.tileSize/2) if self.nullTest else (0,0,0)
+            axis:(0,0,1)
+    ArrowPoint:
+        clr : root.clr
+        pos: root.pos
+        tileSize : root.tileSize
+    RectangleForArrow:
+        clr: root.clr
+        pos: root.pos
+        tileSize : root.tileSize
+        longueur : 0.13 * root.tileSize + 0.5 * root.tileSize + 0.2 * root.tileSize / 2
+    RectangleForArrow:
+        clr: root.clr
+        pos: root.pos[0] - root.tileSize, root.pos[1]
+        tileSize : root.tileSize
+        longueur : 0.13 * root.tileSize + 1.5 * root.tileSize - 0.2 * root.tileSize / 2
+        offset : root.tileSize / 2 - 0.2 * root.tileSize / 2 - 0.13 * root.tileSize
+        rotationAngle: 90

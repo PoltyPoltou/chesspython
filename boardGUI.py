@@ -1,4 +1,4 @@
-from arrow import arrow_factory
+from arrow import Arrow, ArrowManager, arrow_factory
 from analysisWidgets import EvaluationBar
 from colors import *
 from kivy.base import Builder
@@ -38,8 +38,11 @@ class BoardWidget(GridLayout):
 
     def __init__(self, **kwargs):
         self.board = None
-        self.arrowList = []
         super().__init__(**kwargs)
+
+    def on_kv_post(self, base_widget):
+        self.arrowManager = ArrowManager(self.parent)
+        return super().on_kv_post(base_widget)
 
     def setup(self, controller):
         self.controller = controller
@@ -77,7 +80,7 @@ class BoardWidget(GridLayout):
                 print(tileTouched.coords, self.children.index(row), row.children.index(tileTouched), "WHITE" *
                       self.board.turn + "BLACK" * (not self.board.turn))
                 self.handleSelection(tileTouched)
-                self.removeArrows()
+                self.arrowManager.removeArrows()
             else:
                 self.unselectCase()
             if(touch.button == 'right'):
@@ -90,10 +93,7 @@ class BoardWidget(GridLayout):
             tileTouched, row = self.findTileTouched(touch)
             touch.ungrab(self)
             if(tileTouched != None and row != None):
-                arrowToDraw = arrow_factory(self.lastTouchedTile, tileTouched)
-                if(arrowToDraw != None):
-                    self.arrowList.append(arrowToDraw)
-                    self.parent.add_widget(arrowToDraw)
+                self.arrowManager.addArrow(self.lastTouchedTile, tileTouched)
         return super().on_touch_up(touch)
 
     def handleSelection(self, tile: Tile):
@@ -131,11 +131,6 @@ class BoardWidget(GridLayout):
                 if(tile.coords != t.coords):
                     t.movableTo = self.board.is_legal(
                         chess.Move.from_uci(tile.coords + t.coords))
-
-    def removeArrows(self):
-        for arr in self.arrowList:
-            self.parent.remove_widget(arr)
-        self.arrowList = []
 
     def update_board(self):
         self.on_board(self, self.board)
