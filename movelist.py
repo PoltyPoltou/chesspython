@@ -6,13 +6,16 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
 
+
 def loadNode(instance, value):
     if value == "move" and instance.node is not None and instance.controller is not None:
         instance.controller.updateCurrentNode(instance.node)
 
+
 def loadVariationNode(instance, value):
     if instance.mapNodes.get(value, None) is not None:
         instance.controller.updateCurrentNode(instance.mapNodes[value])
+
 
 class MoveLabel(Label):
     moveColor = ObjectProperty(None)
@@ -28,21 +31,14 @@ class MoveLabel(Label):
         return super().on_kv_post(base_widget)
     pass
 
+
 class VariationLabel(Label):
-    mapNodes = {}
-    old_y = NumericProperty(0)
 
     def __init__(self, controller, **kwargs):
         super().__init__(**kwargs)
+        self.mapNodes = {}
         self.controller = controller
 
-    def on_texture_size(self, instance, value):
-        if self.parent is None:
-            return
-        self.parent.y += self.texture_size[1] - self.old_y
-        print("self.old_y = ",self.old_y)
-        print("self.y = ",self.texture_size[1])
-        self.old_y = self.texture_size[1]
 
 class MoveList(ScrollView):
     gridLayoutRef = ObjectProperty(None)
@@ -55,10 +51,10 @@ class MoveList(ScrollView):
         if str(controller.game.game()) == self.gameStr:
             for entry in self.listFullMoveEntry:
                 for child in entry.children:
-                    child.highlighted = child.node == controller.game
+                    child.highlighted = child.node is controller.game
             return
 
-        self.gameStr =str(controller.game.game())
+        self.gameStr = str(controller.game.game())
 
         lastGame = controller.game.game()
         curGame = lastGame.next()
@@ -75,26 +71,27 @@ class MoveList(ScrollView):
 
             index = 2 if prevBoard.turn == chess.WHITE else 3
             # create new move
-            if len(entry.children) < index :
+            if len(entry.children) < index:
                 self.add_move_in_entry(curGame, controller, entry)
-            elif entry.children[-index].node != curGame:
+            elif entry.children[-index].node is not curGame:
                 # otherwise update directly the widget
                 entry.children[-index].node = curGame
                 san = prevBoard.san(curGame.move)
                 entry.children[-index].text = "[ref=move]"+san+"[ref=move]"
-                entry.children[-index].moveColor = (0.75,0.75,0.75,1)
+                entry.children[-index].moveColor = (0.75, 0.75, 0.75, 1)
             # last entry is complete iif its black who has played
             lastEntryComplete = index == 3
 
             self.remove_all_variation(fullmove_number, lastEntryComplete)
             # Check for variation
-            for variation in curGame.variations :
+            for variation in curGame.variations:
                 # Only handle non mainline here
                 if not variation.is_mainline():
-                    self.add_variation(fullmove_number, lastEntryComplete, variation, controller)
+                    self.add_variation(
+                        fullmove_number, lastEntryComplete, variation, controller)
 
             # check highlightedness
-            entry.children[-index].highlighted = entry.children[-index].node == controller.game
+            entry.children[-index].highlighted = entry.children[-index].node is controller.game
             lastGame = curGame
             curGame = curGame.next()
             prevBoard = board
@@ -105,7 +102,7 @@ class MoveList(ScrollView):
             self.remove_move()
 
         # remove last entry black move if incomplete
-        if not lastEntryComplete :
+        if not lastEntryComplete:
             entry = self.getFullMoveEntry(-1)
             if len(entry.children) > 2:
                 entry.remove_widget(entry.children[0])
@@ -117,7 +114,8 @@ class MoveList(ScrollView):
             move = gameNode.move
             san = board.san(move)
 
-        moveWidget = MoveLabel("[ref=move]"+san+"[ref=move]", gameNode, controller, markup=True)
+        moveWidget = MoveLabel(
+            "[ref=move]"+san+"[ref=move]", gameNode, controller, markup=True)
         moveWidget.bind(on_ref_press=loadNode)
         entry.add_widget(moveWidget)
         if(self.gridLayoutRef.height > self.height):
@@ -125,7 +123,8 @@ class MoveList(ScrollView):
 
     def remove_move(self):
         self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
-        self.gridLayoutRef.size = (0, self.gridLayoutRef.size[1]-self.textHeight)
+        self.gridLayoutRef.size = (
+            0, self.gridLayoutRef.size[1]-self.textHeight)
         self.listFullMoveEntry.pop()
 
     def clearList(self):
@@ -147,45 +146,53 @@ class MoveList(ScrollView):
 
                 label = self.getFullMoveEntry(full_move).children[index]
                 if quality.isPerfect():
-                    label.moveColor = (50/256, 161/256, 144/256,1)
+                    label.moveColor = (50/256, 161/256, 144/256, 1)
                 elif quality.isGood():
-                    label.moveColor = (105/256, 163/256, 38/256,1)
+                    label.moveColor = (105/256, 163/256, 38/256, 1)
                 elif quality.isOk():
-                    label.moveColor = (0.75,0.75,0.75,1)
+                    label.moveColor = (0.75, 0.75, 0.75, 1)
                 elif quality.isImprecision():
-                    label.moveColor = (255/256, 213/256, 0,1)
+                    label.moveColor = (255/256, 213/256, 0, 1)
                 elif quality.isError():
-                    label.moveColor = (214/256, 137/256, 4/256,1)
+                    label.moveColor = (214/256, 137/256, 4/256, 1)
                 elif quality.isBlunder():
-                    label.moveColor = (105/256, 15/256, 12/256,1)
+                    label.moveColor = (105/256, 15/256, 12/256, 1)
 
             index -= 1
             color = not color
 
     def addMainFullMoveEntry(self, fullMoveCount, controller):
-        entry = GridLayout(cols=3, cols_minimum={0:30, 1:50, 2:50})
-        entry.add_widget(MoveLabel(str(fullMoveCount+1) + ". ", None, None, markup=True))
+        entry = GridLayout(cols=3, cols_minimum={0: 30, 1: 50, 2: 50})
+        entry.add_widget(MoveLabel(str(fullMoveCount+1) +
+                                   ". ", None, None, markup=True))
         self.gridLayoutRef.add_widget(entry)
-        self.gridLayoutRef.size = (0, self.gridLayoutRef.size[1]+self.textHeight)
+        self.gridLayoutRef.size = (
+            0, self.gridLayoutRef.size[1]+self.textHeight)
         self.listFullMoveEntry.append(entry)
         self.add_move_in_entry(None, controller, entry)
         self.add_move_in_entry(None, controller, entry)
         return entry
 
     def remove_all_variation(self, fullmove_number, lastEntryComplete):
-        varList = self.mapVariationPerEntry.get(str(fullmove_number)+("black" if lastEntryComplete else "white"), [])
+        variationKey = str(fullmove_number) + \
+            ("black" if lastEntryComplete else "white")
+        varList = self.mapVariationPerEntry.get(variationKey, [])
         if varList is not None:
             for var in varList:
-                self.gridLayoutRef.size = (0, self.gridLayoutRef.size[1]-var.size[1])
+                self.gridLayoutRef.size = (
+                    0, self.gridLayoutRef.size[1]-var.size[1])
                 self.gridLayoutRef.remove_widget(var)
-        self.mapVariationPerEntry[str(fullmove_number)+("black" if lastEntryComplete else "white")] = None
+        self.mapVariationPerEntry[variationKey] = None
 
     def add_variation(self, fullmove_number, lastEntryComplete, variation, controller):
-        if self.mapVariationPerEntry[str(fullmove_number)+("black" if lastEntryComplete else "white")] is None:
-            self.mapVariationPerEntry[str(fullmove_number)+("black" if lastEntryComplete else "white")] = []
-        listVar = self.mapVariationPerEntry[str(fullmove_number)+("black" if lastEntryComplete else "white")]
+        variationKey = str(fullmove_number) + \
+            ("black" if lastEntryComplete else "white")
+        if self.mapVariationPerEntry[variationKey] is None:
+            self.mapVariationPerEntry[variationKey] = []
+        listVar = self.mapVariationPerEntry[variationKey]
 
-        varLabel = VariationLabel(controller, markup=True, text_size=(self.size[0]-10, None))
+        varLabel = VariationLabel(
+            controller, markup=True, text_size=(self.size[0]-10, None))
         varLabel.bind(on_ref_press=loadVariationNode)
 
         curGame = variation
@@ -193,7 +200,8 @@ class MoveList(ScrollView):
         board = curGame.board()
         index = 0
 
-        text = str(prevBoard.fullmove_number) + "." + (" ... " if not lastEntryComplete else " ")
+        text = str(prevBoard.fullmove_number) + "." + \
+            (" ... " if not lastEntryComplete else " ")
 
         while curGame is not None:
             board = curGame.board()
@@ -206,7 +214,6 @@ class MoveList(ScrollView):
             text += "[ref="+ref+"]"+san+"[ref="+ref+"] "
             varLabel.mapNodes[ref] = curGame
 
-
             curGame = curGame.next()
             prevBoard = board
             index += 1
@@ -214,12 +221,13 @@ class MoveList(ScrollView):
         varLabel.text = text
         varLabel.texture_update()
 
-        widx = self.gridLayoutRef.children.index(self.getFullMoveEntry(fullmove_number))
+        widx = self.gridLayoutRef.children.index(
+            self.getFullMoveEntry(fullmove_number))
 
         self.gridLayoutRef.add_widget(varLabel, widx)
-        self.gridLayoutRef.size = (0, self.gridLayoutRef.size[1]+varLabel.texture_size[1])
+        self.gridLayoutRef.size = (
+            0, self.gridLayoutRef.size[1]+varLabel.texture_size[1])
         listVar.append(varLabel)
-
 
     def getFullMoveEntry(self, fullMoveCount):
         return self.listFullMoveEntry[fullMoveCount]
