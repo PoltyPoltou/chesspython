@@ -23,6 +23,7 @@ class LoadDialog(FloatLayout):
 class ChessWindow(GridLayout):
     couleurBg = BACKGROUND
     boardGUI = ObjectProperty(None)
+    progressBar = ObjectProperty(None)
     moveList: Optional[MoveList] = ObjectProperty(None)
 
     def __init__(self, **kwargs):
@@ -41,6 +42,7 @@ class ChessWindow(GridLayout):
     def on_kv_post(self, base_widget):
         self.controller.moveList = self.moveList
         self.controller.boardGUI = self.boardGUI
+        self.controller.progressBar = self.progressBar
         self.boardGUI.setup(self.controller)
         return super().on_kv_post(base_widget)
 

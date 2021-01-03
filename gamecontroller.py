@@ -9,6 +9,8 @@ import boardGUI
 class GameController():
     moveList: Optional[MoveList] = None
     boardGUI = None
+    progressBar = None
+
     listAnalysis = []
 
     def __init__(self):

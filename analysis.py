@@ -132,6 +132,8 @@ class GameAnalysis(threading.Thread):
         board = curGame.board()
         self.wrapper = BoardAnalysisWrapper(board)
         self.wrapper.start()
+        size = curGame.end().board().fullmove_number*2
+        progress = 0
         while curGame is not None and not self.stopFlag:
             self.wrapper.update(curGame.board())
             while not self.wrapper.hasFinished() and not self.stopFlag:
@@ -140,6 +142,9 @@ class GameAnalysis(threading.Thread):
                 evalList.append(
                     (curGame.move, self.wrapper.getEngineAnalysis()))
             curGame = curGame.next()
+            progress += 1
+            self.controller.progressBar.progress = progress/size
+        self.controller.progressBar.progress = 1
         self.wrapper.stop()
         return evalList
 

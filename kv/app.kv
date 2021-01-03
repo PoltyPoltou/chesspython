@@ -9,7 +9,8 @@
     padding : (10,10)
     spacing : 10
     boardGUI : boardGUI
-    moveList: mvlst
+    moveList : mvlst
+    progressBar : progress
     canvas:
         Color:
             rgb : self.couleurBg
@@ -39,9 +40,13 @@
     MoveList:
         id:mvlst
         size_hint : (0.25,1)
+
+    AnalysisProgressBar:
+        id: progress
+        size_hint : (0.1,0.1)
+
     BoxLayout:
         size_hint : (0.1,0.1)
         Button:
             text: 'Load'
             on_release: root.show_load()
-

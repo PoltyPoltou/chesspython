@@ -3,7 +3,7 @@ from typing import Optional
 import chess
 import analysis
 from kivy.uix.widget import Widget
-from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
+from kivy.properties import NumericProperty, ObjectProperty, ColorProperty, BooleanProperty, StringProperty
 from kivy.clock import *
 
 
@@ -79,3 +79,6 @@ class EvaluationBar(Widget):
             self.displayedEval = self.eval
 
     pass
+
+class AnalysisProgressBar(Widget):
+    progress = NumericProperty(0.00)

@@ -30,5 +30,30 @@
         size:(root.width,20)
 
 
-        
-            
+<AnalysisProgressBar>:
+    progress : 0
+    textProgress : "{:.0f}".format(self.progress*100)+"%"
+    bgColor : (0.25, 0.25, 0.25, 1)
+    barColor : (46/256, 143/256, 72/256, 1)
+    canvas.before:
+        Color:
+            rgba:self.bgColor
+        Rectangle:
+            pos:self.pos
+            size:self.size
+    canvas:
+        Color:
+            rgba:self.barColor
+        Rectangle:
+            pos:self.pos
+            size: self.width * self.progress , self.height
+    Label:
+        canvas:"after"
+        color : (1,1,1)
+        text:root.textProgress
+        font_size:'12sp'
+        bold: True
+        valign:"center"
+        halign:"left"
+        pos:(root.x,root.y)
+        size:(root.width,root.height)
