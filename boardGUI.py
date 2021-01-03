@@ -1,3 +1,4 @@
+from kivy.clock import Clock
 from arrow import Arrow, ArrowManager, arrow_factory
 from analysisWidgets import EvaluationBar
 from colors import *
@@ -31,7 +32,7 @@ class BoardWidget(GridLayout):
     imageDict = {"r": "br.webp", "n": "bn.webp", "b": "bb.webp", "k": "bk.webp", "q": "bq.webp", "p": "bp.webp",
                  "R": "wr.webp", "N": "wn.webp", "B": "wb.webp", "K": "wk.webp", "Q": "wq.webp", "P": "wp.webp"}
     selectedTile: Optional[Tile] = None
-    board: Optional[chess.Board] = ObjectProperty(None, True)
+    board: Optional[chess.Board] = ObjectProperty(None, rebind=True)
     evalWidget: Optional[EvaluationBar] = ObjectProperty(None, True)
     moveList: Optional[MoveList] = ObjectProperty(None)
     controller: Optional[gamecontroller.GameController] = None
@@ -42,6 +43,10 @@ class BoardWidget(GridLayout):
 
     def on_kv_post(self, base_widget):
         self.arrowManager = ArrowManager(self.parent)
+        if(self.evalWidget is not None):
+            self.bestMove = None
+            self.bestMoveEvent = Clock.schedule_interval(
+                self.checkBestMove, 1/2)
         return super().on_kv_post(base_widget)
 
     def setup(self, controller):
@@ -65,6 +70,24 @@ class BoardWidget(GridLayout):
     def stopEval(self):
         self.evalWidget.stop()
         pass
+
+    def checkBestMove(self, dt):
+        if(self.evalWidget.evalWrapper.hasAnalysis()):
+            bestMove = self.evalWidget.evalWrapper.bestMove()
+            if(bestMove is not None and self.board.is_legal(bestMove)):
+                tileFrom = self.findTile(
+                    chess.square_name(bestMove.from_square))
+                tileTo = self.findTile(chess.square_name(bestMove.to_square))
+                self.arrowManager.addEngineArrow(tileFrom, tileTo)
+            elif(not self.board.is_legal(bestMove)):
+                self.arrowManager.removeEngineArrow()
+
+    def findTile(self, coords) -> Tile:
+        for row in self.children:
+            for tile in row.children:
+                if(tile.coords == coords):
+                    return tile
+        return None
 
     def findTileTouched(self, touch: MotionEvent) -> Tuple[Tile, Widget]:
         for row in self.children:
@@ -112,7 +135,6 @@ class BoardWidget(GridLayout):
         else:
             if(self.board.piece_at(tile.square) != None and self.board.piece_at(tile.square).color == self.board.turn):
                 self.selectCase(tile)
-        self.update_board()
 
     def unselectCase(self):
         if(self.selectedTile != None):
@@ -137,6 +159,7 @@ class BoardWidget(GridLayout):
 
     def on_board(self, instance, value):
         lastMoveIndexList: list[int] = []
+        self.checkBestMove(0)
         if(self.board.move_stack != []):
             lastMoveIndexList.append(self.board.move_stack[-1].from_square)
             lastMoveIndexList.append(self.board.move_stack[-1].to_square)

@@ -78,4 +78,3 @@ class ChessWindow(GridLayout):
 
     def unlockLoad(self):
         self.loadButton.disabled = False
-

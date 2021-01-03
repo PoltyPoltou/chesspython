@@ -1,8 +1,9 @@
-from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
+from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty, ColorProperty
 from kivy.uix.widget import Widget
 
 
 class Arrow(Widget):
+    clr = ColorProperty((1, 2/3, 0, 0.8))
     tileTo = ObjectProperty(None, rebind=True)
     tileFrom = ObjectProperty(None, rebind=True)
     vertical = BooleanProperty(False)
@@ -13,6 +14,7 @@ class Arrow(Widget):
 
 
 class ArrowKnight(Widget):
+    clr = ColorProperty((1, 2/3, 0, 0.8))
     tileTo = ObjectProperty(None, rebind=True)
     tileFrom = ObjectProperty(None, rebind=True)
     angleDict = {(1, 2): 0, (-2, 1): 90, (-1, -2): 180,
@@ -47,6 +49,7 @@ class ArrowManager:
     def __init__(self, widgetToAddArrows) -> None:
         self.arrowList = []
         self.widgetToAddArrows = widgetToAddArrows
+        self.engineArrow = None
 
     def addArrow(self, tileFrom, tileTo):
         arrowToDraw = arrow_factory(tileFrom, tileTo)
@@ -62,6 +65,26 @@ class ArrowManager:
             else:
                 self.widgetToAddArrows.remove_widget(arrowToRemove)
                 self.arrowList.remove(arrowToRemove)
+
+    def addEngineArrow(self, tileFrom, tileTo):
+        if(self.engineArrow is not None):
+            if(self.engineArrow.tileFrom.coords != tileFrom.coords or self.engineArrow.tileTo.coords != tileTo.coords):
+                self.removeEngineArrow()
+                arrowToDraw = arrow_factory(tileFrom, tileTo)
+                arrowToDraw.clr = (0, 0, 1, 0.8)
+                self.widgetToAddArrows.add_widget(arrowToDraw)
+                self.engineArrow = arrowToDraw
+        else:
+            self.removeEngineArrow()
+            arrowToDraw = arrow_factory(tileFrom, tileTo)
+            arrowToDraw.clr = (0, 0, 1, 0.8)
+            self.widgetToAddArrows.add_widget(arrowToDraw)
+            self.engineArrow = arrowToDraw
+
+    def removeEngineArrow(self):
+        if(self.engineArrow is not None):
+            self.widgetToAddArrows.remove_widget(self.engineArrow)
+            self.engineArrow = None
 
     def removeArrows(self):
         for arr in self.arrowList:

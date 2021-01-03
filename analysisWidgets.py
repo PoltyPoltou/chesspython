@@ -17,7 +17,7 @@ class EvaluationBar(Widget):
     sign = BooleanProperty(False)
 
     def __init__(self, **kwargs):
-        self.evalWrapper = None
+        self.evalWrapper: analysis.BoardAnalysisWrapper = None
         self.board = None
         self.started = False
         super().__init__(**kwargs)
@@ -79,6 +79,7 @@ class EvaluationBar(Widget):
             self.displayedEval = self.eval
 
     pass
+
 
 class AnalysisProgressBar(Widget):
     progress = NumericProperty(0.00)
