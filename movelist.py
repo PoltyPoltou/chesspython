@@ -10,6 +10,10 @@ def loadNode(instance, value):
     if value == "move" and instance.node is not None and instance.controller is not None:
         instance.controller.updateCurrentNode(instance.node)
 
+def loadVariationNode(instance, value):
+    if instance.mapNodes.get(value, None) is not None:
+        instance.controller.updateCurrentNode(instance.mapNodes[value])
+
 class MoveLabel(Label):
     moveColor = ObjectProperty(None)
     highlighted = BooleanProperty(None)
@@ -28,8 +32,9 @@ class VariationLabel(Label):
     mapNodes = {}
     old_y = NumericProperty(0)
 
-    def __init__(self, **kwargs):
+    def __init__(self, controller, **kwargs):
         super().__init__(**kwargs)
+        self.controller = controller
 
     def on_texture_size(self, instance, value):
         if self.parent is None:
@@ -86,7 +91,7 @@ class MoveList(ScrollView):
             for variation in curGame.variations :
                 # Only handle non mainline here
                 if not variation.is_mainline():
-                    self.add_variation(fullmove_number, lastEntryComplete, variation)
+                    self.add_variation(fullmove_number, lastEntryComplete, variation, controller)
 
             # check highlightedness
             entry.children[-index].highlighted = entry.children[-index].node == controller.game
@@ -175,12 +180,13 @@ class MoveList(ScrollView):
                 self.gridLayoutRef.remove_widget(var)
         self.mapVariationPerEntry[str(fullmove_number)+("black" if lastEntryComplete else "white")] = None
 
-    def add_variation(self, fullmove_number, lastEntryComplete, variation):
+    def add_variation(self, fullmove_number, lastEntryComplete, variation, controller):
         if self.mapVariationPerEntry[str(fullmove_number)+("black" if lastEntryComplete else "white")] is None:
             self.mapVariationPerEntry[str(fullmove_number)+("black" if lastEntryComplete else "white")] = []
         listVar = self.mapVariationPerEntry[str(fullmove_number)+("black" if lastEntryComplete else "white")]
 
-        varLabel = VariationLabel(markup=True, text_size=(self.size[0]-10, None))
+        varLabel = VariationLabel(controller, markup=True, text_size=(self.size[0]-10, None))
+        varLabel.bind(on_ref_press=loadVariationNode)
 
         curGame = variation
         prevBoard = curGame.parent.board()
