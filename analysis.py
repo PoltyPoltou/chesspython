@@ -26,7 +26,6 @@ class BoardAnalysisWrapper():
                     for info in analysis:
                         if(info.get('score') is not None):
                             self.infoMove = info
-                        time.sleep(0.05)
                         if(self.stopFlag or self.wrapper.board.fen() != boardCopy.fen()):
                             break
                     self.finished = self.wrapper.board.fen() == boardCopy.fen()
@@ -69,7 +68,7 @@ class BoardAnalysisWrapper():
     def bestVariant(self):
         return self._evalThread.infoMove.get('pv').copy()
 
-    def depth(self):
+    def getDepth(self):
         return self._evalThread.infoMove.get('depth')
 
     def setLimitDepth(self, depth: int):
@@ -80,6 +79,7 @@ class BoardAnalysisWrapper():
 
     def hasFinished(self):
         return self._evalThread.finished
+
 
 class GameAnalysis(threading.Thread):
     class MoveQuality():
@@ -126,7 +126,7 @@ class GameAnalysis(threading.Thread):
         self.wrapper = None
         self.controller = controller
 
-    def analyseGame(self, game : chess.pgn.Game):
+    def analyseGame(self, game: chess.pgn.Game):
         evalList = []
         curGame = game
         board = curGame.board()
@@ -137,7 +137,8 @@ class GameAnalysis(threading.Thread):
             while not self.wrapper.hasFinished() and not self.stopFlag:
                 time.sleep(0.1)
             if(self.wrapper.bestMove() is not None):
-                evalList.append((curGame.move, self.wrapper.getEngineAnalysis()))
+                evalList.append(
+                    (curGame.move, self.wrapper.getEngineAnalysis()))
             curGame = curGame.next()
         self.wrapper.stop()
         return evalList
@@ -150,17 +151,23 @@ class GameAnalysis(threading.Thread):
             if evalPrev is not None and move == evalPrev.get('pv')[0]:
                 moveQualityList.append(GameAnalysis.MoveQuality(move, 0))
             elif evalPrev is not None:
-                score = eval["score"].white() if color else eval["score"].black()
-                prevScore = evalPrev["score"].white() if color else evalPrev["score"].black()
+                score = eval["score"].white(
+                ) if color else eval["score"].black()
+                prevScore = evalPrev["score"].white(
+                ) if color else evalPrev["score"].black()
                 if score.score() is not None and prevScore.score() is not None:
-                    moveQualityList.append(GameAnalysis.MoveQuality(move, score.score() - prevScore.score()))
+                    moveQualityList.append(GameAnalysis.MoveQuality(
+                        move, score.score() - prevScore.score()))
                 elif prevScore.is_mate() != score.is_mate():
-                    moveQualityList.append(GameAnalysis.MoveQuality(move, -100))
+                    moveQualityList.append(
+                        GameAnalysis.MoveQuality(move, -100))
                 elif prevScore.is_mate() and score.is_mate():
                     if prevScore.mate() <= score.mate():
-                        moveQualityList.append(GameAnalysis.MoveQuality(move, -0.5))
+                        moveQualityList.append(
+                            GameAnalysis.MoveQuality(move, -0.5))
                     if prevScore.mate() > score.mate():
-                        moveQualityList.append(GameAnalysis.MoveQuality(move, 0))
+                        moveQualityList.append(
+                            GameAnalysis.MoveQuality(move, 0))
             color = not color
             evalPrev = eval
         return moveQualityList
@@ -169,7 +176,7 @@ class GameAnalysis(threading.Thread):
         evalList = self.analyseGame(self.game.game())
         moveQuality = self.analyseMoves(evalList)
         for quality in moveQuality:
-            print(quality.move," ", quality)
+            print(quality.move, " ", quality)
         self.controller.postAnalysis(self.game.game(), moveQuality)
 
     def stop(self):
