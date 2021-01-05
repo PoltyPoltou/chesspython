@@ -61,7 +61,7 @@ class BoardAnalysisWrapper():
         return self._evalThread.infoMove.copy()
 
     def bestMove(self):
-        if 'pv' in self._evalThread.infoMove:
+        if 'pv' in self._evalThread.infoMove and len(self._evalThread.infoMove.get('pv')) > 0:
             return self._evalThread.infoMove.get('pv')[0]
         return None
 

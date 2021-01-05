@@ -16,14 +16,12 @@
             pos : self.pos
             size : self.size
 
-
 <VariationLabel>:
+    font_size:'15sp'
+
+<VariationBox>:
     size_hint:(1, None)
-    font_size:'20sp'
-    size:self.texture_size
-    bold: False
-    halign:"left"
-    valign:"middle"
+    height : self.minimum_height
     canvas.before:
         Color:
             rgba : (0.25,0.25,0.25,1)
@@ -31,12 +29,18 @@
             pos : self.pos
             size : self.size
 
+<VariationStack>:
+    size_hint:(1, None)
+    orientation: 'lr-tb'
+    height : self.minimum_height
+
 <GridLayoutMinHeight>:
     cols:1
     size_hint:(1, None)
     height: self.minimum_height
     col_force_default: True
     col_default_width: self.width/self.cols
+
 
 <MoveList>:
     gridLayoutRef:gridref

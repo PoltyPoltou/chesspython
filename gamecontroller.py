@@ -68,7 +68,8 @@ class GameController():
             self.moveList.new_move(self.game, self)
 
     def postAnalysis(self, game, moveQualityList):
-        self.updateCurrentNode(game.end())
+        if game.game() is not self.game.game():
+            self.updateCurrentNode(game.end())
         self.moveList.postAnalysis(moveQualityList)
         self.chessWindow.unlockLoad()
 

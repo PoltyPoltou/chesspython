@@ -2,19 +2,16 @@ import chess
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.stacklayout import StackLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
 
 
-def loadNode(instance, value):
-    if value == "move" and instance.node is not None and instance.controller is not None:
-        instance.controller.updateCurrentNode(instance.node)
-
-
-def loadVariationNode(instance, value):
-    if instance.mapNodes.get(value, None) is not None:
-        instance.controller.updateCurrentNode(instance.mapNodes[value])
+def loadNode(self, touch):
+    if self.node is not None and self.controller is not None and self.collide_point(touch.pos[0], touch.pos[1]):
+        self.controller.updateCurrentNode(self.node)
 
 
 class MoveLabel(Label):
@@ -32,13 +29,24 @@ class MoveLabel(Label):
     pass
 
 
-class VariationLabel(Label):
+class VariationLabel(MoveLabel):
 
-    def __init__(self, controller, rootNode, **kwargs):
+    def __init__(self, text, node, controller, **kwargs):
+        super().__init__(text, node, controller, **kwargs)
+        self.next = None
+        self.prev = None
+
+
+class VariationBox(BoxLayout):
+    def addSubVariation(self):
+        varBox = VariationBox(padding=(10, 0, 0, 0))
+        self.add_widget(varBox)
+        return varBox
+
+
+class VariationStack(StackLayout):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.mapNodes = {}
-        self.controller = controller
-        self.rootNode = rootNode
 
 
 class MoveList(ScrollView):
@@ -67,6 +75,7 @@ class MoveList(ScrollView):
         self.listFullMoveEntry = []
         self.mapVariationPerEntry = {}
         self.mapMove = {}
+        self.mapVariation = {}
         self.oldMove = None
 
     def update_moves(self, controller):
@@ -106,7 +115,7 @@ class MoveList(ScrollView):
                 # Only handle non mainline here
                 if not variation.is_mainline():
                     self.add_variation(
-                        fullmove_number, lastEntryComplete, variation, controller)
+                        fullmove_number, lastEntryComplete, variation, controller, None)
 
             # check highlightedness
             widget.highlighted = widget.node is controller.game
@@ -156,22 +165,17 @@ class MoveList(ScrollView):
                 self.add_move_in_entry(gameNode, controller, entry)
             # else
             else:
-                rootNode = gameNode
                 # find variation from parent
-                variation = self.mapMove.get(gameNode.parent, None)
-                if variation is not None and not gameNode.starts_variation():
-                    rootNode = variation.rootNode
-                    self.remove_variation(variation)
+                variation = self.mapVariation.get(gameNode.parent, None)
 
-                if (gameNode.parent.is_mainline() and gameNode.starts_variation()) \
-                        or (variation is not None and not gameNode.starts_variation()):
-                    board = rootNode.board()
-                    color = not board.turn
-                    fullMoveCount = board.fullmove_number - \
-                        1 if color == chess.WHITE else board.fullmove_number - 2
+                board = gameNode.board()
+                color = not board.turn
+                fullMoveCount = board.fullmove_number - \
+                    1 if color == chess.WHITE else board.fullmove_number - 2
 
-                    self.add_variation(fullMoveCount, color ==
-                                       chess.WHITE, rootNode, controller)
+                self.add_variation(fullMoveCount, color ==
+                                   chess.WHITE, gameNode, controller, variation)
+
             if self.mapMove.get(gameNode, None) is not None:
                 widget = self.mapMove[gameNode]
 
@@ -189,9 +193,8 @@ class MoveList(ScrollView):
             move = gameNode.move
             san = board.san(move)
 
-        moveWidget = MoveLabel(
-            "[ref=move]"+san+"[ref=move]", gameNode, controller, markup=True)
-        moveWidget.bind(on_ref_press=loadNode)
+        moveWidget = MoveLabel(san, gameNode, controller, markup=True)
+        moveWidget.bind(on_touch_down=loadNode)
         entry.add_widget(moveWidget)
         if(self.gridLayoutRef.height > self.height):
             self.scroll_y = 0
@@ -258,50 +261,56 @@ class MoveList(ScrollView):
             0, self.gridLayoutRef.size[1]-var.size[1])
         self.gridLayoutRef.remove_widget(var)
 
-    def add_variation(self, fullmove_number, lastEntryComplete, variation, controller):
+    def add_variation(self, fullmove_number, lastEntryComplete, variation, controller, originVariation):
         variationKey = str(fullmove_number) + \
             ("black" if lastEntryComplete else "white")
         if self.mapVariationPerEntry.get(variationKey, None) is None:
             self.mapVariationPerEntry[variationKey] = []
         listVar = self.mapVariationPerEntry[variationKey]
 
-        varLabel = VariationLabel(
-            controller, variation, markup=True, text_size=(self.size[0]-10, None))
-        varLabel.bind(on_ref_press=loadVariationNode)
+        # start of variation from mainline
+        if originVariation is None and variation.parent.is_mainline():
+            box = VariationBox()
+            stack = VariationStack()
+            box.add_widget(stack)
 
-        curGame = variation
-        prevBoard = curGame.parent.board()
-        board = curGame.board()
-        index = 0
+            prevBoard = variation.parent.board()
 
-        text = str(prevBoard.fullmove_number) + "." + \
-            (" ... " if not lastEntryComplete else " ")
+            text = str(prevBoard.fullmove_number) + "." + (" ... " if not lastEntryComplete else " ") + \
+                prevBoard.san(variation.move)
 
-        while curGame is not None:
-            board = curGame.board()
+            label = VariationLabel(text, variation, controller, markup=True)
+            label.bind(on_touch_down=loadNode)
+            stack.add_widget(label)
 
-            if prevBoard.turn == chess.WHITE and curGame != variation:
+            self.mapMove[variation] = label
+            self.mapVariation[variation] = box
+
+            listVar.append(box)
+
+            widx = self.gridLayoutRef.children.index(
+                self.getFullMoveEntry(fullmove_number))
+
+            self.gridLayoutRef.add_widget(box, widx)
+
+        # continue same variation than parent
+        if originVariation is not None and len(variation.parent.variations) == 1:
+            stack = originVariation.children[0]
+
+            prevBoard = variation.parent.board()
+
+            text = " "
+            if prevBoard.turn == chess.WHITE:
                 text += str(prevBoard.fullmove_number) + ". "
 
-            san = prevBoard.san(curGame.move)
-            ref = str(index)
-            text += "[ref="+ref+"]"+san+"[ref="+ref+"] "
-            varLabel.mapNodes[ref] = curGame
-            self.mapMove[curGame] = varLabel
+            text += prevBoard.san(variation.move)
 
-            curGame = curGame.next()
-            prevBoard = board
-            index += 1
+            label = VariationLabel(text, variation, controller, markup=True)
+            label.bind(on_touch_down=loadNode)
+            stack.add_widget(label)
 
-        varLabel.text = text
-        varLabel.texture_update()
-
-        widx = self.gridLayoutRef.children.index(
-            self.getFullMoveEntry(fullmove_number))
-
-        self.gridLayoutRef.add_widget(varLabel, widx)
-        listVar.append(varLabel)
-        return varLabel
+            self.mapMove[variation] = label
+            self.mapVariation[variation] = originVariation
 
     def getFullMoveEntry(self, fullMoveCount):
         return self.listFullMoveEntry[fullMoveCount]
