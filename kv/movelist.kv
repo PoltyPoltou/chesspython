@@ -6,7 +6,6 @@
     text_size: self.size
     bold: True
     halign:"left"
-    valign:"middle"
     moveColor : (0.75,0.75,0.75,1)
     highlighted : False
     color : self.moveColor if not self.highlighted else (1,1,1,1)
@@ -55,6 +54,7 @@
 
 <VariationStack>:
     size_hint:(1, None)
+    spacing:[2,1]
     orientation: 'lr-tb'
     height : self.minimum_height
 

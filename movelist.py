@@ -344,6 +344,11 @@ class MoveList(ScrollView):
                     self.add_variation(
                         0, False, curLabel.node, controller, box)
                     curLabel = curLabel.next
+                listBoxChildren = originVariation.children[:-1]
+                listBoxChildren.reverse()
+                for boxChild in listBoxChildren:
+                    originVariation.remove_widget(boxChild)
+                    box.add_widget(boxChild)
                 originVariation.add_widget(box)
 
             # create new sub variation
