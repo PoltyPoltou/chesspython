@@ -43,7 +43,19 @@ class VariationLabel(Label):
 
 class MoveList(ScrollView):
     gridLayoutRef = ObjectProperty(None)
-    textHeight = 20
+    # WARNING THIS IS HORRIBLE CODE
+    # if the old coord is the same as the new but rounded we don't care and we do not update
+    # on the actualisation of the variable we set it to be integer
+    x = NumericProperty(0, comparator=lambda oldValue,
+                        newValue: oldValue == int(newValue))
+    y = NumericProperty(0, comparator=lambda oldValue,
+                        newValue: oldValue == int(newValue))
+
+    def on_x(self, instance, x):
+        self.x = int(x)
+
+    def on_y(self, instance, y):
+        self.y = int(y)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -225,7 +237,7 @@ class MoveList(ScrollView):
 
     def addMainFullMoveEntry(self, fullMoveCount, controller):
         entry = GridLayoutMinHeight(
-            cols=3, cols_minimum={0: 30, 1: 50, 2: 50})
+            cols=3)
         entry.add_widget(MoveLabel(str(fullMoveCount+1) +
                                    ". ", None, None, markup=True))
         self.gridLayoutRef.add_widget(entry)

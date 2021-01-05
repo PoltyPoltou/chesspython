@@ -30,12 +30,18 @@
         Rectangle:
             pos : self.pos
             size : self.size
+
 <GridLayoutMinHeight>:
+    cols:1
     size_hint:(1, None)
     height: self.minimum_height
+    col_force_default: True
+    col_default_width: self.width/self.cols
+
 <MoveList>:
     gridLayoutRef:gridref
     do_scroll_y:True
+
     canvas.before:
         Color:
             rgba : (39/255,37/255,34/255,1)
