@@ -1,8 +1,9 @@
 #:kivy 2.0.0
 <MoveLabel>:
-    size_hint:(0.33, None)
+    size_hint:(1, None)
     font_size:'20sp'
     size:self.texture_size
+    text_size: self.size
     bold: True
     halign:"left"
     valign:"middle"
@@ -18,6 +19,7 @@
 
 <VariationLabel>:
     size_hint:(None, None)
+    text_size:(None, None)
     size:self.texture_size
     font_size:'15sp'
     bold: False

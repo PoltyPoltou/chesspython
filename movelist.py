@@ -243,7 +243,7 @@ class MoveList(ScrollView):
     def addMainFullMoveEntry(self, fullMoveCount, controller):
         entry = GridLayoutMinHeight(
             cols=3)
-        entry.add_widget(MoveLabel(str(fullMoveCount+1) +
+        entry.add_widget(MoveLabel("   " + str(fullMoveCount+1) +
                                    ". ", None, None, markup=True))
         self.gridLayoutRef.add_widget(entry)
         self.listFullMoveEntry.append(entry)
@@ -270,7 +270,7 @@ class MoveList(ScrollView):
 
         prevBoard = variation.parent.board()
 
-        text = str(prevBoard.fullmove_number) + "." + (" ... " if prevBoard.turn == chess.BLACK else " ") + \
+        text = " " + str(prevBoard.fullmove_number) + "." + (" ... " if prevBoard.turn == chess.BLACK else " ") + \
             prevBoard.san(variation.move)
 
         label = VariationLabel(text, variation, controller, markup=True)
