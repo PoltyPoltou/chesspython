@@ -17,11 +17,15 @@
             size : self.size
 
 <VariationLabel>:
+    size_hint:(None, None)
+    size:self.texture_size
     font_size:'15sp'
 
 <VariationBox>:
     size_hint:(1, None)
     height : self.minimum_height
+    orientation: 'vertical'
+    padding : (10,0,0,0)
     canvas.before:
         Color:
             rgba : (0.25,0.25,0.25,1)

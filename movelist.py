@@ -261,30 +261,37 @@ class MoveList(ScrollView):
             0, self.gridLayoutRef.size[1]-var.size[1])
         self.gridLayoutRef.remove_widget(var)
 
+    def create_variation(self, variation, controller):
+        box = VariationBox()
+        stack = VariationStack()
+        box.add_widget(stack)
+
+        prevBoard = variation.parent.board()
+
+        text = str(prevBoard.fullmove_number) + "." + (" ... " if prevBoard.turn == chess.BLACK else " ") + \
+            prevBoard.san(variation.move)
+
+        label = VariationLabel(text, variation, controller, markup=True)
+        label.bind(on_touch_down=loadNode)
+        stack.add_widget(label)
+
+        self.mapMove[variation] = label
+        self.mapVariation[variation] = box
+
+        return box
+
     def add_variation(self, fullmove_number, lastEntryComplete, variation, controller, originVariation):
-        variationKey = str(fullmove_number) + \
-            ("black" if lastEntryComplete else "white")
-        if self.mapVariationPerEntry.get(variationKey, None) is None:
-            self.mapVariationPerEntry[variationKey] = []
-        listVar = self.mapVariationPerEntry[variationKey]
 
         # start of variation from mainline
         if originVariation is None and variation.parent.is_mainline():
-            box = VariationBox()
-            stack = VariationStack()
-            box.add_widget(stack)
+            box = self.create_variation(variation, controller)
+            variationKey = str(fullmove_number) + \
+                ("black" if lastEntryComplete else "white")
 
-            prevBoard = variation.parent.board()
+            if self.mapVariationPerEntry.get(variationKey, None) is None:
+                self.mapVariationPerEntry[variationKey] = []
 
-            text = str(prevBoard.fullmove_number) + "." + (" ... " if not lastEntryComplete else " ") + \
-                prevBoard.san(variation.move)
-
-            label = VariationLabel(text, variation, controller, markup=True)
-            label.bind(on_touch_down=loadNode)
-            stack.add_widget(label)
-
-            self.mapMove[variation] = label
-            self.mapVariation[variation] = box
+            listVar = self.mapVariationPerEntry[variationKey]
 
             listVar.append(box)
 
@@ -295,7 +302,7 @@ class MoveList(ScrollView):
 
         # continue same variation than parent
         if originVariation is not None and len(variation.parent.variations) == 1:
-            stack = originVariation.children[0]
+            stack = originVariation.children[-1]
 
             prevBoard = variation.parent.board()
 
@@ -307,10 +314,37 @@ class MoveList(ScrollView):
 
             label = VariationLabel(text, variation, controller, markup=True)
             label.bind(on_touch_down=loadNode)
+            lastLabel = stack.children[0]
+            lastLabel.next = label
+            label.prev = lastLabel
             stack.add_widget(label)
 
             self.mapMove[variation] = label
             self.mapVariation[variation] = originVariation
+
+        if originVariation is not None and len(variation.parent.variations) > 1:
+            stack = originVariation.children[-1]
+            base = self.mapMove[variation.parent]
+            base_next = base.next
+            if base_next is not None:
+                # break link in variation label
+                base_next.prev = None
+                base.next = None
+                # remove all label in original variation
+                while len(stack.children) > 0 and stack.children[0] is not base:
+                    stack.remove_widget(stack.children[0])
+                # create old variation
+                box = self.create_variation(base_next.node, controller)
+                curLabel = base_next.next
+                while curLabel is not None:
+                    self.add_variation(
+                        0, False, curLabel.node, controller, box)
+                    curLabel = curLabel.next
+                originVariation.add_widget(box)
+
+            # create new sub variation
+            box = self.create_variation(variation, controller)
+            originVariation.add_widget(box)
 
     def getFullMoveEntry(self, fullMoveCount):
         return self.listFullMoveEntry[fullMoveCount]
