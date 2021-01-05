@@ -33,7 +33,7 @@ class BoardWidget(GridLayout):
                  "R": "wr.webp", "N": "wn.webp", "B": "wb.webp", "K": "wk.webp", "Q": "wq.webp", "P": "wp.webp"}
     selectedTile: Optional[Tile] = None
     board: Optional[chess.Board] = ObjectProperty(None, rebind=True)
-    evalWidget: Optional[EvaluationBar] = ObjectProperty(None, True)
+    evalBarWidget: Optional[EvaluationBar] = ObjectProperty(None)
     moveList: Optional[MoveList] = ObjectProperty(None)
     controller: Optional[gamecontroller.GameController] = None
 
@@ -43,7 +43,7 @@ class BoardWidget(GridLayout):
 
     def on_kv_post(self, base_widget):
         self.arrowManager = ArrowManager(self.parent)
-        if(self.evalWidget is not None):
+        if(self.evalBarWidget is not None):
             self.bestMove = None
             self.bestMoveEvent = Clock.schedule_interval(
                 self.checkBestMove, 1/2)
@@ -51,29 +51,28 @@ class BoardWidget(GridLayout):
 
     def setup(self, controller):
         self.controller = controller
-        self.evalWidget.evalWrapper = controller.evalWrapper
         self.changeBoard(self.controller.board)
 
     def changeBoard(self, board):
         self.board = board
-        if(self.hasEval() and not self.evalWidget.isStarted()):
+        if(self.hasEval() and not self.evalBarWidget.isStarted()):
             self.startEval()
-        self.evalWidget.update(self.board)
+        self.evalBarWidget.update(self.board)
 
     def hasEval(self):
-        return self.evalWidget != None
+        return self.evalBarWidget != None
 
     def startEval(self):
-        self.evalWidget.start()
+        self.evalBarWidget.start()
         pass
 
     def stopEval(self):
-        self.evalWidget.stop()
+        self.evalBarWidget.stop()
         pass
 
     def checkBestMove(self, dt):
-        if(self.evalWidget.evalWrapper.hasAnalysis()):
-            bestMove = self.evalWidget.evalWrapper.bestMove()
+        if(self.controller.evalWrapper.hasAnalysis()):
+            bestMove = self.controller.evalWrapper.bestMove()
             if(bestMove is not None and self.board.is_legal(bestMove)):
                 tileFrom = self.findTile(
                     chess.square_name(bestMove.from_square))
