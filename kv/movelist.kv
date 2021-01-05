@@ -20,18 +20,36 @@
     size_hint:(None, None)
     size:self.texture_size
     font_size:'15sp'
+    bold: False
 
 <VariationBox>:
     size_hint:(1, None)
     height : self.minimum_height
     orientation: 'vertical'
     padding : (10,0,0,0)
+    last : True
     canvas.before:
         Color:
             rgba : (0.25,0.25,0.25,1)
         Rectangle:
             pos : self.pos
             size : self.size
+        Color:
+            rgba : (0.35,0.35,0.35,1)
+        Line:
+            points : (self.x+3, self.top, self.x+3, self.top-8, self.x+10, self.top-8)
+            width : 1.2
+            cap : 'square'
+            joint : 'miter'
+            close : False
+        Color:
+            rgba : (0.35,0.35,0.35,0 if self.last else 1)
+        Line:
+            points : (self.x+3, self.top, self.x+3, self.y+2)
+            width : 1.2
+            cap : 'square'
+            joint : 'miter'
+            close : False
 
 <VariationStack>:
     size_hint:(1, None)

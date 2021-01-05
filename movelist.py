@@ -6,7 +6,7 @@ from kivy.uix.stacklayout import StackLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
-from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
+from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty, ListProperty
 
 
 def loadNode(self, touch):
@@ -38,6 +38,8 @@ class VariationLabel(MoveLabel):
 
 
 class VariationBox(BoxLayout):
+    last = BooleanProperty(True, rebind=True)
+
     def addSubVariation(self):
         varBox = VariationBox(padding=(10, 0, 0, 0))
         self.add_widget(varBox)
@@ -293,6 +295,8 @@ class MoveList(ScrollView):
 
             listVar = self.mapVariationPerEntry[variationKey]
 
+            if len(listVar) > 0:
+                box.last = False
             listVar.append(box)
 
             widx = self.gridLayoutRef.children.index(
@@ -344,6 +348,7 @@ class MoveList(ScrollView):
 
             # create new sub variation
             box = self.create_variation(variation, controller)
+            originVariation.children[0].last = False
             originVariation.add_widget(box)
 
     def getFullMoveEntry(self, fullMoveCount):
