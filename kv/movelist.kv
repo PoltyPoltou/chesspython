@@ -1,9 +1,8 @@
 #:kivy 2.0.0
 <MoveLabel>:
     size_hint:(0.33, None)
-    font_size:'15sp'
+    font_size:'20sp'
     size:self.texture_size
-    text_size: self.size
     bold: True
     halign:"left"
     valign:"middle"
@@ -19,32 +18,31 @@
 
 
 <VariationLabel>:
-    font_size:'15sp'
+    size_hint:(1, None)
+    font_size:'20sp'
     size:self.texture_size
     bold: False
     halign:"left"
     valign:"middle"
-    old_y:0
-    size_hint:(1, None)
     canvas.before:
         Color:
             rgba : (0.25,0.25,0.25,1)
         Rectangle:
             pos : self.pos
             size : self.size
-
+<GridLayoutMinHeight>:
+    size_hint:(1, None)
+    height: self.minimum_height
 <MoveList>:
     gridLayoutRef:gridref
     do_scroll_y:True
-    GridLayout:
+    canvas.before:
+        Color:
+            rgba : (39/255,37/255,34/255,1)
+        Rectangle:
+            pos : self.pos
+            size : self.size
+    GridLayoutMinHeight:
         id:gridref
         cols: 1
-        size_hint:(1, None)
-        size:(0,0)
-        canvas.before:
-            Color:
-                rgba : (0.45,0.45,0.45,1)
-            Rectangle:
-                pos : self.pos
-                size : self.size
 

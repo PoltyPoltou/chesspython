@@ -40,6 +40,7 @@ class VariationLabel(Label):
         self.controller = controller
         self.rootNode = rootNode
 
+
 class MoveList(ScrollView):
     gridLayoutRef = ObjectProperty(None)
     textHeight = 20
@@ -133,7 +134,8 @@ class MoveList(ScrollView):
 
                 board = gameNode.board()
                 color = not board.turn
-                fullMoveCount = board.fullmove_number - 1 if color == chess.WHITE else board.fullmove_number - 2
+                fullMoveCount = board.fullmove_number - \
+                    1 if color == chess.WHITE else board.fullmove_number - 2
 
                 if color == chess.WHITE:
                     # add entry
@@ -150,12 +152,14 @@ class MoveList(ScrollView):
                     self.remove_variation(variation)
 
                 if (gameNode.parent.is_mainline() and gameNode.starts_variation()) \
-                    or (variation is not None and not gameNode.starts_variation()):
+                        or (variation is not None and not gameNode.starts_variation()):
                     board = rootNode.board()
                     color = not board.turn
-                    fullMoveCount = board.fullmove_number - 1 if color == chess.WHITE else board.fullmove_number - 2
+                    fullMoveCount = board.fullmove_number - \
+                        1 if color == chess.WHITE else board.fullmove_number - 2
 
-                    self.add_variation(fullMoveCount, color == chess.WHITE, rootNode, controller)
+                    self.add_variation(fullMoveCount, color ==
+                                       chess.WHITE, rootNode, controller)
             if self.mapMove.get(gameNode, None) is not None:
                 widget = self.mapMove[gameNode]
 
@@ -184,13 +188,10 @@ class MoveList(ScrollView):
 
     def remove_move(self):
         self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
-        self.gridLayoutRef.size = (
-            0, self.gridLayoutRef.size[1]-self.textHeight)
         self.listFullMoveEntry.pop()
 
     def clearList(self):
         self.gridLayoutRef.clear_widgets()
-        self.gridLayoutRef.size = (0, 0)
         self.listFullMoveEntry.clear()
 
     def postAnalysis(self, moveQualityList):
@@ -223,12 +224,11 @@ class MoveList(ScrollView):
             color = not color
 
     def addMainFullMoveEntry(self, fullMoveCount, controller):
-        entry = GridLayout(cols=3, cols_minimum={0: 30, 1: 50, 2: 50})
+        entry = GridLayoutMinHeight(
+            cols=3, cols_minimum={0: 30, 1: 50, 2: 50})
         entry.add_widget(MoveLabel(str(fullMoveCount+1) +
                                    ". ", None, None, markup=True))
         self.gridLayoutRef.add_widget(entry)
-        self.gridLayoutRef.size = (
-            0, self.gridLayoutRef.size[1]+self.textHeight)
         self.listFullMoveEntry.append(entry)
         return entry
 
@@ -288,10 +288,12 @@ class MoveList(ScrollView):
             self.getFullMoveEntry(fullmove_number))
 
         self.gridLayoutRef.add_widget(varLabel, widx)
-        self.gridLayoutRef.size = (
-            0, self.gridLayoutRef.size[1]+varLabel.texture_size[1])
         listVar.append(varLabel)
         return varLabel
 
     def getFullMoveEntry(self, fullMoveCount):
         return self.listFullMoveEntry[fullMoveCount]
+
+
+class GridLayoutMinHeight(GridLayout):
+    pass
