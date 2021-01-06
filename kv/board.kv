@@ -1,5 +1,6 @@
 #:kivy 2.0.0
 #:include kv/tiles.kv
+#:import brd boardGUI
 <Row>:
     cols : 8
 <FirstRowEven@Row>:
@@ -131,3 +132,35 @@
     FirstRowEven:
         rowNumber : 1
         reverseOrder : root.pov == 'WHITE'
+
+<ClickableImage@Button>:
+    source : ""
+    canvas.after:
+        Rectangle:
+            pos:self.pos
+            size:self.size
+            source:root.source
+<PromotionBubble>:
+    color: False
+    pieceDir : ""
+    size_hint : None,None
+    size : 200,200
+    pos_hint:{"center_x":0.5,"center_y":0.5}
+    GridLayout:
+        cols:2
+        ClickableImage:
+            source: root.pieceDir + brd.BoardWidget.imageDict["Q" if root.color else "q"]
+            on_press:
+                root.toCallOnPress("q")
+        ClickableImage:
+            source: root.pieceDir + brd.BoardWidget.imageDict["R" if root.color else "r"]
+            on_press:
+                root.toCallOnPress("r")
+        ClickableImage:
+            source: root.pieceDir + brd.BoardWidget.imageDict["N" if root.color else "n"]
+            on_press:
+                root.toCallOnPress("n")
+        ClickableImage:
+            source: root.pieceDir + brd.BoardWidget.imageDict["B" if root.color else "b"]
+            on_press:
+                root.toCallOnPress("b")

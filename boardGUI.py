@@ -10,6 +10,7 @@ from kivy.uix.behaviors import *
 from kivy.uix.boxlayout import *
 from kivy.uix.gridlayout import *
 from kivy.uix.image import *
+from kivy.uix.modalview import *
 from kivy.uix.widget import Widget
 from kivy.input.motionevent import MotionEvent
 from movelist import MoveList
@@ -23,6 +24,19 @@ import gamecontroller
 class Row(GridLayout):
     rowNumber = NumericProperty(0)
     reverseOrder = BooleanProperty(False)
+
+
+class PromotionBubble(ModalView):
+    color = BooleanProperty(chess.WHITE)
+    toCallOnPress = ObjectProperty(None)
+    pieceDir = StringProperty("")
+
+    def dismiss(self, *largs, **kwargs):
+        self.clear_widgets()
+        self.attach_to.unselectCase()
+        return super().dismiss(*largs, **kwargs)
+
+    pass
 
 
 class BoardWidget(GridLayout):
@@ -125,12 +139,34 @@ class BoardWidget(GridLayout):
             else:
                 move = chess.Move.from_uci(
                     self.selectedTile.coords + tile.coords)
+                movePromoteTest = chess.Move.from_uci(
+                    self.selectedTile.coords + tile.coords + 'q')
+                isPromoteLegal = self.board.is_legal(movePromoteTest)
                 if(self.board.is_legal(move) and not self.board.is_game_over(claim_draw=True)):
                     self.controller.playMove(move)
                     self.unselectCase()
                 else:
-                    self.unselectCase()
-                    self.handleSelection(tile)
+                    if(isPromoteLegal and not self.board.is_game_over(claim_draw=True)):
+                        promotebb = PromotionBubble()
+                        color = self.board.piece_at(
+                            self.selectedTile.square).color
+
+                        def playMove(promoteChar):
+                            moveToPlay = chess.Move.from_uci(
+                                self.selectedTile.coords + tile.coords + promoteChar)
+                            if(self.board.is_legal(moveToPlay)):
+                                self.controller.playMove(moveToPlay)
+                                self.unselectCase()
+                            promotebb.dismiss()
+
+                        promotebb.color = color
+                        promotebb.toCallOnPress = playMove
+                        promotebb.pieceDir = self.imageDir + self.imageStyleDir
+                        promotebb.attach_to = self
+                        promotebb.open()
+                    else:
+                        self.unselectCase()
+                        self.handleSelection(tile)
         else:
             if(self.board.piece_at(tile.square) != None and self.board.piece_at(tile.square).color == self.board.turn):
                 self.selectCase(tile)
