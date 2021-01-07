@@ -5,6 +5,8 @@ import chess.engine
 import time
 import os
 
+from kivy.clock import Clock
+
 
 class BoardAnalysisWrapper():
     class ThreadContinuousEvaluation(threading.Thread):
@@ -17,6 +19,7 @@ class BoardAnalysisWrapper():
             self.threads = 3
             self.setDaemon(True)
             self.finished = False
+            self.dispatcher = Clock.create_trigger(self.wrapper.notifyListener)
             print("Eval thread Launched")
 
         def run(self):
@@ -26,6 +29,7 @@ class BoardAnalysisWrapper():
                     for info in analysis:
                         if(info.get('score') is not None):
                             self.infoMove = info
+                            self.dispatcher()
                         if(self.stopFlag or self.wrapper.board.fen() != boardCopy.fen()):
                             break
                     self.finished = self.wrapper.board.fen() == boardCopy.fen()
@@ -46,6 +50,7 @@ class BoardAnalysisWrapper():
         self.engine: chess.engine.SimpleEngine = chess.engine.SimpleEngine.popen_uci(
             engineStr)
         self._evalThread = self.ThreadContinuousEvaluation(self)
+        self.listenerList = []
 
     def update(self, board):
         self.board = board
@@ -85,6 +90,17 @@ class BoardAnalysisWrapper():
 
     def hasFinished(self):
         return self._evalThread.finished
+
+    def notifyListener(self, dt):
+        for listener in self.listenerList:
+            listener.newEngineEvalEvent()
+
+    def addEvalEventListener(self, listener):
+        if(hasattr(listener, "newEngineEvalEvent")):
+            self.listenerList.append(listener)
+        else:
+            raise Exception(
+                "Listener added to ThreadContinuousEvaluation without newEngineEvalEvent(dt) attribute")
 
 
 class GameAnalysis(threading.Thread):
