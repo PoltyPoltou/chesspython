@@ -71,7 +71,6 @@ class BoardWidget(GridLayout):
         self.board = board
         if(self.hasEval() and not self.evalBarWidget.isStarted()):
             self.startEval()
-        self.evalBarWidget.update(self.board)
 
     def hasEval(self):
         return self.evalBarWidget != None
