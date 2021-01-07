@@ -1,14 +1,15 @@
 #:kivy 2.0.0
 
 <LoadDialog>:
+    id:loader
     BoxLayout:
         size: root.size
         pos: root.pos
         orientation: "vertical"
-        FileChooserListView:
+        MyFileChooserListView:
             id: filechooser
             path: root.path
-
+            loaderWidget:loader
         BoxLayout:
             size_hint_y: None
             height: 30
