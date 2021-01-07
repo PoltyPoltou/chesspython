@@ -38,6 +38,8 @@ class ChessWindow(GridLayout):
     progressBar = ObjectProperty(None)
     moveList: Optional[MoveList] = ObjectProperty(None)
     loadButton = ObjectProperty(None)
+    topMoveList = ObjectProperty(None)
+    evalBarWidget = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         self.controller = gamecontroller.GameController()
@@ -56,7 +58,8 @@ class ChessWindow(GridLayout):
         self.controller.moveList = self.moveList
         self.controller.boardGUI = self.boardGUI
         self.controller.progressBar = self.progressBar
-        self.boardGUI.evalBarWidget.evalWrapper = self.controller.evalWrapper
+        self.evalBarWidget.evalWrapper = self.controller.evalWrapper
+        self.topMoveList.threadEngine = self.controller.evalWrapper
         self.boardGUI.setup(self.controller)
         return super().on_kv_post(base_widget)
 

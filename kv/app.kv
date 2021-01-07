@@ -12,6 +12,8 @@
     moveList : mvlst
     progressBar : progress
     loadButton : button
+    topMoveList: hdMoveLst
+    evalBarWidget:bar
     canvas:
         Color:
             rgb : self.couleurBg
@@ -38,9 +40,16 @@
             pos_hint: {'center_x' : 0.5 + container.evalWidth/container.width/2, 'center_y' : 0.5}
             evalBarWidget: bar
             moveList: mvlst
-    MoveList:
-        id:mvlst
+    BoxLayout:
+        orientation:'vertical'
         size_hint : (0.25,1)
+        HeadMoveList:
+            id:hdMoveLst
+            size_hint : (1,0.2)
+            text: "azd"
+        MoveList:
+            size_hint : (1,0.8)
+            id:mvlst
 
     AnalysisProgressBar:
         id: progress

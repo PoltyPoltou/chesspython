@@ -1,6 +1,7 @@
 import math
 from typing import Optional
 import chess
+from kivy.uix.anchorlayout import AnchorLayout
 import analysis
 from kivy.uix.widget import Widget
 from kivy.properties import NumericProperty, ObjectProperty, ColorProperty, BooleanProperty, StringProperty
@@ -78,6 +79,19 @@ class EvaluationBar(Widget):
         if(abs(self.displayedEval - self.eval) < 0.01):
             self.displayedEval = self.eval
 
+    pass
+
+
+class HeadMoveList(AnchorLayout):
+    threadEngine: Optional[analysis.BoardAnalysisWrapper] = ObjectProperty(
+        None, rebind=True)
+
+
+class DepthTracker(AnchorLayout):
+    threadEngine: Optional[analysis.BoardAnalysisWrapper] = ObjectProperty(
+        None, rebind=True)
+    actualDepth = NumericProperty(0)
+    defaultDepth = NumericProperty(0)
     pass
 
 
