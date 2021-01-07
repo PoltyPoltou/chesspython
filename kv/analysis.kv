@@ -62,7 +62,14 @@
     DepthTracker:
         threadEngine:root.threadEngine
 <DepthTracker>:
-    actualDepth : self.threadEngine.getDepth() if self.threadEngine is not None else 0
-    defaultDepth : self.threadEngine.getDefaultDepth() if self.threadEngine is not None else 0
+    orientation:"horizontal"
     Label:
         text: str(root.actualDepth) + " / " + str(root.defaultDepth)
+    BoxLayout:
+        orientation:"vertical"
+        Button:
+            text:"+"
+            on_press: root.threadEngine.setDefaultDepth(root.threadEngine.getDefaultDepth()+1)
+        Button:
+            text:"-"
+            on_press: root.threadEngine.setDefaultDepth(root.threadEngine.getDefaultDepth()-1)

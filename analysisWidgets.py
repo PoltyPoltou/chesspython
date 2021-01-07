@@ -2,6 +2,7 @@ import math
 from typing import Optional
 import chess
 from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.boxlayout import BoxLayout
 import analysis
 from kivy.uix.widget import Widget
 from kivy.properties import NumericProperty, ObjectProperty, ColorProperty, BooleanProperty, StringProperty
@@ -27,13 +28,12 @@ class EvaluationBar(Widget):
         return self.evalWrapper is not None and self.started
 
     def start(self):
-        if(self.evalWrapper != None):
+        if(self.evalWrapper is not None):
             self.started = True
-            self.evalEvent = Clock.schedule_interval(self.checkEval, 1/60)
+            self.evalWrapper.addEvalEventListener(self)
 
     def stop(self):
         if(self.evalWrapper != None and self.started):
-            self.evalEvent.cancel()
             self.evalWrapper = None
             self.started = False
 
@@ -65,19 +65,13 @@ class EvaluationBar(Widget):
 
         return (eval, textEval)
 
-    def checkEval(self, dt):
-        speedLimit = 2
+    def newEngineEvalEvent(self):
         if(self.evalWrapper.hasAnalysis()):
             povScore: chess.engine.PovScore = self.evalWrapper.getEngineAnalysis()[
                 "score"]
             evalLinear, self.textEval = self.parseEval(povScore)
             self.eval = 10*math.tanh(evalLinear/4)
-        speed = (self.displayedEval - self.eval)/3
-        if(abs(speed) < speedLimit and speed != 0):
-            speed = speed/abs(speed) * speedLimit
-        self.displayedEval -= dt*speed
-        if(abs(self.displayedEval - self.eval) < 0.01):
-            self.displayedEval = self.eval
+        self.displayedEval = self.eval
 
     pass
 
@@ -86,12 +80,28 @@ class HeadMoveList(AnchorLayout):
     threadEngine: Optional[analysis.BoardAnalysisWrapper] = ObjectProperty(
         None, rebind=True)
 
+    def on_threadEngine(self, instance, value):
+        if(self.threadEngine is not None):
+            self.threadEngine.addEvalEventListener(self)
 
-class DepthTracker(AnchorLayout):
+    def newEngineEvalEvent(self):
+        pass
+
+
+class DepthTracker(BoxLayout):
     threadEngine: Optional[analysis.BoardAnalysisWrapper] = ObjectProperty(
         None, rebind=True)
     actualDepth = NumericProperty(0)
     defaultDepth = NumericProperty(0)
+
+    def newEngineEvalEvent(self):
+        self.actualDepth = self.threadEngine.getDepth()
+        self.defaultDepth = self.threadEngine.getDefaultDepth()
+        pass
+
+    def on_threadEngine(self, instance, value):
+        if(self.threadEngine is not None):
+            self.threadEngine.addEvalEventListener(self)
     pass
 
 

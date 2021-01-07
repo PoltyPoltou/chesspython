@@ -19,22 +19,22 @@ class BoardAnalysisWrapper():
             self.threads = 3
             self.setDaemon(True)
             self.finished = False
-            self.dispatcher = Clock.create_trigger(self.wrapper.notifyListener)
-            print("Eval thread Launched")
 
         def run(self):
+            print("Eval thread Launched")
             while(not self.stopFlag):
                 boardCopy = self.wrapper.board
                 with self.wrapper.engine.analysis(boardCopy, chess.engine.Limit(depth=self.defaultDepth), multipv=1, options={"threads": self.threads}) as analysis:
                     for info in analysis:
                         if(info.get('score') is not None):
                             self.infoMove = info
-                            self.dispatcher()
+                            self.wrapper.dispatcher()
                         if(self.stopFlag or self.wrapper.board.fen() != boardCopy.fen()):
                             break
+
                     self.finished = self.wrapper.board.fen() == boardCopy.fen()
                     # on dors si l'analyse est finie (limit atteinte)
-                    while(not self.stopFlag and self.wrapper.board.fen() == boardCopy.fen()):
+                    while(not self.stopFlag and self.finished):
                         time.sleep(0.1)
             self.wrapper.engine.quit()
             print("Eval thread Killed")
@@ -51,6 +51,7 @@ class BoardAnalysisWrapper():
             engineStr)
         self._evalThread = self.ThreadContinuousEvaluation(self)
         self.listenerList = []
+        self.dispatcher = Clock.create_trigger(self.notifyListener)
 
     def update(self, board):
         self.board = board
@@ -84,6 +85,11 @@ class BoardAnalysisWrapper():
 
     def getDefaultDepth(self):
         return self._evalThread.defaultDepth
+
+    def setDefaultDepth(self, depth: int):
+        if(depth != self._evalThread.defaultDepth):
+            self._evalThread.finished = False
+        self._evalThread.defaultDepth = depth
 
     def stop(self):
         self._evalThread.stopFlag = True

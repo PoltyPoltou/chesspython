@@ -65,12 +65,11 @@ class BoardWidget(GridLayout):
         self.arrowManager = ArrowManager(self.parent)
         if(self.evalBarWidget is not None):
             self.bestMove = None
-            self.bestMoveEvent = Clock.schedule_interval(
-                self.checkBestMove, 1/2)
         return super().on_kv_post(base_widget)
 
     def setup(self, controller):
         self.controller = controller
+        self.controller.evalWrapper.addEvalEventListener(self)
         self.changeBoard(self.controller.board)
 
     def changeBoard(self, board):
@@ -89,16 +88,14 @@ class BoardWidget(GridLayout):
         self.evalBarWidget.stop()
         pass
 
-    def checkBestMove(self, dt):
+    def newEngineEvalEvent(self):
         if(self.controller.evalWrapper.hasAnalysis()):
             bestMove = self.controller.evalWrapper.bestMove()
-            if(bestMove is not None and self.board.is_legal(bestMove)):
+            if(bestMove is not None):
                 tileFrom = self.findTile(
                     chess.square_name(bestMove.from_square))
                 tileTo = self.findTile(chess.square_name(bestMove.to_square))
                 self.arrowManager.addEngineArrow(tileFrom, tileTo)
-            elif(not self.board.is_legal(bestMove)):
-                self.arrowManager.removeEngineArrow()
 
     def findTile(self, coords) -> Tile:
         for row in self.children:
@@ -197,7 +194,6 @@ class BoardWidget(GridLayout):
 
     def on_board(self, instance, value):
         lastMoveIndexList: list[int] = []
-        self.checkBestMove(0)
         if(self.board.move_stack != []):
             lastMoveIndexList.append(self.board.move_stack[-1].from_square)
             lastMoveIndexList.append(self.board.move_stack[-1].to_square)
