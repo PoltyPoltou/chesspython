@@ -28,8 +28,14 @@ class Row(GridLayout):
 
 class PromotionBubble(ModalView):
     color = BooleanProperty(chess.WHITE)
-    toCallOnPress = ObjectProperty(None)
+    promotePlay = ObjectProperty(None)
     pieceDir = StringProperty("")
+
+    def __init__(self, attachWidget, color, pieceDir, **kwargs):
+        self.attach_to = attachWidget
+        self.color = color
+        self.pieceDir = pieceDir
+        super().__init__(**kwargs)
 
     def dismiss(self, *largs, **kwargs):
         self.clear_widgets()
@@ -146,9 +152,10 @@ class BoardWidget(GridLayout):
                     self.unselectCase()
                 else:
                     if(isPromoteLegal and not self.board.is_game_over(claim_draw=True)):
-                        promotebb = PromotionBubble()
                         color = self.board.piece_at(
                             self.selectedTile.square).color
+                        promotebb = PromotionBubble(self,
+                                                    color, self.imageDir + self.imageStyleDir)
 
                         def playMove(promoteChar):
                             moveToPlay = chess.Move.from_uci(
@@ -158,10 +165,7 @@ class BoardWidget(GridLayout):
                                 self.unselectCase()
                             promotebb.dismiss()
 
-                        promotebb.color = color
-                        promotebb.toCallOnPress = playMove
-                        promotebb.pieceDir = self.imageDir + self.imageStyleDir
-                        promotebb.attach_to = self
+                        promotebb.promotePlay = playMove
                         promotebb.open()
                     else:
                         self.unselectCase()
