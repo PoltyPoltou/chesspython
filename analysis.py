@@ -12,7 +12,7 @@ class BoardAnalysisWrapper():
             super().__init__()
             self.wrapper: BoardAnalysisWrapper = wrapper
             self.infoMove: chess.engine.InfoDict = None
-            self.depth = 18
+            self.defaultDepth = 18
             self.stopFlag = False
             self.threads = 3
             self.setDaemon(True)
@@ -22,7 +22,7 @@ class BoardAnalysisWrapper():
         def run(self):
             while(not self.stopFlag):
                 boardCopy = self.wrapper.board
-                with self.wrapper.engine.analysis(boardCopy, chess.engine.Limit(depth=self.depth), multipv=1, options={"threads": self.threads}) as analysis:
+                with self.wrapper.engine.analysis(boardCopy, chess.engine.Limit(depth=self.defaultDepth), multipv=1, options={"threads": self.threads}) as analysis:
                     for info in analysis:
                         if(info.get('score') is not None):
                             self.infoMove = info
@@ -66,13 +66,19 @@ class BoardAnalysisWrapper():
         return None
 
     def bestVariant(self):
-        return self._evalThread.infoMove.get('pv').copy()
+        if 'pv' in self._evalThread.infoMove:
+            return self._evalThread.infoMove.get('pv').copy()
+        else:
+            return None
 
     def getDepth(self):
-        return self._evalThread.infoMove.get('depth')
+        if 'depth' in self._evalThread.infoMove:
+            return self._evalThread.infoMove.get('depth')
+        else:
+            return None
 
-    def setLimitDepth(self, depth: int):
-        self._evalThread.limit = chess.engine.Limit(depth=depth)
+    def getDefaultDepth(self):
+        return self._evalThread.defaultDepth
 
     def stop(self):
         self._evalThread.stopFlag = True
