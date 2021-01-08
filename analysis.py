@@ -51,7 +51,8 @@ class BoardAnalysisWrapper():
             engineStr)
         self._evalThread = self.ThreadContinuousEvaluation(self)
         self.listenerList = []
-        self.dispatcher = Clock.create_trigger(self.notifyListener)
+        self.dispatcher = Clock.create_trigger(
+            self.notifyListener, interval=True, timeout=1/30)
 
     def update(self, board):
         self.board = board
