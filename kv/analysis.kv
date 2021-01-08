@@ -61,15 +61,22 @@
 <HeadMoveList>:
     DepthTracker:
         threadEngine:root.threadEngine
+<ButtonDepth@Button>:
+    canvas.before:
+        Color:
+            rgb:53/255,134/255,208/255
+        Rectangle:
+            pos:self.pos
+            size:self.size
 <DepthTracker>:
     orientation:"horizontal"
     Label:
         text: str(root.actualDepth) + " / " + str(root.defaultDepth)
     BoxLayout:
         orientation:"vertical"
-        Button:
+        ButtonDepth:
             text:"+"
             on_press: root.threadEngine.setDefaultDepth(root.threadEngine.getDefaultDepth()+1)
-        Button:
+        ButtonDepth:
             text:"-"
             on_press: root.threadEngine.setDefaultDepth(root.threadEngine.getDefaultDepth()-1)
