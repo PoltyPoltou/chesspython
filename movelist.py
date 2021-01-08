@@ -80,63 +80,33 @@ class MoveList(ScrollView):
         self.mapVariation = {}
         self.oldMove = None
 
-    def update_moves(self, controller):
-        if str(controller.game.game()) == self.gameStr:
-            for entry in self.listFullMoveEntry:
-                for child in entry.children:
-                    child.highlighted = child.node is controller.game
-                    self.oldMove = child
-            return
+    def addFullVariation(self, gameNode, controller):
+        curGame = gameNode
+        while(curGame is not None):
+            self.new_move(curGame, controller)
+            if curGame is not gameNode:
+                for variation in curGame.variations:
+                    if curGame.next() is not variation:
+                        self.addFullVariation(variation, controller)
+            curGame = curGame.next()
 
+    def update_moves(self, controller):
         self.reset()
         self.clearList()
         self.game = controller.game.game()
         self.gameStr = str(self.game)
 
-        lastGame = self.game
-        curGame = lastGame.next()
-        prevBoard = lastGame.board()
-        # Track if we need to delete the last entry black move
-        lastEntryComplete = False
-        while curGame is not None:
-            board = curGame.board()
-            # We need to get the full move number BEFORE the move was done
-            fullmove_number = prevBoard.fullmove_number - 1
-            if len(self.listFullMoveEntry) <= fullmove_number:
-                self.addMainFullMoveEntry(fullmove_number, controller)
-            entry = self.getFullMoveEntry(fullmove_number)
-
-            # create new move
-            widget = self.add_move_in_entry(curGame, controller, entry)
-            # last entry is complete iif its black who has played
-            lastEntryComplete = prevBoard.turn == chess.BLACK
-
-            self.remove_all_variation(fullmove_number, lastEntryComplete)
-            # Check for variation
-            for variation in curGame.variations:
-                # Only handle non mainline here
-                if not variation.is_mainline():
-                    self.add_variation(
-                        fullmove_number, lastEntryComplete, variation, controller, None)
-
-            # check highlightedness
-            widget.highlighted = widget.node is controller.game
-            if widget.highlighted:
-                self.oldMove = widget
-            lastGame = curGame
+        curGame = self.game
+        while(curGame is not None):
+            self.new_move(curGame, controller)
             curGame = curGame.next()
-            prevBoard = board
 
-        # remove all unused indexes
-        fullmove_number = prevBoard.fullmove_number
-        while len(self.listFullMoveEntry) > fullmove_number:
-            self.remove_move()
-
-        # remove last entry black move if incomplete
-        if not lastEntryComplete:
-            entry = self.getFullMoveEntry(-1)
-            if len(entry.children) > 2:
-                entry.remove_widget(entry.children[0])
+        curGame = self.game
+        while(curGame is not None):
+            for variation in curGame.variations:
+                if variation is not curGame.next():
+                    self.addFullVariation(variation, controller)
+            curGame = curGame.next()
 
     def new_move(self, gameNode, controller):
         # if game is completely different we update every move
