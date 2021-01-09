@@ -18,7 +18,6 @@ from tile import Tile
 from typing import List, Optional
 import chess
 import chess.pgn
-import gamecontroller
 
 
 class Row(GridLayout):
@@ -55,10 +54,11 @@ class BoardWidget(GridLayout):
     board: Optional[chess.Board] = ObjectProperty(None, rebind=True)
     evalBarWidget: Optional[EvaluationBar] = ObjectProperty(None)
     moveList: Optional[MoveList] = ObjectProperty(None)
-    controller: Optional[gamecontroller.GameController] = None
+    controller = None
 
     def __init__(self, **kwargs):
         self.board = None
+        self.analysisArrow = None
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -210,11 +210,12 @@ class BoardWidget(GridLayout):
                     else:
                         tile.pieceSourceImg = ""
                     tile.played = tile.square in lastMoveIndexList
-        # On a une analyse de la partie en cours
-        if(self.controller.moveQualityList != [] and self.board.ply() > 0):
-            bestMove: chess.Move = self.controller.moveQualityList[self.board.ply(
-            )-1].bestMove
-            self.arrowManager.addArrow(self.findTileWidgetFromSquare(
+        # On a une analyse de la partie en cours, alors on affiche le meilleur coup précedant
+        self.arrowManager.removeOneArrow(self.analysisArrow)
+        if(self.controller.game.parent in self.controller.moveQualityDict):
+            bestMove: chess.Move = self.controller.moveQualityDict[
+                self.controller.game.parent].bestMove
+            self.analysisArrow = self.arrowManager.directAddArrow(self.findTileWidgetFromSquare(
                 bestMove.from_square), self.findTileWidgetFromSquare(bestMove.to_square), (6/255, 101/255, 22/255, 0.8))
             pass
 

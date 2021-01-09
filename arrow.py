@@ -48,7 +48,7 @@ def arrow_factory(tileFrom, tileTo) -> Widget:
 class ArrowManager:
     def __init__(self, widgetToAddArrows) -> None:
         self.arrowList = []
-        self.widgetToAddArrows = widgetToAddArrows
+        self.widgetToAddArrows: Widget = widgetToAddArrows
         self.engineArrow = None
 
     def addArrow(self, tileFrom, tileTo, color=None):
@@ -64,9 +64,11 @@ class ArrowManager:
                 if(color is not None):
                     arrowToDraw.clr = color
                 self.arrowList.append(arrowToDraw)
+                return arrowToDraw
             else:
                 self.widgetToAddArrows.remove_widget(arrowToRemove)
                 self.arrowList.remove(arrowToRemove)
+        return None
 
     def addEngineArrow(self, tileFrom, tileTo):
         if(self.engineArrow is not None):
@@ -83,10 +85,23 @@ class ArrowManager:
             self.widgetToAddArrows.add_widget(arrowToDraw)
             self.engineArrow = arrowToDraw
 
+    def directAddArrow(self, tileFrom, tileTo, color=None):
+        arrowToDraw = arrow_factory(tileFrom, tileTo)
+        if(arrowToDraw is not None):
+            if(color is not None):
+                arrowToDraw.clr = color
+            self.widgetToAddArrows.add_widget(arrowToDraw)
+            self.arrowList.append(arrowToDraw)
+        return arrowToDraw
+
     def removeEngineArrow(self):
         if(self.engineArrow is not None):
             self.widgetToAddArrows.remove_widget(self.engineArrow)
             self.engineArrow = None
+
+    def removeOneArrow(self, arr):
+        if(arr in self.widgetToAddArrows.children):
+            self.widgetToAddArrows.remove_widget(arr)
 
     def removeArrows(self):
         for arr in self.arrowList:
