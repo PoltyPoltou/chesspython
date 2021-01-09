@@ -18,7 +18,7 @@ class GameController():
         self.lock = threading.Lock()
         self.game = chess.pgn.Game()
         self.board = self.game.board()
-        self.moveQualityList: list[MoveQuality] = []
+        self.moveQualityDict: dict[chess.pgn.GameNode, MoveQuality] = {}
         self.evalWrapper = BoardAnalysisWrapper(self.board)
         self.evalWrapper.start()
 
@@ -68,11 +68,11 @@ class GameController():
             self.evalWrapper.update(self.board)
             self.moveList.new_move(self.game, self)
 
-    def postAnalysis(self, game, moveQualityList):
+    def postAnalysis(self, game, moveQualityDict):
         if game.game() is not self.game.game():
             self.updateCurrentNode(game.end())
-        self.moveList.postAnalysis(moveQualityList)
-        self.moveQualityList = moveQualityList
+        self.moveList.postAnalysis(moveQualityDict.values())
+        self.moveQualityDict = moveQualityDict
         self.chessWindow.unlockLoad()
 
     def analysisRunning(self):

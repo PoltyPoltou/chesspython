@@ -1,3 +1,4 @@
+from logging import exception
 import threading
 from typing import Optional
 import chess
@@ -111,7 +112,7 @@ class BoardAnalysisWrapper():
                 "Listener added to ThreadContinuousEvaluation without newEngineEvalEvent(dt) attribute")
 
 
-class MoveQuality():
+class MoveQuality:
     def __init__(self, move, quality, bestMove=None):
         self.move: chess.Move = move
         self.bestMove: Optional[chess.Move] = bestMove
@@ -183,41 +184,47 @@ class GameAnalysis(threading.Thread):
         return evalList
 
     def analyseMoves(self, evalList):
-        moveQualityList = []
+        nodeToMoveQualityMap = {}
         evalPrev = None
+        gameNode: chess.pgn.GameNode = self.game.game()
         color = chess.BLACK
         for move, eval in evalList:
             if evalPrev is not None and move == evalPrev.get('pv')[0]:
-                moveQualityList.append(MoveQuality(
-                    move, 0, evalPrev.get('pv')[0]))
+                nodeToMoveQualityMap.update([(gameNode, MoveQuality(
+                    move, 0, evalPrev.get('pv')[0]))])
+                gameNode = gameNode.next()
             elif evalPrev is not None:
                 score = eval["score"].white(
                 ) if color else eval["score"].black()
                 prevScore = evalPrev["score"].white(
                 ) if color else evalPrev["score"].black()
                 if score.score() is not None and prevScore.score() is not None:
-                    moveQualityList.append(MoveQuality(
-                        move, score.score() - prevScore.score(), evalPrev.get('pv')[0]))
+                    nodeToMoveQualityMap.update([(gameNode, MoveQuality(
+                        move, score.score() - prevScore.score(), evalPrev.get('pv')[0]))])
+                    gameNode = gameNode.next()
                 elif prevScore.is_mate() != score.is_mate():
-                    moveQualityList.append(
-                        MoveQuality(move, -100, evalPrev.get('pv')[0]))
+                    nodeToMoveQualityMap.update([
+                        (gameNode, MoveQuality(move, -100, evalPrev.get('pv')[0]))])
+                    gameNode = gameNode.next()
                 elif prevScore.is_mate() and score.is_mate():
                     if prevScore.mate() <= score.mate():
-                        moveQualityList.append(
-                            MoveQuality(move, -0.5, evalPrev.get('pv')[0]))
+                        nodeToMoveQualityMap.update([
+                            (gameNode, MoveQuality(move, -0.5, evalPrev.get('pv')[0]))])
+                        gameNode = gameNode.next()
                     if prevScore.mate() > score.mate():
-                        moveQualityList.append(
-                            MoveQuality(move, 0, evalPrev.get('pv')[0]))
+                        nodeToMoveQualityMap.update([
+                            (gameNode, MoveQuality(move, 0, evalPrev.get('pv')[0]))])
+                        gameNode = gameNode.next()
+                else:
+                    raise exception("tout cassé")
             color = not color
             evalPrev = eval
-        return moveQualityList
+        return nodeToMoveQualityMap
 
     def run(self):
         self.running = True
         evalList = self.analyseGame(self.game.game())
         moveQuality = self.analyseMoves(evalList)
-        for quality in moveQuality:
-            print(quality.move, " ", quality)
         self.controller.postAnalysis(self.game.game(), moveQuality)
         self.running = False
 
