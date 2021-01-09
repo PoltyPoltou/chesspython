@@ -8,9 +8,9 @@ from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, St
 from kivy.uix.anchorlayout import *
 from kivy.uix.behaviors import *
 from kivy.uix.boxlayout import *
-from kivy.uix.gridlayout import *
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.image import *
-from kivy.uix.modalview import *
+from kivy.uix.modalview import ModalView
 from kivy.uix.widget import Widget
 from kivy.input.motionevent import MotionEvent
 from movelist import MoveList
@@ -218,5 +218,4 @@ class BoardWidget(GridLayout):
             self.analysisArrow = self.arrowManager.directAddArrow(self.findTileWidgetFromSquare(
                 bestMove.from_square), self.findTileWidgetFromSquare(bestMove.to_square), (6/255, 101/255, 22/255, 0.8))
             pass
-
     pass

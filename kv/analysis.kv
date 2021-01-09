@@ -33,7 +33,7 @@
 <AnalysisProgressBar>:
     progress : 0
     textProgress : "{:.0f}".format(self.progress*100)+"%"
-    bgColor : (0.25, 0.25, 0.25, 1)
+    bgColor : (0.15, 0.15, 0.15, 1)
     barColor : (46/256, 143/256, 72/256, 1)
     canvas.before:
         Color:
@@ -41,19 +41,19 @@
         Rectangle:
             pos:self.pos
             size:self.size
-    canvas:
+    canvas.after:
         Color:
-            rgba:self.barColor
-        Rectangle:
-            pos:self.pos
-            size: self.width * self.progress , self.height
+            rgba:self.bgColor
+        Line:
+            points: (self.x, self.y + self.height/2, self.x + self.width, self.y + self.height/2)
     Label:
         canvas:"after"
         color : (1,1,1)
+        text_size:root.size
         text:root.textProgress
         font_size:'12sp'
         bold: True
-        valign:"center"
+        valign:"top"
         halign:"left"
         pos:(root.x,root.y)
         size:(root.width,root.height)

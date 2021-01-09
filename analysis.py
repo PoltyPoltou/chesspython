@@ -179,6 +179,8 @@ class GameAnalysis(threading.Thread):
             curGame = curGame.next()
             progress += 1
             self.controller.progressBar.progress = progress/size
+            self.controller.progressBar.addEval(evalList[-1][1])
+
         self.controller.progressBar.progress = 1
         self.wrapper.stop()
         return evalList

@@ -6,6 +6,7 @@ from kivy.uix.boxlayout import BoxLayout
 import analysis
 from kivy.uix.widget import Widget
 from kivy.properties import NumericProperty, ObjectProperty, ColorProperty, BooleanProperty, StringProperty
+from kivy.graphics import Color, Line, Mesh, Triangle
 from kivy.clock import *
 
 
@@ -107,3 +108,84 @@ class DepthTracker(BoxLayout):
 
 class AnalysisProgressBar(Widget):
     progress = NumericProperty(0.00)
+    lastScore = 0
+    lastPos = 0
+
+    def drawTriangles(self, lastPos, newPos, lastHeight, newHeight):
+        trianglePts = []
+        baseWhite = lastHeight >= 0.5 * self.height and newHeight >= 0.5 * self.height \
+            and (lastHeight > 0.5 * self.height or newHeight > 0.5 * self.height)
+        baseBlack = lastHeight <= 0.5 * self.height and newHeight <= 0.5 * self.height \
+            and (lastHeight < 0.5 * self.height or newHeight < 0.5 * self.height)
+        if baseWhite or baseBlack:
+            refHeight = min(lastHeight, newHeight) if baseWhite else max(
+                lastHeight, newHeight)
+            biggestHeight = max(lastHeight, newHeight) if baseWhite else min(
+                lastHeight, newHeight)
+
+            refPos = lastPos if refHeight == lastHeight else newPos
+            biggestPos = lastPos if biggestHeight == lastHeight else newPos
+
+            trianglePts += [self.x + self.width*lastPos,
+                            self.y + 0.5 * self.height, 0, 0,
+                            self.x + self.width*lastPos,
+                            self.y + refHeight, 0, 0,
+                            self.x + self.width*newPos,
+                            self.y + 0.5 * self.height, 0, 0,
+
+                            self.x + self.width*lastPos,
+                            self.y + refHeight, 0, 0,
+                            self.x + self.width*newPos,
+                            self.y + 0.5 * self.height, 0, 0,
+                            self.x + self.width*newPos,
+                            self.y + refHeight, 0, 0,
+
+                            self.x + self.width*refPos,
+                            self.y + refHeight, 0, 0,
+                            self.x + self.width*biggestPos,
+                            self.y + refHeight, 0, 0,
+                            self.x + self.width*biggestPos,
+                            self.y + biggestHeight, 0, 0
+                            ]
+        baseColor = 0.65 if baseWhite else 0.35
+
+        with self.canvas:
+            Color(baseColor, baseColor, baseColor)
+            if len(trianglePts) > 0:
+                Mesh(vertices=trianglePts, mode="triangles",
+                     indices=range(int(len(trianglePts)/4)))
+
+    def addEval(self, eval):
+        score = eval["score"].white().score()
+        if score is None and eval["score"].white().is_mate():
+            score = eval["score"].white().moves * 1000
+        pos = self.progress
+        maxScale = 600
+        lastHeight = min(max(self.lastScore, -maxScale), maxScale) / \
+            (2*maxScale) * self.height + 0.5 * self.height
+        newHeight = min(max(score, -maxScale), maxScale) / (2*maxScale) * \
+            self.height + 0.5 * self.height
+
+        alternate = lastHeight > 0.5 * self.height and newHeight < 0.5 * self.height \
+            or lastHeight < 0.5 * self.height and newHeight > 0.5 * self.height
+        if alternate:
+            a = (newHeight - lastHeight) / (pos - self.lastPos)
+            posToZero = self.lastPos - (lastHeight - 0.5 * self.height) / a
+            print("self.lastPos : ", self.lastPos)
+            print("pos : ", pos)
+            print("posToZero : ", posToZero)
+            print("lastHeight : ", lastHeight)
+            print("newHeight : ", newHeight)
+            self.drawTriangles(self.lastPos, posToZero,
+                               lastHeight, 0.5 * self.height)
+            self.drawTriangles(posToZero, pos, 0.5 * self.height, newHeight)
+        else:
+            self.drawTriangles(self.lastPos, pos, lastHeight, newHeight)
+
+        with self.canvas:
+            Color(1., 1., 1.)
+            Line(points=[self.x + self.width*self.lastPos,
+                         self.y + lastHeight, self.x + self.width*pos, self.y + newHeight])
+
+        self.lastScore = score
+        self.lastPos = pos
