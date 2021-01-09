@@ -1,4 +1,5 @@
 import threading
+from typing import Optional
 import chess
 import chess.pgn
 import chess.engine
@@ -110,43 +111,46 @@ class BoardAnalysisWrapper():
                 "Listener added to ThreadContinuousEvaluation without newEngineEvalEvent(dt) attribute")
 
 
+class MoveQuality():
+    def __init__(self, move, quality, bestMove=None):
+        self.move: chess.Move = move
+        self.bestMove: Optional[chess.Move] = bestMove
+        self.quality = quality
+
+    def isPerfect(self):
+        return self.quality >= 0
+
+    def isGood(self):
+        return self.quality >= -20 and self.quality < 0
+
+    def isOk(self):
+        return self.quality >= -75 and self.quality < -20
+
+    def isImprecision(self):
+        return self.quality >= -150 and self.quality < -75
+
+    def isError(self):
+        return self.quality >= -400 and self.quality < -150
+
+    def isBlunder(self):
+        return self.quality < -400
+
+    def __str__(self):
+        if(self.isPerfect()):
+            return "Perfect"
+        if(self.isGood()):
+            return "Good"
+        if(self.isOk()):
+            return "Ok"
+        if(self.isImprecision()):
+            return "Imprecision"
+        if(self.isError()):
+            return "Error"
+        if(self.isBlunder()):
+            return "Blunder"
+
+
 class GameAnalysis(threading.Thread):
-    class MoveQuality():
-        def __init__(self, move, quality):
-            self.move = move
-            self.quality = quality
-
-        def isPerfect(self):
-            return self.quality >= 0
-
-        def isGood(self):
-            return self.quality >= -20 and self.quality < 0
-
-        def isOk(self):
-            return self.quality >= -75 and self.quality < -20
-
-        def isImprecision(self):
-            return self.quality >= -150 and self.quality < -75
-
-        def isError(self):
-            return self.quality >= -400 and self.quality < -150
-
-        def isBlunder(self):
-            return self.quality < -400
-
-        def __str__(self):
-            if(self.isPerfect()):
-                return "Perfect"
-            if(self.isGood()):
-                return "Good"
-            if(self.isOk()):
-                return "Ok"
-            if(self.isImprecision()):
-                return "Imprecision"
-            if(self.isError()):
-                return "Error"
-            if(self.isBlunder()):
-                return "Blunder"
 
     def __init__(self, controller):
         super().__init__()
@@ -184,25 +188,26 @@ class GameAnalysis(threading.Thread):
         color = chess.BLACK
         for move, eval in evalList:
             if evalPrev is not None and move == evalPrev.get('pv')[0]:
-                moveQualityList.append(GameAnalysis.MoveQuality(move, 0))
+                moveQualityList.append(MoveQuality(
+                    move, 0, evalPrev.get('pv')[0]))
             elif evalPrev is not None:
                 score = eval["score"].white(
                 ) if color else eval["score"].black()
                 prevScore = evalPrev["score"].white(
                 ) if color else evalPrev["score"].black()
                 if score.score() is not None and prevScore.score() is not None:
-                    moveQualityList.append(GameAnalysis.MoveQuality(
-                        move, score.score() - prevScore.score()))
+                    moveQualityList.append(MoveQuality(
+                        move, score.score() - prevScore.score(), evalPrev.get('pv')[0]))
                 elif prevScore.is_mate() != score.is_mate():
                     moveQualityList.append(
-                        GameAnalysis.MoveQuality(move, -100))
+                        MoveQuality(move, -100, evalPrev.get('pv')[0]))
                 elif prevScore.is_mate() and score.is_mate():
                     if prevScore.mate() <= score.mate():
                         moveQualityList.append(
-                            GameAnalysis.MoveQuality(move, -0.5))
+                            MoveQuality(move, -0.5, evalPrev.get('pv')[0]))
                     if prevScore.mate() > score.mate():
                         moveQualityList.append(
-                            GameAnalysis.MoveQuality(move, 0))
+                            MoveQuality(move, 0, evalPrev.get('pv')[0]))
             color = not color
             evalPrev = eval
         return moveQualityList

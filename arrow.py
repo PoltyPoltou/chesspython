@@ -51,7 +51,7 @@ class ArrowManager:
         self.widgetToAddArrows = widgetToAddArrows
         self.engineArrow = None
 
-    def addArrow(self, tileFrom, tileTo):
+    def addArrow(self, tileFrom, tileTo, color=None):
         arrowToDraw = arrow_factory(tileFrom, tileTo)
         if(arrowToDraw != None):
             arrowToRemove = None
@@ -61,6 +61,8 @@ class ArrowManager:
                     break
             if(arrowToRemove == None):
                 self.widgetToAddArrows.add_widget(arrowToDraw)
+                if(color is not None):
+                    arrowToDraw.clr = color
                 self.arrowList.append(arrowToDraw)
             else:
                 self.widgetToAddArrows.remove_widget(arrowToRemove)

@@ -92,9 +92,8 @@ class BoardWidget(GridLayout):
         if(self.controller.evalWrapper.hasAnalysis()):
             bestMove = self.controller.evalWrapper.bestMove()
             if(bestMove is not None):
-                tileFrom = self.findTile(
-                    chess.square_name(bestMove.from_square))
-                tileTo = self.findTile(chess.square_name(bestMove.to_square))
+                tileFrom = self.findTileWidgetFromSquare(bestMove.from_square)
+                tileTo = self.findTileWidgetFromSquare(bestMove.to_square)
                 self.arrowManager.addEngineArrow(tileFrom, tileTo)
 
     def findTile(self, coords) -> Tile:
@@ -103,6 +102,9 @@ class BoardWidget(GridLayout):
                 if(tile.coords == coords):
                     return tile
         return None
+
+    def findTileWidgetFromSquare(self, square: chess.Square):
+        return self.findTile(chess.square_name(square))
 
     def findTileTouched(self, touch: MotionEvent) -> Tuple[Tile, Widget]:
         for row in self.children:
@@ -208,5 +210,12 @@ class BoardWidget(GridLayout):
                     else:
                         tile.pieceSourceImg = ""
                     tile.played = tile.square in lastMoveIndexList
+        # On a une analyse de la partie en cours
+        if(self.controller.moveQualityList != [] and self.board.ply() > 0):
+            bestMove: chess.Move = self.controller.moveQualityList[self.board.ply(
+            )-1].bestMove
+            self.arrowManager.addArrow(self.findTileWidgetFromSquare(
+                bestMove.from_square), self.findTileWidgetFromSquare(bestMove.to_square), (6/255, 101/255, 22/255, 0.8))
+            pass
 
     pass
