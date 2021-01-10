@@ -16,15 +16,23 @@ class ChessComGameReader():
             self.username, year, month)
 
     def nextGame(self) -> chess.pgn.Game:
-        if(len(self.gameData.json["games"]) > self.index):
+        if(self.gameData is not None and len(self.gameData.json["games"]) > self.index):
             pgn = self.gameData.json["games"][self.index]["pgn"]
             self.index += 1
             return chess.pgn.read_game(io.StringIO(pgn))
         else:
             print("Fin des parties")
-            return chess.pgn.Game()
+            return None
+
+
+def printGameInfo(game):
+    print(game.headers["Date"], " - ", game.headers["StartTime"],
+          " - ", game.headers["White"], " - ", game.headers["Black"])
 
 
 if __name__ == "__main__":
     test = ChessComGameReader("PoltyPoltou")
-    print(test.nextGame())
+    curGame = test.nextGame()
+    while curGame is not None:
+        printGameInfo(curGame)
+        curGame = test.nextGame()

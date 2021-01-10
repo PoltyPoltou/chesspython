@@ -12,9 +12,19 @@ class MyKeyboardListener(Widget):
         self._bindings = {}
 
     def _keyboard_closed(self):
-        print('My keyboard have been closed!')
+        print('My keyboard has been closed!')
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
         self._keyboard = None
+
+    def isClosed(self):
+        return self._keyboard is None
+
+    def respawn(self):
+        if self._keyboard is None:
+            print('My keyboard has been respawned!')
+            self._keyboard = Window.request_keyboard(
+                self._keyboard_closed, self, 'text')
+            self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
     def bind_key(self, textKey, callback):
         '''

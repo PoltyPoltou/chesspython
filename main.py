@@ -4,7 +4,9 @@ import movelist
 import chess
 import chesswindow
 from kivy.base import Builder
+from kivy.core.window import Window
 Builder.load_file("kv/app.kv")
+
 
 class MyChessApp(App):
     def build(self):
@@ -24,5 +26,7 @@ class MyChessApp(App):
         for analysis in self.root.controller.listAnalysis:
             analysis.stop()
 
+
 if __name__ == '__main__':
+    Window.size = (1024, 768)
     MyChessApp().run()

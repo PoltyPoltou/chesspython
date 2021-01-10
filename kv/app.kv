@@ -6,7 +6,8 @@
 #: include kv/arrows.kv
 #: include kv/movelistheader.kv
 <ChessWindow>:
-    cols : 2
+    cols : 1
+    rows : 2
     padding : (10,10)
     spacing : 10
     boardGUI : boardGUI
@@ -15,50 +16,73 @@
     loadButton : button
     moveListHeader: hdMoveLst
     evalBarWidget:bar
+    inputText:text_input
     canvas:
         Color:
             rgb : self.couleurBg
         Rectangle:
             pos : self.pos
             size : self.size
-    FloatLayout:
-        size_hint : (0.75,0.9)
-        id : container
-        spacing : 10
-        evalWidth : bar.width + self.spacing
-
-        EvaluationBar:
-            id : bar
-            size_hint : (None, None)
-            size : (40, boardGUI.height)
-            pos_hint : {'center_y' : 0.5}
-            right : boardGUI.right - boardGUI.width - container.spacing
-            pov : boardGUI.pov
-        BoardWidget:
-            id : boardGUI
-            size_hint : (None,None)
-            size : min(container.width - container.evalWidth, container.height), min(container.width - container.evalWidth, container.height)
-            pos_hint: {'center_x' : 0.5 + container.evalWidth/container.width/2, 'center_y' : 0.5}
-            evalBarWidget: bar
-            moveList: mvlst
     BoxLayout:
-        orientation:'vertical'
-        size_hint : (0.25,1)
-        HeadMoveList:
-            id:hdMoveLst
-            size_hint : (1,0.2)
-            text: "azd"
-        MoveList:
-            size_hint : (1,0.8)
-            id:mvlst
-
-    AnalysisProgressBar:
-        id: progress
-        size_hint : (0.1,0.1)
-
-    BoxLayout:
-        size_hint : (0.1,0.1)
-        Button:
+        size_hint : (1,0.05)
+        orientation : 'horizontal'
+        Button :
             id : button
-            text: 'Load'
+            text: 'Load from file'
             on_release: root.show_load()
+        Button :
+            id : button
+            text: 'Load from chess.com'
+            on_release: root.load_from_chess_com()
+        Button :
+            id : button
+            text: 'analyse'
+            on_release: root.controller.analyseFullGame()
+    GridLayout:
+        cols : 2
+        padding : (10,10)
+        spacing : 10
+        size_hint : (1,0.95)
+        FloatLayout:
+            size_hint : (0.75,0.9)
+            id : container
+            spacing : 10
+            evalWidth : bar.width + self.spacing
+
+            EvaluationBar:
+                id : bar
+                size_hint : (None, None)
+                size : (40, boardGUI.height)
+                pos_hint : {'center_y' : 0.5}
+                right : boardGUI.right - boardGUI.width - container.spacing
+                pov : boardGUI.pov
+            BoardWidget:
+                id : boardGUI
+                size_hint : (None,None)
+                size : min(container.width - container.evalWidth, container.height), min(container.width - container.evalWidth, container.height)
+                pos_hint: {'center_x' : 0.5 + container.evalWidth/container.width/2, 'center_y' : 0.5}
+                evalBarWidget: bar
+                moveList: mvlst
+        BoxLayout:
+            orientation:'vertical'
+            size_hint : (0.25,0.9)
+            HeadMoveList:
+                id:hdMoveLst
+                size_hint : (1,0.2)
+                text: "azd"
+            MoveList:
+                size_hint : (1,0.8)
+                id:mvlst
+
+        AnalysisProgressBar:
+            id: progress
+            size_hint : (0.9,0.1)
+
+        BoxLayout:
+            size_hint : (0.1,0.1)
+            orientation:'vertical'
+            TextInput:
+                id : text_input
+                text : 'Username'
+                multiline : False
+                on_focus : root.text_lost_focus(args[1])

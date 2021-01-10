@@ -13,6 +13,7 @@ import gamecontroller
 import os
 from movelist import MoveList
 from typing import List, Optional
+from chesscomGameReader import ChessComGameReader
 
 
 class MyFileChooserListView(FileChooserListView):
@@ -40,6 +41,7 @@ class ChessWindow(GridLayout):
     loadButton = ObjectProperty(None)
     moveListHeader = ObjectProperty(None)
     evalBarWidget = ObjectProperty(None)
+    inputText = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         self.controller = gamecontroller.GameController()
@@ -53,6 +55,11 @@ class ChessWindow(GridLayout):
         self.keyboard.bind_key('a', self.controller.analyseFullGame)
 
         super().__init__(**kwargs)
+
+    def text_lost_focus(self, focus):
+        if not focus:
+            if self.keyboard.isClosed():
+                self.keyboard.respawn()
 
     def on_kv_post(self, base_widget):
         self.controller.moveList = self.moveList
@@ -86,6 +93,12 @@ class ChessWindow(GridLayout):
             self.controller.loadGame(first_game)
 
         self.dismiss_popup()
+
+    def load_from_chess_com(self):
+        reader = ChessComGameReader(self.inputText.text)
+        game = reader.nextGame()
+        if game is not None:
+            self.controller.loadGame(game)
 
     def dismiss_popup(self):
         self._popup.dismiss()
