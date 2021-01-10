@@ -12,11 +12,11 @@ from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, St
 class Tile(AnchorLayout):
     color = ObjectProperty(WHITE)
     bgColor = ObjectProperty(WHITE)
-    circleColor = ObjectProperty(WHITE)
     displayedColor = ObjectProperty(WHITE)
     reverseOrder = BooleanProperty(False)
     selected = BooleanProperty(False)
     movableTo = BooleanProperty(False)
+    canBeTaken = BooleanProperty(False)
     played = BooleanProperty(False)
     xBoard = StringProperty('a')
     column = StringProperty('a')

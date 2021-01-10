@@ -9,12 +9,12 @@
     img : img
     selected : False
     movableTo : False
+    canBeTaken : False
     played : False
     color : (0,0,0)
     bgColor : c.baricenterColor(self.color, c.YELLOW, 0.4,0.6) if self.selected else self.color
     displayedColor : c.baricenterColor(self.bgColor, c.YELLOW, 0.4,0.6) if self.played else self.bgColor
-    circleColor : c.darkerColor(self.color,0.90) if self.movableTo else self.displayedColor
-    circleSize : 0.3
+    circleSize : 0.4
     canvas:
         Color:
             rgb : root.displayedColor
@@ -22,11 +22,19 @@
             pos:self.pos
             size:self.size
         Color:
-            rgb : self.circleColor
+            rgb : c.darkerColor(self.displayedColor,0.90) if self.movableTo else self.displayedColor
         Ellipse:
             pos: (self.x + self.width/2-self.width * root.circleSize/2, self.y + self.height/2 - self.width * root.circleSize/2)
             size: (self.width*root.circleSize, self.width*root.circleSize)
             segments: 300
+        Color:
+            rgb : c.darkerColor(self.displayedColor,0.90) if self.canBeTaken else self.displayedColor
+        Line:
+            circle: self.x + self.width/2, self.y + self.height/2, 1/2*self.height*0.9
+            cap:'round'
+            joint:'round'
+            close:True
+            width: 3
     Image:
         id:img
         source:root.pieceSourceImg

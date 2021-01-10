@@ -1,3 +1,4 @@
+from chess.svg import board
 from kivy.clock import Clock
 from arrow import ArrowManager, arrow_factory
 from analysisWidgets import EvaluationBar
@@ -180,6 +181,7 @@ class BoardWidget(GridLayout):
         for row in self.children:
             for tile in row.children:
                 tile.movableTo = False
+                tile.canBeTaken = False
         self.selectedTile = None
 
     def selectCase(self, tile: Tile):
@@ -190,7 +192,11 @@ class BoardWidget(GridLayout):
             for t in row.children:
                 if(tile.coords != t.coords):
                     t.movableTo = self.board.is_legal(
-                        chess.Move.from_uci(tile.coords + t.coords))
+                        chess.Move.from_uci(tile.coords + t.coords)) or self.board.is_legal(
+                        chess.Move.from_uci(tile.coords + t.coords + 'q'))
+                    if(t.movableTo and self.board.piece_at(t.square) is not None):
+                        t.canBeTaken = True
+                        t.movableTo = False
 
     def update_board(self):
         self.on_board(self, self.board)
