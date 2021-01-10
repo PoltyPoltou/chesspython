@@ -6,8 +6,8 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 import analysis
 from kivy.uix.widget import Widget
-from kivy.properties import NumericProperty, ObjectProperty, ColorProperty, BooleanProperty, StringProperty
-from kivy.graphics import Color, Line, Mesh, Triangle
+from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
+from kivy.graphics import Color, Mesh, Line
 from kivy.clock import *
 
 
@@ -127,8 +127,15 @@ class DepthTracker(BoxLayout):
 
 class AnalysisProgressBar(Widget):
     progress = NumericProperty(0.00)
-    lastScore = 0
-    lastPos = 0
+
+    def __init__(self, **kwargs):
+        self.evalList = []
+        self.lastScore = 0
+        self.lastPos = 0
+        self.reconstruct = False
+        self.progressDelta = 0
+        self.bind(size=lambda a1, a2: self.drawAllMeshes())
+        super().__init__(**kwargs)
 
     def drawTriangles(self, lastPos, newPos, lastHeight, newHeight):
         trianglePts = []
@@ -175,10 +182,13 @@ class AnalysisProgressBar(Widget):
                      indices=range(int(len(trianglePts)/4)))
 
     def addEval(self, eval):
+        self.progress += self.progressDelta
+        if(not self.reconstruct):
+            self.evalList.append(eval)
         score = eval["score"].white().score()
         if score is None and eval["score"].white().is_mate():
             score = eval["score"].white().moves * 1000
-        pos = self.progress
+        pos = self.progress - self.progressDelta
         maxScale = 600
         lastHeight = min(max(self.lastScore, -maxScale), maxScale) / \
             (2*maxScale) * self.height + 0.5 * self.height
@@ -190,11 +200,6 @@ class AnalysisProgressBar(Widget):
         if alternate:
             a = (newHeight - lastHeight) / (pos - self.lastPos)
             posToZero = self.lastPos - (lastHeight - 0.5 * self.height) / a
-            print("self.lastPos : ", self.lastPos)
-            print("pos : ", pos)
-            print("posToZero : ", posToZero)
-            print("lastHeight : ", lastHeight)
-            print("newHeight : ", newHeight)
             self.drawTriangles(self.lastPos, posToZero,
                                lastHeight, 0.5 * self.height)
             self.drawTriangles(posToZero, pos, 0.5 * self.height, newHeight)
@@ -208,3 +213,21 @@ class AnalysisProgressBar(Widget):
 
         self.lastScore = score
         self.lastPos = pos
+
+    def drawAllMeshes(self):
+        self.resetBar()
+        self.reconstruct = True
+        for eval in self.evalList:
+            self.addEval(eval)
+        self.reconstruct = False
+
+    def resetBar(self):
+        self.lastScore = 0
+        self.lastPos = 0
+        self.progress = 0
+        self.canvas.clear()
+
+    def newEval(self):
+        self.resetBar()
+        self.progressDelta = 0
+        self.evalList = []

@@ -41,9 +41,8 @@
         Rectangle:
             pos:self.pos
             size:self.size
-    canvas.after:
         Color:
-            rgba:self.bgColor
+            rgb:(1,1,1)
         Line:
             points: (self.x, self.y + self.height/2, self.x + self.width, self.y + self.height/2)
     Label:

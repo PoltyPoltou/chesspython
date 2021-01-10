@@ -165,28 +165,28 @@ class GameAnalysis(threading.Thread):
         self.running = False
 
     def analyseGame(self, game: chess.pgn.Game):
-        evalList = []
-        curGame = game
-        board = curGame.board()
-        self.wrapper = BoardAnalysisWrapper(board)
-        self.wrapper.start()
-        size = curGame.end().board().fullmove_number*2
-        progress = 0
-        while curGame is not None and not self.stopFlag:
-            self.wrapper.update(curGame.board())
-            while not self.wrapper.hasFinished() and not self.stopFlag:
-                time.sleep(0.1)
-            if(self.wrapper.bestMove() is not None):
-                evalList.append(
-                    (curGame.move, self.wrapper.getEngineAnalysis()))
-            curGame = curGame.next()
-            progress += 1
-            self.controller.progressBar.progress = progress/size
-            self.controller.progressBar.addEval(evalList[-1][1])
-
-        self.controller.progressBar.progress = 1
-        self.wrapper.stop()
-        return evalList
+        if(game is not game.end()):
+            evalList = []
+            curGame = game
+            board = curGame.board()
+            self.wrapper = BoardAnalysisWrapper(board)
+            self.wrapper.start()
+            size = curGame.end().board().ply()
+            self.controller.progressBar.progressDelta = 1/size
+            self.controller.progressBar.newEval()
+            while curGame is not None and not self.stopFlag:
+                self.wrapper.update(curGame.board())
+                while not self.wrapper.hasFinished() and not self.stopFlag:
+                    time.sleep(0.1)
+                if(self.wrapper.bestMove() is not None):
+                    evalList.append(
+                        (curGame.move, self.wrapper.getEngineAnalysis()))
+                curGame = curGame.next()
+                self.controller.progressBar.addEval(evalList[-1][1])
+            self.wrapper.stop()
+            return evalList
+        else:
+            return []
 
     def analyseMoves(self, evalList):
         nodeToMoveQualityMap = {}
