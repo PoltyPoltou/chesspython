@@ -11,6 +11,7 @@ class GameController():
     boardGUI = None
     progressBar = None
     chessWindow = None
+    moveListHeader = None
 
     listAnalysis = []
 
@@ -67,13 +68,14 @@ class GameController():
             self.boardGUI.changeBoard(self.board)
             self.evalWrapper.update(self.board)
             self.moveList.new_move(self.game, self)
+            self.moveListHeader.on_updateGameNode(game)
 
     def postAnalysis(self, game, moveQualityDict):
-        if game.game() is not self.game.game():
-            self.updateCurrentNode(game.end())
         self.moveList.postAnalysis(moveQualityDict.values())
+        self.moveListHeader.postAnalysis(moveQualityDict)
         self.moveQualityDict = moveQualityDict
         self.chessWindow.unlockLoad()
+        self.updateCurrentNode(game.end())
 
     def analysisRunning(self):
         for analysis in self.listAnalysis:

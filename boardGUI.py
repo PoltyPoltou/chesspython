@@ -1,5 +1,5 @@
 from kivy.clock import Clock
-from arrow import Arrow, ArrowManager, arrow_factory
+from arrow import ArrowManager, arrow_factory
 from analysisWidgets import EvaluationBar
 from colors import *
 from kivy.base import Builder
@@ -76,6 +76,7 @@ class BoardWidget(GridLayout):
         self.board = board
         if(self.hasEval() and not self.evalBarWidget.isStarted()):
             self.startEval()
+        self.update_board()
 
     def hasEval(self):
         return self.evalBarWidget != None
@@ -212,9 +213,9 @@ class BoardWidget(GridLayout):
                     tile.played = tile.square in lastMoveIndexList
         # On a une analyse de la partie en cours, alors on affiche le meilleur coup précedant
         self.arrowManager.removeOneArrow(self.analysisArrow)
-        if(self.controller.game.parent in self.controller.moveQualityDict):
+        if(self.controller.game in self.controller.moveQualityDict):
             bestMove: chess.Move = self.controller.moveQualityDict[
-                self.controller.game.parent].bestMove
+                self.controller.game].bestMove
             self.analysisArrow = self.arrowManager.directAddArrow(self.findTileWidgetFromSquare(
                 bestMove.from_square), self.findTileWidgetFromSquare(bestMove.to_square), (6/255, 101/255, 22/255, 0.8))
             pass

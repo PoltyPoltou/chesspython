@@ -1,6 +1,7 @@
 import math
 from typing import Optional
 import chess
+from chess.pgn import Game, GameNode
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.boxlayout import BoxLayout
 import analysis
@@ -77,13 +78,31 @@ class EvaluationBar(Widget):
     pass
 
 
-class HeadMoveList(AnchorLayout):
+class HeadMoveList(BoxLayout):
+    txt = StringProperty("")
+
+    def __init__(self, **kwargs):
+        self.moveQualityDict: Optional[dict[GameNode,
+                                            analysis.MoveQuality]] = None
+        super().__init__(**kwargs)
+
     threadEngine: Optional[analysis.BoardAnalysisWrapper] = ObjectProperty(
         None, rebind=True)
 
     def on_threadEngine(self, instance, value):
         if(self.threadEngine is not None):
             self.threadEngine.addEvalEventListener(self)
+
+    def on_updateGameNode(self, gameNode: GameNode):
+        if(self.moveQualityDict is not None):
+            if(gameNode in self.moveQualityDict):
+                self.txt = "[size=20][b][color=30a090]" + \
+                    self.moveQualityDict[gameNode].sanBestMove + \
+                    "[/color][/b] was the best move [/size]"
+        pass
+
+    def postAnalysis(self, moveQualityDict):
+        self.moveQualityDict = moveQualityDict
 
     def newEngineEvalEvent(self):
         pass

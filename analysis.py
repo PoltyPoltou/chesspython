@@ -1,13 +1,14 @@
 from logging import exception
 import threading
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 import chess
 import chess.pgn
 import chess.engine
 import time
 import os
-
 from kivy.clock import Clock
+if TYPE_CHECKING:
+    import gamecontroller
 
 
 class BoardAnalysisWrapper():
@@ -113,10 +114,12 @@ class BoardAnalysisWrapper():
 
 
 class MoveQuality:
-    def __init__(self, move, quality, bestMove=None):
+    def __init__(self, move, quality, bestMove, sanMove, sanBestMove):
         self.move: chess.Move = move
         self.bestMove: Optional[chess.Move] = bestMove
         self.quality = quality
+        self.sanMove = sanMove
+        self.sanBestMove = sanBestMove
 
     def isPerfect(self):
         return self.quality >= 0
@@ -158,7 +161,7 @@ class GameAnalysis(threading.Thread):
         self.game = None
         self.stopFlag = False
         self.wrapper = None
-        self.controller = controller
+        self.controller: gamecontroller = controller
         self.running = False
 
     def analyseGame(self, game: chess.pgn.Game):
@@ -191,34 +194,34 @@ class GameAnalysis(threading.Thread):
         gameNode: chess.pgn.GameNode = self.game.game()
         color = chess.BLACK
         for move, eval in evalList:
-            if evalPrev is not None and move == evalPrev.get('pv')[0]:
-                nodeToMoveQualityMap.update([(gameNode, MoveQuality(
-                    move, 0, evalPrev.get('pv')[0]))])
+            if evalPrev is not None:
+                bestMove = evalPrev.get('pv')[0]
+                sanMove = gameNode.board().san(move)
+                sanBestMove = gameNode.board().san(bestMove)
                 gameNode = gameNode.next()
-            elif evalPrev is not None:
-                score = eval["score"].white(
-                ) if color else eval["score"].black()
-                prevScore = evalPrev["score"].white(
-                ) if color else evalPrev["score"].black()
-                if score.score() is not None and prevScore.score() is not None:
+                if(move == bestMove):
                     nodeToMoveQualityMap.update([(gameNode, MoveQuality(
-                        move, score.score() - prevScore.score(), evalPrev.get('pv')[0]))])
-                    gameNode = gameNode.next()
-                elif prevScore.is_mate() != score.is_mate():
-                    nodeToMoveQualityMap.update([
-                        (gameNode, MoveQuality(move, -100, evalPrev.get('pv')[0]))])
-                    gameNode = gameNode.next()
-                elif prevScore.is_mate() and score.is_mate():
-                    if prevScore.mate() <= score.mate():
-                        nodeToMoveQualityMap.update([
-                            (gameNode, MoveQuality(move, -0.5, evalPrev.get('pv')[0]))])
-                        gameNode = gameNode.next()
-                    if prevScore.mate() > score.mate():
-                        nodeToMoveQualityMap.update([
-                            (gameNode, MoveQuality(move, 0, evalPrev.get('pv')[0]))])
-                        gameNode = gameNode.next()
+                        move, 0, bestMove, sanMove, sanBestMove))])
                 else:
-                    raise exception("tout cassé")
+                    score = eval["score"].white(
+                    ) if color else eval["score"].black()
+                    prevScore = evalPrev["score"].white(
+                    ) if color else evalPrev["score"].black()
+                    if score.score() is not None and prevScore.score() is not None:
+                        nodeToMoveQualityMap.update([(gameNode, MoveQuality(
+                            move, score.score() - prevScore.score(), bestMove, sanMove, sanBestMove))])
+                    elif prevScore.is_mate() != score.is_mate():
+                        nodeToMoveQualityMap.update([
+                            (gameNode, MoveQuality(move, -100, bestMove, sanMove, sanBestMove))])
+                    elif prevScore.is_mate() and score.is_mate():
+                        if prevScore.mate() <= score.mate():
+                            nodeToMoveQualityMap.update([
+                                (gameNode, MoveQuality(move, -0.5, bestMove, sanMove, sanBestMove))])
+                        if prevScore.mate() > score.mate():
+                            nodeToMoveQualityMap.update([
+                                (gameNode, MoveQuality(move, 0, bestMove, sanMove, sanBestMove))])
+                    else:
+                        raise exception("tout cassé")
             color = not color
             evalPrev = eval
         return nodeToMoveQualityMap
