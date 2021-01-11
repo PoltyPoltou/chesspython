@@ -71,13 +71,9 @@ class BoardWidget(GridLayout):
     def setup(self, controller):
         self.controller = controller
         self.controller.evalWrapper.addEvalEventListener(self)
-        self.changeBoard(self.controller.board)
-
-    def changeBoard(self, board):
-        self.board = board
+        self.board = self.controller.board
         if(self.hasEval() and not self.evalBarWidget.isStarted()):
             self.startEval()
-        self.update_board()
 
     def hasEval(self):
         return self.evalBarWidget != None

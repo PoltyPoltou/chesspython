@@ -63,7 +63,7 @@ class ChessWindow(GridLayout):
 
     def on_kv_post(self, base_widget):
         self.controller.moveList = self.moveList
-        self.controller.boardGUI = self.boardGUI
+        self.controller.boardWidget = self.boardGUI
         self.controller.progressBar = self.progressBar
         self.controller.moveListHeader = self.moveListHeader
         self.evalBarWidget.evalWrapper = self.controller.evalWrapper

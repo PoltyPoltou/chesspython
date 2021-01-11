@@ -1,17 +1,22 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if(TYPE_CHECKING):
+    from typing import List, Optional
+    from movelist import MoveList
+    from chesswindow import ChessWindow
+    from boardGUI import BoardWidget
+    from analysisWidgets import AnalysisProgressBar, HeadMoveList
 import threading
 from analysis import GameAnalysis, BoardAnalysisWrapper, MoveQuality
 import chess.pgn
-from movelist import MoveList
-from typing import List, Optional
-import boardGUI
 
 
 class GameController():
     moveList: Optional[MoveList] = None
-    boardGUI = None
-    progressBar = None
-    chessWindow = None
-    moveListHeader = None
+    boardWidget: Optional[BoardWidget] = None
+    progressBar: Optional[AnalysisProgressBar] = None
+    chessWindow: Optional[ChessWindow] = None
+    moveListHeader: Optional[HeadMoveList] = None
 
     listAnalysis = []
 
@@ -65,7 +70,7 @@ class GameController():
         with self.lock:
             self.game = game
             self.board = self.game.board()
-            self.boardGUI.changeBoard(self.board)
+            self.boardWidget.board = self.board
             self.evalWrapper.update(self.board)
             self.moveList.new_move(self.game, self)
             self.moveListHeader.on_updateGameNode(game)
