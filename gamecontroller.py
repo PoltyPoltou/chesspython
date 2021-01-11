@@ -27,6 +27,8 @@ class GameController():
         self.moveQualityDict: dict[chess.pgn.GameNode, MoveQuality] = {}
         self.evalWrapper = BoardAnalysisWrapper(self.board)
         self.evalWrapper.start()
+        self.mapAllGame = {}
+        self.dropdown = None
 
     def playMove(self, move: chess.Move):
         if self.game.next() is None:
@@ -36,13 +38,20 @@ class GameController():
         else:
             self.updateCurrentNode(self.game.add_variation(move))
 
+    def addGame(self, game, dictQuality):
+        if game.end() is not game.game():
+            if game not in self.mapAllGame:
+                self.mapAllGame.update([(game, {})])
+                self.dropdown.createButtonForGame(self, game)
+            self.mapAllGame[game] = dictQuality.copy()
+
     def loadGame(self, game):
-        analysis = GameAnalysis(self)
-        analysis.game = game.game()
-        analysis.start()
-        self.chessWindow.lockLoad()
-        self.listAnalysis.append(analysis)
+        self.addGame(self.game.game(), self.moveQualityDict)
         self.updateCurrentNode(game)
+        if game.game() in self.mapAllGame:
+            self.moveQualityDict = self.mapAllGame[game]
+            if len(self.moveQualityDict) > 0:
+                self.postAnalysis(self.game, self.moveQualityDict)
 
     def computerPlay(self):
         if(self.evalWrapper != None):
@@ -68,6 +77,8 @@ class GameController():
 
     def updateCurrentNode(self, game):
         with self.lock:
+            if self.game.game() is not game.game():
+                self.moveQualityDict.clear()
             self.game = game
             self.board = self.game.board()
             self.boardWidget.board = self.board

@@ -12,8 +12,11 @@ class ChessComGameReader():
         self.index = 0
 
     def setDate(self, month: int, year: int):
-        self.gameData = chessdotcom.get_player_games_by_month(
-            self.username, year, month)
+        try:
+            self.gameData = chessdotcom.get_player_games_by_month(
+                self.username, year, month)
+        except chessdotcom.ChessDotComError as error:
+            self.gameData = None
 
     def nextGame(self) -> chess.pgn.Game:
         if(self.gameData is not None and len(self.gameData.json["games"]) > self.index):

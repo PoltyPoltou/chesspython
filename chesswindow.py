@@ -9,6 +9,7 @@ from kivy.uix.popup import Popup
 import boardGUI
 import arrow
 import chess.pgn
+import dropbox
 import gamecontroller
 import os
 from movelist import MoveList
@@ -39,6 +40,9 @@ class ChessWindow(GridLayout):
     progressBar = ObjectProperty(None)
     moveList: Optional[MoveList] = ObjectProperty(None)
     loadButton = ObjectProperty(None)
+    loadChesscomButton = ObjectProperty(None)
+    loadGameButton = ObjectProperty(None)
+    analysisButton = ObjectProperty(None)
     moveListHeader = ObjectProperty(None)
     evalBarWidget = ObjectProperty(None)
     inputText = ObjectProperty(None)
@@ -46,6 +50,7 @@ class ChessWindow(GridLayout):
     def __init__(self, **kwargs):
         self.controller = gamecontroller.GameController()
         self.controller.chessWindow = self
+        self.dropdown = dropbox.GameMenu()
 
         self.keyboard: MyKeyboardListener = MyKeyboardListener()
         self.keyboard.bind_key('r', self.rotate)
@@ -66,6 +71,7 @@ class ChessWindow(GridLayout):
         self.controller.boardWidget = self.boardGUI
         self.controller.progressBar = self.progressBar
         self.controller.moveListHeader = self.moveListHeader
+        self.controller.dropdown = self.dropdown
         self.evalBarWidget.evalWrapper = self.controller.evalWrapper
         self.moveListHeader.threadEngine = self.controller.evalWrapper
         self.boardGUI.setup(self.controller)
@@ -99,12 +105,22 @@ class ChessWindow(GridLayout):
         game = reader.nextGame()
         if game is not None:
             self.controller.loadGame(game)
+        while game is not None:
+            self.controller.addGame(game, {})
+            game = reader.nextGame()
 
     def dismiss_popup(self):
         self._popup.dismiss()
 
     def lockLoad(self):
         self.loadButton.disabled = True
+        self.loadChesscomButton.disabled = True
+        self.loadGameButton.disabled = True
+        self.loadGameButton.disabled = True
+        self.analysisButton.disabled = True
 
     def unlockLoad(self):
         self.loadButton.disabled = False
+        self.loadChesscomButton.disabled = False
+        self.loadGameButton.disabled = False
+        self.analysisButton.disabled = False

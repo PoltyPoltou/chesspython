@@ -14,6 +14,9 @@
     moveList : mvlst
     progressBar : progress
     loadButton : button
+    loadChesscomButton : buttonChess
+    loadGameButton : buttonGame
+    analysisButton : buttonAnalysis
     moveListHeader: hdMoveLst
     evalBarWidget:bar
     inputText:text_input
@@ -31,13 +34,18 @@
             text: 'Load from file'
             on_release: root.show_load()
         Button :
-            id : button
+            id : buttonChess
             text: 'Load from chess.com'
             on_release: root.load_from_chess_com()
         Button :
-            id : button
+            id : buttonAnalysis
             text: 'analyse'
             on_release: root.controller.analyseFullGame()
+        Button :
+            id : buttonGame
+            text : 'chooseGame'
+            on_release : root.dropdown.open(self)
+
     GridLayout:
         cols : 2
         padding : (10,10)
