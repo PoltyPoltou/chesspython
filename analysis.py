@@ -172,8 +172,8 @@ class GameAnalysis(threading.Thread):
             self.wrapper = BoardAnalysisWrapper(board)
             self.wrapper.start()
             size = curGame.end().board().ply()
-            self.controller.progressBar.progressDelta = 1/size
             self.controller.progressBar.newEval()
+            self.controller.progressBar.progressDelta = 1/size
             while curGame is not None and not self.stopFlag:
                 self.wrapper.update(curGame.board())
                 while not self.wrapper.hasFinished() and not self.stopFlag:

@@ -182,13 +182,12 @@ class AnalysisProgressBar(Widget):
                      indices=range(int(len(trianglePts)/4)))
 
     def addEval(self, eval):
-        self.progress += self.progressDelta
         if(not self.reconstruct):
             self.evalList.append(eval)
         score = eval["score"].white().score()
         if score is None and eval["score"].white().is_mate():
             score = eval["score"].white().moves * 1000
-        pos = self.progress - self.progressDelta
+        pos = self.progress
         maxScale = 600
         lastHeight = min(max(self.lastScore, -maxScale), maxScale) / \
             (2*maxScale) * self.height + 0.5 * self.height
@@ -213,6 +212,7 @@ class AnalysisProgressBar(Widget):
 
         self.lastScore = score
         self.lastPos = pos
+        self.progress += self.progressDelta
 
     def drawAllMeshes(self):
         self.resetBar()
