@@ -1,3 +1,4 @@
+from piecemanager import PieceManager
 from chess.svg import board
 from kivy.clock import Clock
 from arrow import ArrowManager, arrow_factory
@@ -64,6 +65,10 @@ class BoardWidget(GridLayout):
 
     def on_kv_post(self, base_widget):
         self.arrowManager = ArrowManager(self.parent)
+        tileList = []
+        for row in self.children:
+            tileList.extend(row.children)
+        self.pieceManager = PieceManager(tileList, self.parent)
         if(self.evalBarWidget is not None):
             self.bestMove = None
         return super().on_kv_post(base_widget)
@@ -203,15 +208,10 @@ class BoardWidget(GridLayout):
         if(self.board.move_stack != []):
             lastMoveIndexList.append(self.board.move_stack[-1].from_square)
             lastMoveIndexList.append(self.board.move_stack[-1].to_square)
+        self.pieceManager.updatePiecesOnBoard(self.board)
         for row in self.children:
             for tile in row.children:
                 if(isinstance(tile, Tile) and tile.square < 64):
-                    if (self.board.piece_at(tile.square) != None):
-                        tile.pieceSourceImg = self.imageDir + self.imageStyleDir + \
-                            self.imageDict[self.board.piece_at(
-                                tile.square).symbol()]
-                    else:
-                        tile.pieceSourceImg = ""
                     tile.played = tile.square in lastMoveIndexList
         # On a une analyse de la partie en cours, alors on affiche le meilleur coup précedant
         self.arrowManager.removeOneArrow(self.analysisArrow)
