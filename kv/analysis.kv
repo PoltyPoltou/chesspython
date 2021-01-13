@@ -1,12 +1,12 @@
 #:kivy 2.0.0
 #:import c colors
 <EvaluationBar>:
-    displayedEval : 0
     textEval : "0"
     pov : "WHITE"
     bgColor : (0,0,0) if self.pov == 'WHITE' else (1,1,1)
     barColor : (1,1,1) if self.bgColor == (0,0,0) else (0,0,0)
     sign : ((self.pov == "WHITE") - (self.pov!="WHITE"))
+    animWidget : wid
     canvas.before:
         Color:
             rgb:self.bgColor
@@ -18,15 +18,17 @@
             rgb:self.barColor
         Rectangle:
             pos:self.pos
-            size:self.width, 0.5 * self.height * (1 + self.sign * self.displayedEval/10)
+            size:(self.width, self.animWidget.height) if self.animRunning else (self.width, 0.5 * self.height * (1 + self.sign * self.eval/10))
+    Widget:
+        id:wid
     Label:
         canvas:"after"
-        color : (0,0,0) if root.displayedEval > 0 else (1,1,1)
+        color : (0,0,0) if root.eval > 0 else (1,1,1)
         text:root.textEval
         font_size:'12sp'
         bold: True
         halign:"center"
-        pos:(root.x,root.top - self.height - (root.sign * root.displayedEval > 0) * (root.height - self.height))
+        pos:(root.x,root.top - self.height - (root.sign * root.eval > 0) * (root.height - self.height))
         size:(root.width,20)
 
 

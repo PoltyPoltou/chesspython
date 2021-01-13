@@ -1,8 +1,8 @@
 import math
 from typing import Optional
 import chess
-from chess.pgn import Game, GameNode
-from kivy.uix.anchorlayout import AnchorLayout
+from chess.pgn import GameNode
+from kivy.animation import Animation
 from kivy.uix.boxlayout import BoxLayout
 import analysis
 from kivy.uix.widget import Widget
@@ -11,20 +11,30 @@ from kivy.graphics import Color, Mesh, Line
 from kivy.clock import *
 
 
+def getHeight(instance, eval):
+    return 0.5 * instance.height * \
+        (1 + instance.sign * eval/10)
+
+
 class EvaluationBar(Widget):
     bgColor = ObjectProperty((0, 0, 0))
     barColor = ObjectProperty((0, 0, 0))
-    displayedEval = NumericProperty(0.00)
-    eval = NumericProperty(0.00)
-    textEval = StringProperty(0.00)
+    eval = NumericProperty()
+    rectHeight = NumericProperty()
+    textEval = StringProperty()
     pov = StringProperty("WHITE")
-    sign = BooleanProperty(False)
+    sign = BooleanProperty()
+    animRunning = BooleanProperty(False)
+    animWidget = ObjectProperty(rebind=True)
 
     def __init__(self, **kwargs):
         self.evalWrapper: analysis.BoardAnalysisWrapper = None
         self.board = None
         self.started = False
         super().__init__(**kwargs)
+
+    def on_kv_post(self, base_widget):
+        return super().on_kv_post(base_widget)
 
     def isStarted(self):
         return self.evalWrapper is not None and self.started
@@ -72,8 +82,21 @@ class EvaluationBar(Widget):
             povScore: chess.engine.PovScore = self.evalWrapper.getEngineAnalysis()[
                 "score"]
             evalLinear, self.textEval = self.parseEval(povScore)
-            self.eval = 10*math.tanh(evalLinear/4)
-        self.displayedEval = self.eval
+            eval = 10*math.tanh(evalLinear/4)
+            if(evalLinear > 10):
+                eval = 10
+            if(not self.animRunning):
+                anim = Animation(
+                    size=(10, getHeight(self, eval)), d=0.3, t="out_quad")
+                anim.e = eval
+
+                def endAnimation(a, w):
+                    self.eval = a.e
+                    self.animRunning = False
+
+                anim.bind(on_complete=endAnimation)
+                self.animRunning = True
+                anim.start(self.animWidget)
 
     pass
 
