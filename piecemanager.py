@@ -24,8 +24,8 @@ class ChessPieceWidget(Image):
     source: Optional[str] = StringProperty()
 
     def __init__(self, linkedTile, src, **kwargs):
-        super().__init__(**kwargs)
         self.linkedTile = linkedTile
+        super().__init__(**kwargs)
         self.source = src
         self.bindLinkedTile()
 
