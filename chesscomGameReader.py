@@ -19,10 +19,15 @@ class ChessComGameReader():
             self.gameData = None
 
     def nextGame(self) -> chess.pgn.Game:
-        if(self.gameData is not None and len(self.gameData.json["games"]) > self.index):
-            pgn = self.gameData.json["games"][self.index]["pgn"]
-            self.index += 1
-            return chess.pgn.read_game(io.StringIO(pgn))
+        if(self.gameData is not None):
+            while(len(self.gameData.json["games"]) > self.index and "pgn" not in self.gameData.json["games"][self.index]):
+                self.index += 1
+            if(len(self.gameData.json["games"]) > self.index):
+                pgn = self.gameData.json["games"][self.index]["pgn"]
+                self.index += 1
+                return chess.pgn.read_game(io.StringIO(pgn))
+            else:
+                return None
         else:
             return None
 
