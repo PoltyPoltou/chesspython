@@ -204,6 +204,7 @@ class BoardWidget(GridLayout):
 
     def on_board(self, instance, value):
         self.newEngineEvalEvent()
+        self.unselectCase()
         lastMoveIndexList: list[int] = []
         if(self.board.move_stack != []):
             lastMoveIndexList.append(self.board.move_stack[-1].from_square)
