@@ -9,6 +9,7 @@ class Arrow(Widget):
     vertical = BooleanProperty(False)
     horizontal = BooleanProperty(False)
     diagonal = BooleanProperty(False)
+    rotated = BooleanProperty(False)
     # defines the angles function of the horizontal and vertical flip (in this order)
     diagonalAngle = [[45, -45], [135, 225]]
 
@@ -17,10 +18,14 @@ class ArrowKnight(Widget):
     clr = ColorProperty((1, 2/3, 0, 0.8))
     tileTo = ObjectProperty(None, rebind=True)
     tileFrom = ObjectProperty(None, rebind=True)
+    rotated = BooleanProperty(False)
     angleDict = {(1, 2): 0, (-2, 1): 90, (-1, -2): 180,
                  (2, -1): 270, (-1, 2): 0, (2, 1): 270, (1, -2): 180, (-2, -1): 90}
     flipDict = {(1, 2): False, (-2, 1): False, (-1, -2): False,
                 (2, -1): False, (2, 1): True, (1, -2): True, (-2, -1): True, (-1, 2): True}
+
+    def on_touch_down(self, touch):
+        return super().on_touch_down(touch)
 
 
 def arrow_factory(tileFrom, tileTo) -> Widget:
@@ -107,3 +112,7 @@ class ArrowManager:
         for arr in self.arrowList:
             self.widgetToAddArrows.remove_widget(arr)
         self.arrowList = []
+
+    def rotateBoard(self):
+        for arr in self.arrowList:
+            arr.rotated = not arr.rotated

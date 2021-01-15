@@ -68,6 +68,14 @@
     delta_x : abs(self.tileFrom.x - self.tileTo.x) if self.nullTest else 0
     delta_y : abs(self.tileFrom.y - self.tileTo.y) if self.nullTest else 0
     longueur : self.delta_x if self.horizontal else (self.delta_y if self.vertical else (m.sqrt(2)*self.delta_x))
+    canvas.before:
+        PushMatrix
+        Rotate:
+            origin:self.tileFrom.parent.parent.center if self.nullTest else (0,0)
+            angle:180 if self.rotated else 0
+            axis:(0,0,1)
+    canvas.after:
+        PopMatrix
     ArrowPoint:
         clr : root.clr
         pos: root.pos
@@ -80,13 +88,6 @@
         longueur : 0.13 * root.tileSize * 2 + root.longueur - root.tileSize
         rotationAngle: 90 * root.vertical + 180 * root.flipped + root.diagonal * ar.Arrow.diagonalAngle[root.horizontalFlip][root.verticalFlip]
 
-<RotationZWidget@Widget>:
-    rotationAngle : 0
-    canvas:
-        Rotate:
-            angle:self.rotationAngle
-            axis:0,0,1
-            origin:self.pos
 
 <ArrowKnight>:
     clr : (1,2/3,0,0.8)
@@ -98,9 +99,14 @@
     horizontalFlip : (self.tileFrom.x > self.tileTo.x) if self.nullTest else False
     verticalFlip : (self.tileFrom.y > self.tileTo.y) if self.nullTest else False
     tileSize : self.tileFrom.width if self.nullTest else 0
-    delta_x : ord(self.tileTo.column) - ord(self.tileFrom.column) if self.nullTest else 0
-    delta_y : self.tileTo.row - self.tileFrom.row if self.nullTest else 0
+    delta_x : (not self.rotated - self.rotated)*round((self.tileTo.x - self.tileFrom.x)/self.tileFrom.width) if self.nullTest else 0
+    delta_y : (not self.rotated - self.rotated)*round((self.tileTo.y - self.tileFrom.y)/self.tileFrom.width) if self.nullTest else 0
     canvas.before:
+        PushMatrix
+        Rotate:
+            origin:self.tileFrom.parent.parent.center if self.nullTest else (0,0)
+            angle:180 if self.rotated else 0
+            axis:(0,0,1)
         Rotate:
             angle:+ar.ArrowKnight.angleDict.get((self.delta_x,self.delta_y),0)
             origin:(self.x + self.tileSize/2, self.y + self.tileSize/2) if self.nullTest else (0,0,0)
@@ -109,13 +115,7 @@
             origin:(self.x + self.tileSize/2, self.y + self.tileSize/2) if self.nullTest else (0,0,0)
             xyz:(-1 if ar.ArrowKnight.flipDict.get((self.delta_x,self.delta_y),False) else 1), 1, 1
     canvas.after:
-        Scale:
-            origin:(self.x + self.tileSize/2, self.y + self.tileSize/2) if self.nullTest else (0,0,0)
-            xyz:(-1 if ar.ArrowKnight.flipDict.get((self.delta_x,self.delta_y),False) else 1), 1, 1
-        Rotate:
-            angle:-ar.ArrowKnight.angleDict.get((self.delta_x,self.delta_y),0)
-            origin:(self.x + self.tileSize/2, self.y + self.tileSize/2) if self.nullTest else (0,0,0)
-            axis:(0,0,1)
+        PopMatrix
     ArrowPoint:
         clr : root.clr
         pos: root.pos

@@ -24,7 +24,6 @@ class ChessComGameReader():
             self.index += 1
             return chess.pgn.read_game(io.StringIO(pgn))
         else:
-            print("Fin des parties")
             return None
 
 

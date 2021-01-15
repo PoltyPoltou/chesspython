@@ -82,6 +82,7 @@ class ChessWindow(GridLayout):
             self.boardGUI.pov = 'BLACK'
         else:
             self.boardGUI.pov = 'WHITE'
+        self.boardGUI.arrowManager.rotateBoard()
         self.boardGUI.update_board()
 
     def show_load(self):
