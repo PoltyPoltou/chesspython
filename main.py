@@ -5,6 +5,7 @@ import chess
 import chesswindow
 from kivy.base import Builder
 from kivy.core.window import Window
+import game_and_analysis_serialisation as serialisationWrapper
 Builder.load_file("kv/app.kv")
 
 
@@ -17,6 +18,7 @@ class MyChessApp(App):
 
     def on_stop(self):
         self.stopThreads()
+        serialisationWrapper.saveGamesToDisk(self.root.controller.savedGames)
         return super().on_stop()
 
     def stopThreads(self):

@@ -51,7 +51,6 @@ class ChessWindow(GridLayout):
         self.controller = gamecontroller.GameController()
         self.controller.chessWindow = self
         self.dropdown = dropbox.GameMenu()
-
         self.keyboard: MyKeyboardListener = MyKeyboardListener()
         self.keyboard.bind_key('r', self.rotate)
         self.keyboard.bind_key('p', self.controller.computerPlay)
@@ -72,8 +71,10 @@ class ChessWindow(GridLayout):
         self.controller.progressBar = self.progressBar
         self.controller.moveListHeader = self.moveListHeader
         self.controller.dropdown = self.dropdown
+        self.controller.initSavedGames()
         self.evalBarWidget.evalWrapper = self.controller.evalWrapper
         self.moveListHeader.threadEngine = self.controller.evalWrapper
+        self.inputText.text = self.controller.savedGames.username
         self.boardGUI.setup(self.controller)
         return super().on_kv_post(base_widget)
 
@@ -102,13 +103,8 @@ class ChessWindow(GridLayout):
         self.dismiss_popup()
 
     def load_from_chess_com(self):
-        reader = ChessComGameReader(self.inputText.text)
-        game = reader.nextGame()
-        if game is not None:
-            self.controller.loadGame(game)
-        while game is not None:
-            self.controller.addGame(game, {})
-            game = reader.nextGame()
+        username = self.inputText.text
+        self.controller.loadChessComGames(username)
 
     def dismiss_popup(self):
         self._popup.dismiss()

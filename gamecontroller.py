@@ -8,6 +8,8 @@ if(TYPE_CHECKING):
     from analysisWidgets import AnalysisProgressBar, HeadMoveList
 import threading
 from analysis import GameAnalysis, BoardAnalysisWrapper, MoveQuality
+import game_and_analysis_serialisation as serialisationWrapper
+from chesscomGameReader import ChessComGameReader
 import chess.pgn
 
 
@@ -27,8 +29,12 @@ class GameController():
         self.moveQualityDict: dict[chess.pgn.GameNode, MoveQuality] = {}
         self.evalWrapper = BoardAnalysisWrapper(self.board)
         self.evalWrapper.start()
-        self.mapAllGame = {}
         self.dropdown = None
+
+    def initSavedGames(self):
+        self.savedGames = serialisationWrapper.loadLastSavedData()
+        for game in self.savedGames.storageDict.keys():
+            self.chessWindow.dropdown.createButtonForGame(self, game)
 
     def playMove(self, move: chess.Move):
         if self.game.next() is None:
@@ -39,19 +45,20 @@ class GameController():
             self.updateCurrentNode(self.game.add_variation(move))
 
     def addGame(self, game, dictQuality):
-        if game.end() is not game.game():
-            if game not in self.mapAllGame:
-                self.mapAllGame.update([(game, {})])
+        if game.end() is not game.game():  # la game est-elle vide ?
+            if game not in self.savedGames.storageDict:
+                self.savedGames.storageDict.update([(game, dictQuality)])
                 self.dropdown.createButtonForGame(self, game)
-            self.mapAllGame[game] = dictQuality.copy()
+            elif (dictQuality is not self.savedGames.storageDict[game]):
+                self.savedGames.storageDict[game] = dictQuality.copy()
 
     def loadGame(self, game):
-        self.addGame(self.game.game(), self.moveQualityDict)
-        self.updateCurrentNode(game)
-        if game.game() in self.mapAllGame:
-            self.moveQualityDict = self.mapAllGame[game]
-            if len(self.moveQualityDict) > 0:
-                self.postAnalysis(self.game, self.moveQualityDict)
+        if (self.game.game() not in self.savedGames):
+            self.addGame(self.game.game(), {})
+        self.updateCurrentNode(game.end())
+        if game.game() in self.savedGames.storageDict:
+            if len(self.savedGames.storageDict[game]) > 0:
+                self.postAnalysis(self.game, self.savedGames.storageDict[game])
 
     def computerPlay(self):
         if(self.evalWrapper != None):
@@ -82,6 +89,7 @@ class GameController():
             self.game = game
             self.board = self.game.board()
             self.boardWidget.board = self.board
+            self.boardWidget.update_board()
             self.evalWrapper.update(self.board)
             self.moveList.new_move(self.game, self)
             self.moveListHeader.on_updateGameNode(game)
@@ -90,6 +98,7 @@ class GameController():
         self.moveList.postAnalysis(moveQualityDict.values())
         self.moveListHeader.postAnalysis(moveQualityDict)
         self.moveQualityDict = moveQualityDict
+        self.addGame(game, moveQualityDict)
         self.chessWindow.unlockLoad()
         self.updateCurrentNode(game.end())
 
@@ -98,3 +107,20 @@ class GameController():
             if analysis.running:
                 return True
         return False
+
+    def loadChessComGames(self, username: str):
+        if(self.savedGames.username != username):
+            serialisationWrapper.saveGamesToDisk(self.savedGames)
+            self.savedGames = serialisationWrapper.loadGamesFromDisk(username)
+        reader = ChessComGameReader(username)
+        game = reader.nextGame()
+        while (game is not None and game in self.savedGames):
+            game = reader.nextGame()
+        prev = None
+        while game is not None:
+            if(game not in self.savedGames):
+                self.addGame(game, {})
+            prev = game
+            game = reader.nextGame()
+        if prev is not None:
+            self.loadGame(prev)
