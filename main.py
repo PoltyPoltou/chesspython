@@ -6,6 +6,10 @@ import chesswindow
 from kivy.base import Builder
 from kivy.core.window import Window
 import game_and_analysis_serialisation as serialisationWrapper
+from kivy.config import Config
+Config.read("config.ini")
+# set config
+Config.write()
 Builder.load_file("kv/app.kv")
 
 
