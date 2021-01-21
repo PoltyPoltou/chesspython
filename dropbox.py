@@ -33,4 +33,4 @@ class GameMenu(DropDown):
             button.text = "Local game - " + str(self.localCount)
             self.localCount += 1
         button.bind(on_release=button.loadGame)
-        self.add_widget(button)
+        self.add_widget(button, len(self.children[0].children))
