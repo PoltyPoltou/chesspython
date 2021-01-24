@@ -1,0 +1,33 @@
+#:kivy 2.0.0
+
+<OpeningMoveLabel>:
+    has_variant : len(self.gameNode.variations) > 1
+    is_child : self.gameNode.parent is not None
+    text: self.gameNode.san()
+    bold:True
+    canvas.before:
+
+        Color:
+            rgb:self.bgColor
+        Rectangle:
+            pos:self.to_window(self.x  + 0.5*self.width*(1-self.sizeFactor),self.y + 0.5*self.height*(1-self.sizeFactor), False)
+            size:self.to_window(self.width*self.sizeFactor,self.height*self.sizeFactor, False)
+        Color:
+            rgb:(1,1,1)
+        Line:
+            points:(self.x-0.5*self.width*(1-self.sizeFactor), self.center_y, self.x+0.5*self.width*(1-self.sizeFactor)-1.5, self.center_y)
+            cap:"square"
+            width: 1.5
+        Line:
+            points:(self.right-0.5*self.width*(1-self.sizeFactor), (self.top_node+1.5)*self.height, self.right-0.5*self.width*(1-self.sizeFactor), (self.bottom_node+1.5)*self.height) if self.has_variant else ()
+            cap:"square"
+            width:1.5
+<OpeningNavigator>:
+    canvas.before:
+        PushMatrix
+        Scale:
+            origin:(self.get_parent_window().width/2 - self.x, self.get_parent_window().height/2 - self.y) if self.get_parent_window() is not None else (0,0)
+            x:self.scaling if self.scaling > 0 else -1/self.scaling
+            y:self.scaling if self.scaling > 0 else -1/self.scaling
+    canvas.after:
+        PopMatrix
