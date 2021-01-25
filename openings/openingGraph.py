@@ -1,4 +1,5 @@
 from kivy import base
+import kivy
 from kivy.lang.builder import Builder
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.relativelayout import RelativeLayout
@@ -10,54 +11,9 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.label import Label
 from kivy.input.motionevent import MotionEvent
+from kivy.graphics.transformation import Matrix
 from kivy.properties import ColorProperty, ObjectProperty, NumericProperty, BooleanProperty
 Builder.load_file("kv/opening.kv")
-
-
-class OpeningMoveLabel(Label):
-    bgColor = ColorProperty()
-    gameNode = ObjectProperty(rebind=True)
-    selected = BooleanProperty(False)
-    sizeFactor = NumericProperty()
-    top_node = NumericProperty()
-    box_width = NumericProperty()
-    box_height = NumericProperty()
-    box_left = NumericProperty()
-    box_right = NumericProperty()
-    box_bottom = NumericProperty()
-    box_top = NumericProperty()
-    line_width = NumericProperty(1.5)
-    instances = set()
-
-    def __init__(self, node,  top_node, bottom_node, sizeFactor=0.8, **kwargs):
-        self.gameNode = node
-        self.sizeFactor = sizeFactor
-        self.top_node = top_node
-        self.bottom_node = bottom_node
-        self.size_hint = (None, None)
-        if(not node.turn() == chess.WHITE):
-            self.bgColor = (1, 1, 1)
-        else:
-            self.bgColor = (0.4, 0.4, 0.4)
-        super().__init__(**kwargs)
-        OpeningMoveLabel.instances.add(self)
-
-    def on_selected(self, instance, value):
-        if(value):
-            for label in OpeningMoveLabel.instances:
-                if(label is not instance):
-                    label.selected = False
-
-    def on_touch_down(self, touch):
-        if(self.collide_point(touch.x, touch.y)):
-            self.selected = True
-        return super().on_touch_down(touch)
-
-
-def addNode(parent: Widget, gameNode: chess.pgn.GameNode, x, y, width, height, top_node=0, bottom_node=0):
-    label = OpeningMoveLabel(
-        gameNode, top_node, bottom_node, color=(0, 0, 0), pos=((x+1) * width, (y+1) * height), size=(width, height))
-    parent.add_widget(label)
 
 
 class DynamicList:
@@ -130,6 +86,85 @@ def createOpeningGraph(baseGame: chess.pgn.Game, matrix, x=0, y=0) -> Tuple[int,
         return relative_to_parent_pos, 1
 
 
+class OpeningMoveLabel(Label):
+    bgColor = ColorProperty()
+    gameNode = ObjectProperty(rebind=True)
+    selected = BooleanProperty(False)
+    sizeFactor = NumericProperty()
+    top_node = NumericProperty()
+    box_width = NumericProperty()
+    box_height = NumericProperty()
+    box_left = NumericProperty()
+    box_right = NumericProperty()
+    box_bottom = NumericProperty()
+    box_top = NumericProperty()
+    line_width = NumericProperty(1.5)
+    instances = set()
+
+    def __init__(self, node,  top_node, bottom_node, sizeFactor=0.8, **kwargs):
+        self.gameNode = node
+        self.sizeFactor = sizeFactor
+        self.top_node = top_node
+        self.bottom_node = bottom_node
+        self.size_hint = (None, None)
+        if(not node.turn() == chess.WHITE):
+            self.bgColor = (1, 1, 1)
+        else:
+            self.bgColor = (0.4, 0.4, 0.4)
+        super().__init__(**kwargs)
+        OpeningMoveLabel.instances.add(self)
+
+    def on_selected(self, instance, value):
+        if(value):
+            for label in OpeningMoveLabel.instances:
+                if(label is not instance):
+                    label.selected = False
+
+    def on_touch_down(self, touch: MotionEvent):
+        t_x, t_y = self.to_window(touch.x, touch.y)
+        t_x -= self.get_parent_window().width/2
+        t_y -= self.get_parent_window().height/2
+        t_x, t_y = t_x/self.parent.getScalingFactor(), t_y/self.parent.getScalingFactor()
+        t_x += self.get_parent_window().width/2
+        t_y += self.get_parent_window().height/2
+        t_x, t_y = self.to_parent(t_x, t_y)
+        if(self.collide_point(t_x, t_y) and touch.button == "left"):
+            self.selected = True
+        return super().on_touch_down(touch)
+
+
+def addNode(parent: Widget, gameNode: chess.pgn.GameNode, x, y, width, height, top_node=0, bottom_node=0):
+    label = OpeningMoveLabel(
+        gameNode, top_node, bottom_node, color=(0, 0, 0), pos=((x+1) * width, (y+1) * height), size=(width, height))
+    parent.add_widget(label)
+
+
+class OpeningNavigator(RelativeLayout):
+    ZOOMPERSCROLL = 0.25
+    scaling = NumericProperty(1)
+
+    def on_touch_move(self, touch: MotionEvent):
+        if "button" in touch.profile:
+            if(touch.button == 'left'):
+                self.x += touch.dx / self.getScalingFactor()
+                self.y += touch.dy / self.getScalingFactor()
+                return True  # stop dispatching event through the widget tree
+        return super().on_touch_move(touch)
+
+    def on_touch_down(self, touch):
+        if "button" in touch.profile:
+            if(touch.button == "scrolldown" or touch.button == "scrollup"):
+                sign = (touch.button == "scrolldown") - \
+                    (touch.button == "scrollup")
+                if(self.scaling == -sign):
+                    self.scaling = sign
+                self.scaling = self.scaling + sign * OpeningNavigator.ZOOMPERSCROLL
+        return super().on_touch_down(touch)
+
+    def getScalingFactor(self):
+        return self.scaling if self.scaling > 0 else -1/self.scaling
+
+
 def createOpeningGraphOnWidget(baseGame: chess.pgn.Game, scatterWidget, x=0, y=0) -> Tuple[int, int]:
     """
     recursive method that creates a matrix that represent a cool tree of moves very useful to see openings \n
@@ -190,7 +225,7 @@ def is_one_line_variation(startGame: chess.pgn.GameNode):
         return False
 
 
-def printOpeningInConsole():
+def printOpeningInConsole(game):
     posMatrix = DynamicList(lambda: DynamicList(lambda: ""))
     createOpeningGraph(game.game(), posMatrix)
 
@@ -205,37 +240,25 @@ def printOpeningInConsole():
         print(newRow)
 
 
-class OpeningNavigator(RelativeLayout):
-    ZOOMPERSCROLL = 0.25
-    scaling = NumericProperty(1)
+def create_opening_app(opening_pgn_file="./data/WHITE_opening.txt"):
+    with open(opening_pgn_file) as pgn:
+        game = chess.pgn.read_game(pgn)
+        app = App()
+        root = OpeningNavigator()
+        app.root = root
+        createOpeningGraphOnWidget(game, root)
+        app.run()
 
-    def on_touch_move(self, touch: MotionEvent):
-        if "button" in touch.profile:
-            if(touch.button == 'left'):
-                self.x += touch.dx / self.getScalingFactor()
-                self.y += touch.dy / self.getScalingFactor()
-                return True  # stop dispatching event through the widget tree
-        return super().on_touch_move(touch)
 
-    def on_touch_down(self, touch):
-        if "button" in touch.profile:
-            if(touch.button == "scrolldown" or touch.button == "scrollup"):
-                sign = (touch.button == "scrolldown") - \
-                    (touch.button == "scrollup")
-                if(self.scaling == -sign):
-                    self.scaling = sign
-                self.scaling = self.scaling + sign * OpeningNavigator.ZOOMPERSCROLL
-        return super().on_touch_down(touch)
-
-    def getScalingFactor(self):
-        return self.scaling if self.scaling > 0 else -1/self.scaling
+def get_opening_widget(size, opening_pgn_file="./data/WHITE_opening.txt"):
+    with open(opening_pgn_file) as pgn:
+        game = chess.pgn.read_game(pgn)
+        widget = OpeningNavigator()
+        createOpeningGraphOnWidget(game, widget)
+        container = FloatLayout(size=size)
+        container.add_widget(widget)
+    return container
 
 
 if __name__ == "__main__":
-    pgn = open("./data/WHITE_opening.txt")
-    game = chess.pgn.read_game(pgn)
-    app = App()
-    root = OpeningNavigator()
-    app.root = root
-    createOpeningGraphOnWidget(game, root)
-    app.run()
+    create_opening_app("./data/WHITE_opening.txt")
