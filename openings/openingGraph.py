@@ -3,26 +3,33 @@ from kivy.lang.builder import Builder
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.relativelayout import RelativeLayout
 from io import StringIO
-from typing import Tuple
+from typing import Set, Tuple
 import chess.pgn
 import chess
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.uix.label import Label
 from kivy.input.motionevent import MotionEvent
-from kivy.properties import ColorProperty, ObjectProperty, NumericProperty
-from kivy.graphics import Scale, PushMatrix, PopMatrix
+from kivy.properties import ColorProperty, ObjectProperty, NumericProperty, BooleanProperty
 Builder.load_file("kv/opening.kv")
 
 
 class OpeningMoveLabel(Label):
     bgColor = ColorProperty()
     gameNode = ObjectProperty(rebind=True)
+    selected = BooleanProperty(False)
     sizeFactor = NumericProperty()
     top_node = NumericProperty()
-    bottom_node = NumericProperty()
+    box_width = NumericProperty()
+    box_height = NumericProperty()
+    box_left = NumericProperty()
+    box_right = NumericProperty()
+    box_bottom = NumericProperty()
+    box_top = NumericProperty()
+    line_width = NumericProperty(1.5)
+    instances = set()
 
-    def __init__(self, node,  top_node=0, bottom_node=0, sizeFactor=0.8, **kwargs):
+    def __init__(self, node,  top_node, bottom_node, sizeFactor=0.8, **kwargs):
         self.gameNode = node
         self.sizeFactor = sizeFactor
         self.top_node = top_node
@@ -33,6 +40,18 @@ class OpeningMoveLabel(Label):
         else:
             self.bgColor = (0.4, 0.4, 0.4)
         super().__init__(**kwargs)
+        OpeningMoveLabel.instances.add(self)
+
+    def on_selected(self, instance, value):
+        if(value):
+            for label in OpeningMoveLabel.instances:
+                if(label is not instance):
+                    label.selected = False
+
+    def on_touch_down(self, touch):
+        if(self.collide_point(touch.x, touch.y)):
+            self.selected = True
+        return super().on_touch_down(touch)
 
 
 def addNode(parent: Widget, gameNode: chess.pgn.GameNode, x, y, width, height, top_node=0, bottom_node=0):
