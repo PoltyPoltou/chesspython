@@ -7,10 +7,6 @@ from kivy.base import Builder
 from kivy.core.window import Window
 import game_and_analysis_serialisation as serialisationWrapper
 from kivy.config import Config
-Config.read("config.ini")
-# set config
-Config.write()
-Builder.load_file("kv/app.kv")
 
 
 class MyChessApp(App):
@@ -34,5 +30,7 @@ class MyChessApp(App):
 
 
 if __name__ == '__main__':
+    Config.read("config.ini")
+    Config.write()
     Window.size = (1024, 768)
     MyChessApp().run()

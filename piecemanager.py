@@ -1,3 +1,4 @@
+from kivy.base import Builder
 from typing import Optional
 from kivy.uix.image import Image
 import chess
@@ -9,6 +10,7 @@ imageDir = "images/"
 imageStyleDir = "std/"
 imageDict = {"r": "br.webp", "n": "bn.webp", "b": "bb.webp", "k": "bk.webp", "q": "bq.webp", "p": "bp.webp",
              "R": "wr.webp", "N": "wn.webp", "B": "wb.webp", "K": "wk.webp", "Q": "wq.webp", "P": "wp.webp"}
+Builder.load_file("./kv/pieceassets.kv")
 
 
 def setpos(instance, pos):

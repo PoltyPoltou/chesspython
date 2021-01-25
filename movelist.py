@@ -7,6 +7,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty, ListProperty
+from kivy.base import Builder
+Builder.load_file("./kv/movelist.kv")
 
 
 def loadNode(self, touch):

@@ -20,6 +20,8 @@ from tile import Tile
 from typing import List, Optional
 import chess
 import chess.pgn
+from kivy.base import Builder
+Builder.load_file("./kv/board.kv")
 
 
 class Row(GridLayout):

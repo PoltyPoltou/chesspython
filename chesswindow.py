@@ -1,7 +1,6 @@
 from colors import BACKGROUND
 from keyboard import MyKeyboardListener
 from kivy.properties import ObjectProperty
-from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.filechooser import FileChooserListView
@@ -11,10 +10,13 @@ import arrow
 import chess.pgn
 import dropbox
 import gamecontroller
+import movelistheader
 import os
 from movelist import MoveList
 from typing import List, Optional
 from chesscomGameReader import ChessComGameReader
+from kivy.base import Builder
+Builder.load_file("./kv/chesswindow.kv")
 
 
 class MyFileChooserListView(FileChooserListView):

@@ -1,5 +1,7 @@
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty, ColorProperty
 from kivy.uix.widget import Widget
+from kivy.base import Builder
+Builder.load_file("./kv/arrows.kv")
 
 
 class Arrow(Widget):
