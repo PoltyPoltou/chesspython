@@ -1,5 +1,3 @@
-from kivy import base
-import kivy
 from kivy.lang.builder import Builder
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
@@ -108,6 +106,7 @@ class OpeningMoveLabel(Label):
         self.sizeFactor = sizeFactor
         self.top_node = top_node
         self.bottom_node = bottom_node
+        self.callback_on_select = None
         self.size_hint = (None, None)
         if(not node.turn() == chess.WHITE):
             self.bgColor = (1, 1, 1)
@@ -118,7 +117,8 @@ class OpeningMoveLabel(Label):
 
     def on_selected(self, instance, value):
         if(value):
-            print(self.gameNode.san())
+            if(self.callback_on_select is not None):
+                self.callback_on_select(self.gameNode)
             for label in OpeningMoveLabel.instances:
                 if(label is not instance):
                     label.selected = False
@@ -134,8 +134,7 @@ class OpeningMoveLabel(Label):
             t_x, t_y = t_x - self.parent.x, t_y - self.parent.y
             if(self.collide_point(t_x, t_y)):
                 self.selected = True
-                print(self.gameNode.san())
-                return True
+                return True  # stop spreading in widget tree
         return super().on_touch_up(touch)
 
 
@@ -149,6 +148,15 @@ class OpeningNavigator(RelativeLayout):
     ZOOMPERSCROLL = 0.25
     scaling = NumericProperty(1)
     active = BooleanProperty(False)
+
+    def __init__(self, callback_on_select, **kw):
+        self.callback_on_select = callback_on_select
+        super().__init__(**kw)
+
+    def add_widget(self, widget, index=0, canvas=None):
+        if(isinstance(widget, OpeningMoveLabel)):
+            widget.callback_on_select = self.callback_on_select
+        return super().add_widget(widget, index=index, canvas=canvas)
 
     def on_touch_move(self, touch: MotionEvent):
         if "button" in touch.profile:
@@ -232,6 +240,29 @@ def is_one_line_variation(startGame: chess.pgn.GameNode):
         return False
 
 
+class OpeningContainer(BoxLayout, StencilView):
+
+    def add_widget(self, widget, index=0, canvas=None):
+        widget.pos = self.pos
+        return super().add_widget(widget, index=index, canvas=canvas)
+
+    def toggleactivate(self):
+        self.children[0].active = not self.children[0].active
+    pass
+
+
+def create_opening_widget(size, opening_pgn_file="./data/WHITE_opening.txt", callback_on_select=lambda node: None):
+    with open(opening_pgn_file) as pgn:
+        game = chess.pgn.read_game(pgn)
+        widget = OpeningNavigator(callback_on_select)
+        createOpeningGraphOnWidget(game, widget)
+        container = OpeningContainer(size=size)
+        container.add_widget(widget)
+        widget.size_hint = (None, None)
+        widget.size = size
+    return container
+
+
 def printOpeningInConsole(game):
     posMatrix = DynamicList(lambda: DynamicList(lambda: ""))
     createOpeningGraph(game.game(), posMatrix)
@@ -254,28 +285,6 @@ def create_opening_app(opening_pgn_file="./data/WHITE_opening.txt"):
         app.root = create_opening_widget((300, 300), opening_pgn_file)
         createOpeningGraphOnWidget(game, app.root.children[0])
         app.run()
-
-
-class OpeningContainer(BoxLayout, StencilView):
-    def add_widget(self, widget, index=0, canvas=None):
-        widget.pos = self.pos
-        return super().add_widget(widget, index=index, canvas=canvas)
-
-    def toggleactivate(self):
-        self.children[0].active = not self.children[0].active
-    pass
-
-
-def create_opening_widget(size, opening_pgn_file="./data/WHITE_opening.txt"):
-    with open(opening_pgn_file) as pgn:
-        game = chess.pgn.read_game(pgn)
-        widget = OpeningNavigator()
-        createOpeningGraphOnWidget(game, widget)
-        container = OpeningContainer(size=size)
-        container.add_widget(widget)
-        widget.size_hint = (None, None)
-        widget.size = size
-    return container
 
 
 if __name__ == "__main__":

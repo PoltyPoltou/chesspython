@@ -127,9 +127,12 @@ class ChessWindow(GridLayout):
         self.analysisButton.disabled = False
 
     def load_opening(self):
+        with open("./data/WHITE_opening.txt") as pgn:
+            self.controller.loadGame(chess.pgn.read_game(pgn))
+        self.controller.updateCurrentNode(self.controller.game.game())
         Window.size = Window.size[0] + 500, Window.size[1]
         self.openingWidget = openings.openingGraph.create_opening_widget(
-            (500, Window.size[1]))
+            (500, Window.size[1]), callback_on_select=self.controller.updateCurrentNode)
         self.add_widget(self.openingWidget)
         self.openingWidget.toggleactivate()
 
