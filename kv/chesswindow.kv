@@ -1,10 +1,7 @@
 #:kivy 2.0.0
 #: include kv/loader.kv
 <ChessWindow>:
-    cols : 1
-    rows : 2
-    padding : (10,10)
-    spacing : 10
+    rows:1
     boardGUI : boardGUI
     moveList : mvlst
     progressBar : progress
@@ -21,71 +18,80 @@
         Rectangle:
             pos : self.pos
             size : self.size
-    BoxLayout:
-        size_hint : (1,0.05)
-        orientation : 'horizontal'
-        Button :
-            id : button
-            text: 'Load from file'
-            on_release: root.show_load()
-        Button :
-            id : buttonChess
-            text: 'Load from chess.com'
-            on_release: root.load_from_chess_com()
-        Button :
-            id : buttonAnalysis
-            text: 'analyse'
-            on_release: root.controller.analyseFullGame()
-        Button :
-            id : buttonGame
-            text : 'chooseGame'
-            on_release : root.dropdown.open(self)
-
     GridLayout:
-        cols : 2
+        cols : 1
+        rows : 2
         padding : (10,10)
         spacing : 10
-        size_hint : (1,0.95)
-        FloatLayout:
-            size_hint : (0.75,0.9)
-            id : container
+        BoxLayout:
+            size_hint : (1,0.05)
+            orientation : 'horizontal'
+            ToggleButton:
+                id:openingButton
+                text: 'show Opening'
+                on_state:  root.load_opening() if args[1] == "down" else  root.unload_opening()
+            Button :
+                id : button
+                text: 'Load from file'
+                on_release: root.show_load()
+            Button :
+                id : buttonChess
+                text: 'Load from chess.com'
+                on_release: root.load_from_chess_com()
+            Button :
+                id : buttonAnalysis
+                text: 'analyse'
+                on_release: root.controller.analyseFullGame()
+            Button :
+                id : buttonGame
+                text : 'chooseGame'
+                on_release : root.dropdown.open(self)
+
+        GridLayout:
+            cols : 2
+            padding : (10,10)
             spacing : 10
-            evalWidth : bar.width + self.spacing
+            size_hint : (1,0.95)
+            FloatLayout:
+                size_hint : (0.75,0.9)
+                id : container
+                spacing : 10
+                evalWidth : bar.width + self.spacing
 
-            EvaluationBar:
-                id : bar
-                size_hint : (None, None)
-                size : (40, boardGUI.height)
-                pos_hint : {'center_y' : 0.5}
-                right : boardGUI.right - boardGUI.width - container.spacing
-                pov : boardGUI.pov
-            BoardWidget:
-                id : boardGUI
-                size_hint : (None,None)
-                size : min(container.width - container.evalWidth, container.height), min(container.width - container.evalWidth, container.height)
-                pos_hint: {'center_x' : 0.5 + container.evalWidth/container.width/2, 'center_y' : 0.5}
-                evalBarWidget: bar
-                moveList: mvlst
-        BoxLayout:
-            orientation:'vertical'
-            size_hint : (0.25,0.9)
-            HeadMoveList:
-                id:hdMoveLst
-                size_hint : (1,0.2)
-                text: "azd"
-            MoveList:
-                size_hint : (1,0.8)
-                id:mvlst
+                EvaluationBar:
+                    id : bar
+                    size_hint : (None, None)
+                    size : (40, boardGUI.height)
+                    pos_hint : {'center_y' : 0.5}
+                    right : boardGUI.right - boardGUI.width - container.spacing
+                    pov : boardGUI.pov
+                BoardWidget:
+                    id : boardGUI
+                    size_hint : (None,None)
+                    size : min(container.width - container.evalWidth, container.height), min(container.width - container.evalWidth, container.height)
+                    pos_hint: {'center_x' : 0.5 + container.evalWidth/container.width/2, 'center_y' : 0.5}
+                    evalBarWidget: bar
+                    moveList: mvlst
+            BoxLayout:
+                orientation:'vertical'
+                size_hint : (0.25,0.9)
+                HeadMoveList:
+                    id:hdMoveLst
+                    size_hint : (1,0.2)
+                    text: "azd"
+                MoveList:
+                    size_hint : (1,0.8)
+                    id:mvlst
 
-        AnalysisProgressBar:
-            id: progress
-            size_hint : (0.9,0.1)
+            AnalysisProgressBar:
+                id: progress
+                size_hint : (0.9,0.1)
 
-        BoxLayout:
-            size_hint : (0.1,0.1)
-            orientation:'vertical'
-            TextInput:
-                id : text_input
-                text : 'Username'
-                multiline : False
-                on_focus : root.text_lost_focus(args[1])
+            BoxLayout:
+                size_hint : (0.1,0.1)
+                orientation:'vertical'
+                TextInput:
+                    id : text_input
+                    text : 'Username'
+                    multiline : False
+                    on_focus : root.text_lost_focus(args[1])

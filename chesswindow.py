@@ -14,7 +14,8 @@ import movelistheader
 import os
 from movelist import MoveList
 from typing import List, Optional
-from chesscomGameReader import ChessComGameReader
+import openings.openingGraph
+from kivy.core.window import Window
 from kivy.base import Builder
 Builder.load_file("./kv/chesswindow.kv")
 
@@ -54,6 +55,7 @@ class ChessWindow(GridLayout):
         self.controller.chessWindow = self
         self.dropdown = dropbox.GameMenu()
         self.keyboard: MyKeyboardListener = MyKeyboardListener()
+        self.openingWidget = None
         self.keyboard.bind_key('r', self.rotate)
         self.keyboard.bind_key('p', self.controller.computerPlay)
         self.keyboard.bind_key('j', self.controller.prevNode)
@@ -123,3 +125,19 @@ class ChessWindow(GridLayout):
         self.loadChesscomButton.disabled = False
         self.loadGameButton.disabled = False
         self.analysisButton.disabled = False
+
+    def load_opening(self):
+        Window.size = Window.size[0] + 500, Window.size[1]
+        self.openingWidget = openings.openingGraph.create_opening_widget(
+            (500, Window.size[1]))
+        self.add_widget(self.openingWidget)
+        self.openingWidget.toggleactivate()
+
+    def unload_opening(self):
+        if(self.openingWidget is not None):
+            self.openingWidget.toggleactivate()
+            self.remove_widget(self.openingWidget)
+            Window.size = Window.size[0] - 500, Window.size[1]
+            self.openingWidget = None
+        else:
+            print("Unloading opening but none were opened")

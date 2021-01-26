@@ -43,8 +43,16 @@
     canvas.before:
         PushMatrix
         Scale:
-            origin:(self.get_parent_window().width/2 - self.x, self.get_parent_window().height/2 - self.y) if self.get_parent_window() is not None else (0,0)
+            origin:(self.parent.center_x - self.x, self.parent.center_y - self.y) if self.active and self.parent is not None else (0,0)
             x:self.scaling if self.scaling > 0 else -1/self.scaling
             y:self.scaling if self.scaling > 0 else -1/self.scaling
     canvas.after:
         PopMatrix
+
+<OpeningContainer>:
+    canvas.before:
+        Color:
+            rgb:0.1,0.1,0.1
+        Rectangle:
+            pos:self.pos
+            size:self.size

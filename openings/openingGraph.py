@@ -1,6 +1,7 @@
 from kivy import base
 import kivy
 from kivy.lang.builder import Builder
+from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.relativelayout import RelativeLayout
 from io import StringIO
@@ -8,6 +9,7 @@ from typing import Set, Tuple
 import chess.pgn
 import chess
 from kivy.app import App
+from kivy.uix.stencilview import StencilView
 from kivy.uix.widget import Widget
 from kivy.uix.label import Label
 from kivy.input.motionevent import MotionEvent
@@ -116,21 +118,25 @@ class OpeningMoveLabel(Label):
 
     def on_selected(self, instance, value):
         if(value):
+            print(self.gameNode.san())
             for label in OpeningMoveLabel.instances:
                 if(label is not instance):
                     label.selected = False
 
-    def on_touch_down(self, touch: MotionEvent):
-        t_x, t_y = self.to_window(touch.x, touch.y)
-        t_x -= self.get_parent_window().width/2
-        t_y -= self.get_parent_window().height/2
-        t_x, t_y = t_x/self.parent.getScalingFactor(), t_y/self.parent.getScalingFactor()
-        t_x += self.get_parent_window().width/2
-        t_y += self.get_parent_window().height/2
-        t_x, t_y = self.to_parent(t_x, t_y)
-        if(self.collide_point(t_x, t_y) and touch.button == "left"):
-            self.selected = True
-        return super().on_touch_down(touch)
+    def on_touch_up(self, touch: MotionEvent):
+        if(touch.button == "left" and abs(touch.dx)+abs(touch.dy) == 0):
+            t_x, t_y = touch.x + self.parent.x, touch.y + self.parent.y
+            t_x -= self.parent.parent.center_x
+            t_y -= self.parent.parent.center_y
+            t_x, t_y = t_x/self.parent.getScalingFactor(), t_y/self.parent.getScalingFactor()
+            t_x += self.parent.parent.center_x
+            t_y += self.parent.parent.center_y
+            t_x, t_y = t_x - self.parent.x, t_y - self.parent.y
+            if(self.collide_point(t_x, t_y)):
+                self.selected = True
+                print(self.gameNode.san())
+                return True
+        return super().on_touch_up(touch)
 
 
 def addNode(parent: Widget, gameNode: chess.pgn.GameNode, x, y, width, height, top_node=0, bottom_node=0):
@@ -142,6 +148,7 @@ def addNode(parent: Widget, gameNode: chess.pgn.GameNode, x, y, width, height, t
 class OpeningNavigator(RelativeLayout):
     ZOOMPERSCROLL = 0.25
     scaling = NumericProperty(1)
+    active = BooleanProperty(False)
 
     def on_touch_move(self, touch: MotionEvent):
         if "button" in touch.profile:
@@ -244,19 +251,30 @@ def create_opening_app(opening_pgn_file="./data/WHITE_opening.txt"):
     with open(opening_pgn_file) as pgn:
         game = chess.pgn.read_game(pgn)
         app = App()
-        root = OpeningNavigator()
-        app.root = root
-        createOpeningGraphOnWidget(game, root)
+        app.root = create_opening_widget((300, 300), opening_pgn_file)
+        createOpeningGraphOnWidget(game, app.root.children[0])
         app.run()
 
 
-def get_opening_widget(size, opening_pgn_file="./data/WHITE_opening.txt"):
+class OpeningContainer(BoxLayout, StencilView):
+    def add_widget(self, widget, index=0, canvas=None):
+        widget.pos = self.pos
+        return super().add_widget(widget, index=index, canvas=canvas)
+
+    def toggleactivate(self):
+        self.children[0].active = not self.children[0].active
+    pass
+
+
+def create_opening_widget(size, opening_pgn_file="./data/WHITE_opening.txt"):
     with open(opening_pgn_file) as pgn:
         game = chess.pgn.read_game(pgn)
         widget = OpeningNavigator()
         createOpeningGraphOnWidget(game, widget)
-        container = FloatLayout(size=size)
+        container = OpeningContainer(size=size)
         container.add_widget(widget)
+        widget.size_hint = (None, None)
+        widget.size = size
     return container
 
 
