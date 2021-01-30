@@ -57,8 +57,8 @@
         PushMatrix
         Scale:
             origin:(self.parent.center_x - self.x, self.parent.center_y - self.y) if self.active and self.parent is not None else (0,0)
-            x:self.scaling if self.scaling > 0 else -1/self.scaling
-            y:self.scaling if self.scaling > 0 else -1/self.scaling
+            x:self.scaling
+            y:self.scaling
     canvas.after:
         PopMatrix
 

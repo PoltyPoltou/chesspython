@@ -128,7 +128,7 @@ class OpeningLabel(Label):
 
 
 class OpeningNavigator(RelativeLayout):
-    ZOOMPERSCROLL = 0.25
+    ZOOMPERSCROLL = 5  # represents a % detla
     scaling = NumericProperty(1)
     active = BooleanProperty(False)
 
@@ -152,15 +152,15 @@ class OpeningNavigator(RelativeLayout):
     def on_touch_down(self, touch):
         if "button" in touch.profile:
             if(touch.button == "scrolldown" or touch.button == "scrollup"):
-                sign = (touch.button == "scrolldown") - \
-                    (touch.button == "scrollup")
-                if(self.scaling == -sign):
-                    self.scaling = sign
-                self.scaling = self.scaling + sign * OpeningNavigator.ZOOMPERSCROLL
+                if("pos" in touch.profile and self.parent.collide_point(touch.x, touch.y)):
+                    sign = (touch.button == "scrolldown") - \
+                        (touch.button == "scrollup")
+                    if(self.scaling > OpeningNavigator.ZOOMPERSCROLL/100 or not touch.button == "scrollup"):
+                        self.scaling = self.scaling + sign * OpeningNavigator.ZOOMPERSCROLL/100
         return super().on_touch_down(touch)
 
     def getScalingFactor(self):
-        return self.scaling if self.scaling > 0 else -1/self.scaling
+        return self.scaling
 
 
 class OpeningContainer(BoxLayout, StencilView):
