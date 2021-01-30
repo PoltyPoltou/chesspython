@@ -5,7 +5,9 @@ if(TYPE_CHECKING):
     from movelist import MoveList
     from chesswindow import ChessWindow
     from boardGUI import BoardWidget
-    from analysisWidgets import AnalysisProgressBar, HeadMoveList
+    from analysisWidgets import AnalysisProgressBar
+    from movelistheader import HeadMoveList
+    from openings.openingGraph import OpeningContainer
 import threading
 from analysis import GameAnalysis, BoardAnalysisWrapper, MoveQuality
 import game_and_analysis_serialisation as serialisationWrapper
@@ -19,7 +21,7 @@ class GameController():
     progressBar: Optional[AnalysisProgressBar] = None
     chessWindow: Optional[ChessWindow] = None
     moveListHeader: Optional[HeadMoveList] = None
-
+    openingWidget: Optional[OpeningContainer] = None
     listAnalysis = []
 
     def __init__(self):
@@ -30,6 +32,7 @@ class GameController():
         self.evalWrapper = BoardAnalysisWrapper(self.board)
         self.evalWrapper.start()
         self.dropdown = None
+        self.openingGame = False
 
     def initSavedGames(self):
         self.savedGames = serialisationWrapper.loadLastSavedData()
@@ -39,10 +42,14 @@ class GameController():
     def playMove(self, move: chess.Move):
         if self.game.next() is None:
             self.updateCurrentNode(self.game.add_main_variation(move))
+            if(self.openingWidget is not None):
+                self.openingWidget.actualize_graph(self.game.game())
         elif self.game.has_variation(move):
             self.updateCurrentNode(self.game.variation(move))
         else:
             self.updateCurrentNode(self.game.add_variation(move))
+            if(self.openingWidget is not None):
+                self.openingWidget.actualize_graph(self.game.game())
 
     def addGame(self, game, dictQuality):
         if game.end() is not game.game():  # la game est-elle vide ?
@@ -93,6 +100,8 @@ class GameController():
             self.evalWrapper.update(self.board)
             self.moveList.new_move(self.game, self)
             self.moveListHeader.on_updateGameNode(game)
+            if(self.openingWidget is not None):
+                self.openingWidget.select_node(game)
 
     def postAnalysis(self, game, moveQualityDict):
         self.moveList.postAnalysis(moveQualityDict.values())

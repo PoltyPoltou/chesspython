@@ -127,20 +127,28 @@ class ChessWindow(GridLayout):
         self.analysisButton.disabled = False
 
     def load_opening(self):
-        with open("./data/WHITE_opening.txt") as pgn:
-            self.controller.loadGame(chess.pgn.read_game(pgn))
-        self.controller.updateCurrentNode(self.controller.game.game())
+        self.controller.openingGame = True
+        with open("./data/WHITE_opening.txt") as openingFile:
+            self.controller.loadGame(chess.pgn.read_game(openingFile))
         Window.size = Window.size[0] + 500, Window.size[1]
-        self.openingWidget = openings.openingGraph.create_opening_widget(
-            (500, Window.size[1]), callback_on_select=self.controller.updateCurrentNode)
+        self.openingWidget = openings.openingGraph.OpeningContainer(
+            self.controller.game.game(), self.controller.updateCurrentNode,
+            size=(500, Window.size[1]))
         self.add_widget(self.openingWidget)
         self.openingWidget.toggleactivate()
+        self.controller.openingWidget = self.openingWidget
 
     def unload_opening(self):
-        if(self.openingWidget is not None):
+        self.controller.openingGame = False
+        if(self.controller.openingGame):
             self.openingWidget.toggleactivate()
             self.remove_widget(self.openingWidget)
             Window.size = Window.size[0] - 500, Window.size[1]
+            with open("./data/WHITE_opening.txt", "w") as openingFile:
+                openingFile.write(str(self.controller.game))
+            self.controller.updateCurrentNode(chess.pgn.Game())
             self.openingWidget = None
+            self.controller.openingGame = False
+            self.controller.openingWidget = None
         else:
             print("Unloading opening but none were opened")

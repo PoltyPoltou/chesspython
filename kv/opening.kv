@@ -1,38 +1,49 @@
 #:kivy 2.0.0
+#:import chesspgn chess.pgn
+#:import chess chess
 
-<OpeningMoveLabel>:
-    has_variant : len(self.gameNode.variations) > 1
-    text: self.gameNode.san()
+<OpeningLabel>:
     bold:True
+    text : self.actual_node.san() if not isinstance(self.actual_node, chesspgn.Game) else "ROOT"
+    color:(0,0,0)
+    size_hint : None,None
+    size: (75,75)
+    sizeFactor : 0.8
+    line_width:1.5
+    has_variant : self.top_node is not self.bottom_node
+    has_children : self.top_node is not None and self.bottom_node is not None
+    x : self.width + self.parent_node.x if self.parent_node is not None else 0
     box_width:self.width*self.sizeFactor
     box_height:self.height*self.sizeFactor
     box_left : self.x  + 0.5*self.width*(1-self.sizeFactor)
     box_right : self.box_left + self.width*self.sizeFactor
     box_bottom : self.y + 0.5*self.height*(1-self.sizeFactor)
     box_top : self.box_bottom + self.height*self.sizeFactor
-    line_width:1.5 * self.parent.getScalingFactor() if self.parent is not None else 1.5
     canvas.before:
-
         Color:
-            rgb:self.bgColor
+            rgb:(1, 1, 1) if(not self.actual_node.turn() == chess.WHITE) else  (0.4, 0.4, 0.4)
         Rectangle:
             pos:self.box_left,self.box_bottom
             size: self.box_width, self.box_height
     canvas:
         Color:
             rgb:(1,1,1)
+        # line to connect to parent
         Line:
-            points:(self.x, self.center_y, self.box_left - self.line_width, self.center_y) if self.gameNode.parent is not None else ()
+            points:(self.x, self.center_y, self.box_left - self.line_width, self.center_y) if self.parent_node is not None else ()
             cap:"square"
             width: self.line_width
+        # line to connect to children
         Line:
-            points:(self.box_right + self.line_width, self.center_y, self.right, self.center_y) if len(self.gameNode.variations)>0 else ()
+            points:(self.box_right + self.line_width, self.center_y, self.right, self.center_y) if self.has_children else ()
             cap:"square"
             width: self.line_width
+        # vertical line to connect to every variant
         Line:
-            points:(self.right, (self.top_node+1.5)*self.height, self.right, (self.bottom_node+1.5)*self.height) if self.has_variant else ()
+            points:(self.right, 0.5*self.height + self.mapNodeToChild[self.top_node].y, self.right, 0.5*self.height + self.mapNodeToChild[self.bottom_node].y) if self.has_variant else ()
             cap:"square"
             width:self.line_width
+        # Square to know wich label is selected
         Color:
             rgb:(0,0,0)
         Line:
