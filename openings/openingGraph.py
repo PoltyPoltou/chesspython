@@ -37,6 +37,8 @@ class OpeningLabel(Label):
     actual_node: chess.pgn.GameNode = ObjectProperty(rebind=True)
     mapNodeToChild = DictProperty(rebind=True)
     parent_node = ObjectProperty(rebind=True)
+    top_node_label = ObjectProperty(rebind=True)
+    bottom_node_label = ObjectProperty(rebind=True)
 
     def __init__(self, gameNode, parent_node=None, **kwargs):
         self.heights = []
@@ -46,14 +48,9 @@ class OpeningLabel(Label):
         if(parent_node is not None):
             self.parent_node = parent_node
         self.actual_node = gameNode
+        super().__init__(**kwargs)
         if(self.parent_node is not None and self.parent_node.parent is not None):
             self.parent_node.parent.add_widget(self)
-        super().__init__(**kwargs)
-        self.bind(mapNodeToChild=self.set_y)
-        self.bind(has_children=self.set_y)
-        self.bind(top_node=self.set_y)
-        self.bind(bottom_node=self.set_y)
-        self.bind(parent_node=self.set_y)
         self.on_parent(self, self.parent)
         self.on_actual_node(self, self.actual_node, True)
         self.calculate_heights()
@@ -71,13 +68,16 @@ class OpeningLabel(Label):
     def calculate_heights(self):
         if(self.actual_node.variations == []):
             self.heights = []
-            self.set_y()
-            return 1
         else:
             self.heights = [self.mapNodeToChild[child_node].calculate_heights(
             ) for child_node in self.actual_node.variations]
-            self.set_y()
-            return sum(self.heights)
+        OpeningLabel.set_all_y_coord()
+        return (1 if self.heights == [] else sum(self.heights))
+
+    @staticmethod
+    def set_all_y_coord():
+        for label in OpeningLabel.instances:
+            label.set_y()
 
     def pos_child(self, child_node):
         y_pos = 0
@@ -185,6 +185,7 @@ class OpeningContainer(BoxLayout, StencilView):
             if(isinstance(child, OpeningLabel)):
                 if(child.actual_node is game):
                     child.on_actual_node()
+                    break
 
     def actualize_graph(self, new_game: chess.pgn.Game):
         self.nav.clear_widgets()

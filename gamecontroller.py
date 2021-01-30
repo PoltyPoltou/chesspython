@@ -43,13 +43,13 @@ class GameController():
         if self.game.next() is None:
             self.updateCurrentNode(self.game.add_main_variation(move))
             if(self.openingWidget is not None):
-                self.openingWidget.actualize_graph(self.game.game())
+                self.openingWidget.actualize_node(self.game.parent)
         elif self.game.has_variation(move):
             self.updateCurrentNode(self.game.variation(move))
         else:
             self.updateCurrentNode(self.game.add_variation(move))
             if(self.openingWidget is not None):
-                self.openingWidget.actualize_graph(self.game.game())
+                self.openingWidget.actualize_node(self.game.parent)
 
     def addGame(self, game, dictQuality):
         if game.end() is not game.game():  # la game est-elle vide ?

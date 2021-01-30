@@ -10,7 +10,7 @@
     size: (75,75)
     sizeFactor : 0.8
     line_width:1.5
-    has_variant : self.top_node is not self.bottom_node
+    has_variant : self.top_node is not self.bottom_node and self.has_children
     has_children : self.top_node is not None and self.bottom_node is not None
     x : self.width + self.parent_node.x if self.parent_node is not None else 0
     box_width:self.width*self.sizeFactor
@@ -19,6 +19,8 @@
     box_right : self.box_left + self.width*self.sizeFactor
     box_bottom : self.y + 0.5*self.height*(1-self.sizeFactor)
     box_top : self.box_bottom + self.height*self.sizeFactor
+    top_node_label : self.mapNodeToChild[self.top_node] if self.has_variant else None
+    bottom_node_label : self.mapNodeToChild[self.bottom_node] if self.has_variant else None
     canvas.before:
         Color:
             rgb:(1, 1, 1) if(not self.actual_node.turn() == chess.WHITE) else  (0.4, 0.4, 0.4)
@@ -40,7 +42,7 @@
             width: self.line_width
         # vertical line to connect to every variant
         Line:
-            points:(self.right, 0.5*self.height + self.mapNodeToChild[self.top_node].y, self.right, 0.5*self.height + self.mapNodeToChild[self.bottom_node].y) if self.has_variant else ()
+            points:(self.right, 0.5*self.height + self.top_node_label.y, self.right, 0.5*self.height + self.bottom_node_label.y) if self.has_variant else ()
             cap:"square"
             width:self.line_width
         # Square to know wich label is selected
