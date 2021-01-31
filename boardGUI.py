@@ -63,6 +63,7 @@ class BoardWidget(GridLayout):
     def __init__(self, **kwargs):
         self.board = None
         self.analysisArrow = None
+        self.oldBoardfen = ""
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -99,7 +100,8 @@ class BoardWidget(GridLayout):
             if(bestMove is not None):
                 tileFrom = self.findTileWidgetFromSquare(bestMove.from_square)
                 tileTo = self.findTileWidgetFromSquare(bestMove.to_square)
-                self.arrowManager.addEngineArrow(tileFrom, tileTo)
+                if(self.board.is_legal(bestMove)):
+                    self.arrowManager.addEngineArrow(tileFrom, tileTo)
 
     def findTile(self, coords) -> Tile:
         for row in self.children:
@@ -204,9 +206,15 @@ class BoardWidget(GridLayout):
     def update_board(self):
         self.on_board(self, self.board)
 
-    def on_board(self, instance, value):
+    def position_changed(self):
         self.newEngineEvalEvent()
         self.unselectCase()
+        pass
+
+    def on_board(self, instance, value):
+        if(self.board.fen != self.oldBoardfen):
+            self.position_changed()
+            self.oldBoardfen = self.board.fen
         lastMoveIndexList: list[int] = []
         if(self.board.move_stack != []):
             lastMoveIndexList.append(self.board.move_stack[-1].from_square)
