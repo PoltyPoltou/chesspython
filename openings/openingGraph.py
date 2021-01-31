@@ -32,13 +32,15 @@ class OpeningLabel(Label):
     box_right = NumericProperty()
     box_bottom = NumericProperty()
     box_top = NumericProperty()
-    top_node: chess.pgn.GameNode = ObjectProperty(rebind=True)
-    bottom_node: chess.pgn.GameNode = ObjectProperty(rebind=True)
-    actual_node: chess.pgn.GameNode = ObjectProperty(rebind=True)
+    top_node: chess.pgn.GameNode = ObjectProperty(rebind=True, allownone=True)
+    bottom_node: chess.pgn.GameNode = ObjectProperty(
+        rebind=True, allownone=True)
+    actual_node: chess.pgn.GameNode = ObjectProperty(
+        rebind=True, allownone=True)
     mapNodeToChild = DictProperty(rebind=True)
     parent_node = ObjectProperty(rebind=True)
-    top_node_label = ObjectProperty(rebind=True)
-    bottom_node_label = ObjectProperty(rebind=True)
+    top_node_label = ObjectProperty(rebind=True, allownone=True)
+    bottom_node_label = ObjectProperty(rebind=True, allownone=True)
 
     def __init__(self, gameNode, parent_node=None, **kwargs):
         self.heights = []
@@ -179,6 +181,33 @@ class OpeningContainer(BoxLayout, StencilView):
             if(isinstance(child, OpeningLabel)):
                 if(child.actual_node is game):
                     child.selected = True
+
+    def find_node(self, game: chess.pgn.GameNode) -> OpeningLabel:
+        for child in self.nav.children:
+            if(isinstance(child, OpeningLabel)):
+                if(child.actual_node is game):
+                    return child
+
+    def remove_node_and_children(self, game: chess.pgn.GameNode):
+        label = self.find_node(game)
+        if(label.parent_node is not None):
+            if(label.parent_node.top_node is label.actual_node and label.parent_node.top_node is label.parent_node.bottom_node):
+                label.parent_node.has_children = False
+                label.parent_node.top_node = None
+                label.parent_node.bottom_node = None
+            else:
+                label.parent_node.top_node = label.parent_node.actual_node.variations[-1]
+                label.parent_node.bottom_node = label.parent_node.actual_node.variations[0]
+                label.parent_node.has_variant = label.parent_node.top_node is not label.parent_node.bottom_node
+            del label.parent_node.mapNodeToChild[label.actual_node]
+
+        def remove_recursive_labels(openingLabel):
+            openingLabel.parent.remove_widget(openingLabel)
+            OpeningLabel.instances.remove(openingLabel)
+            valuesList = list(openingLabel.mapNodeToChild.values())
+            for child_label in valuesList:
+                remove_recursive_labels(child_label)
+        remove_recursive_labels(label)
 
     def actualize_node(self, game: chess.pgn.GameNode):
         for child in self.nav.children:

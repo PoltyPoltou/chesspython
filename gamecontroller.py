@@ -41,15 +41,29 @@ class GameController():
 
     def playMove(self, move: chess.Move):
         if self.game.next() is None:
-            self.updateCurrentNode(self.game.add_main_variation(move))
+            new_node = self.game.add_main_variation(move)
             if(self.openingWidget is not None):
-                self.openingWidget.actualize_node(self.game.parent)
+                self.openingWidget.actualize_node(self.game)
+            self.updateCurrentNode(new_node)
         elif self.game.has_variation(move):
             self.updateCurrentNode(self.game.variation(move))
         else:
-            self.updateCurrentNode(self.game.add_variation(move))
+            new_node = self.game.add_variation(move)
             if(self.openingWidget is not None):
-                self.openingWidget.actualize_node(self.game.parent)
+                self.openingWidget.actualize_node(self.game)
+            self.updateCurrentNode(new_node)
+
+    def deleteNode(self):
+        old_game = self.game
+
+        def confirmDeleteNode():
+            self.updateCurrentNode(self.game.parent)
+            self.game.remove_variation(old_game)
+            if(self.openingWidget is not None):
+                self.openingWidget.remove_node_and_children(old_game)
+        title = "Delete node ? " + str(self.game.ply()//2) + "." + \
+            (".." * ((self.game.ply() - 1) % 2)) + " " + self.game.san()
+        self.chessWindow.confirmPopup(title, confirmDeleteNode)
 
     def addGame(self, game, dictQuality):
         if game.end() is not game.game():  # la game est-elle vide ?

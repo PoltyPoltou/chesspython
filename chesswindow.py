@@ -1,3 +1,4 @@
+from kivy.uix.boxlayout import BoxLayout
 from colors import BACKGROUND
 from keyboard import MyKeyboardListener
 from kivy.properties import ObjectProperty
@@ -5,6 +6,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.filechooser import FileChooserListView
 from kivy.uix.popup import Popup
+from kivy.uix.button import Button
 import boardGUI
 import arrow
 import chess.pgn
@@ -61,6 +63,7 @@ class ChessWindow(GridLayout):
         self.keyboard.bind_key('j', self.controller.prevNode)
         self.keyboard.bind_key('l', self.controller.nextNode)
         self.keyboard.bind_key('a', self.controller.analyseFullGame)
+        self.keyboard.bind_key('delete', self.controller.deleteNode)
 
         super().__init__(**kwargs)
 
@@ -109,6 +112,20 @@ class ChessWindow(GridLayout):
     def load_from_chess_com(self):
         username = self.inputText.text
         self.controller.loadChessComGames(username)
+
+    def confirmPopup(self, title, fun_on_accept):
+        content = BoxLayout(orientation='horizontal')
+        confirm_button = Button(text="Confirm")
+        cancel_button = Button(text="Cancel")
+        content.add_widget(confirm_button)
+        content.add_widget(cancel_button)
+        popup = Popup(title=title, content=content,
+                      size_hint=(None, None), size=(300, 100))
+        confirm_button.bind(on_press=popup.dismiss)
+        confirm_button.bind(on_press=lambda x: fun_on_accept())
+        cancel_button.bind(on_press=popup.dismiss)
+        popup.open()
+        pass
 
     def dismiss_popup(self):
         self._popup.dismiss()
