@@ -146,9 +146,10 @@ class OpeningNavigator(RelativeLayout):
     def on_touch_move(self, touch: MotionEvent):
         if "button" in touch.profile:
             if(touch.button == 'left'):
-                self.x += touch.dx / self.getScalingFactor()
-                self.y += touch.dy / self.getScalingFactor()
-                return True  # stop dispatching event through the widget tree
+                if("pos" in touch.profile and self.parent.collide_point(touch.x, touch.y)):
+                    self.x += touch.dx / self.getScalingFactor()
+                    self.y += touch.dy / self.getScalingFactor()
+                    return True  # stop dispatching event through the widget tree
         return super().on_touch_move(touch)
 
     def on_touch_down(self, touch):
