@@ -156,13 +156,12 @@ class ChessWindow(GridLayout):
         self.controller.openingWidget = self.openingWidget
 
     def unload_opening(self):
-        self.controller.openingGame = False
         if(self.controller.openingGame):
             self.openingWidget.toggleactivate()
             self.remove_widget(self.openingWidget)
             Window.size = Window.size[0] - 500, Window.size[1]
             with open("./data/WHITE_opening.txt", "w") as openingFile:
-                openingFile.write(str(self.controller.game))
+                openingFile.write(str(self.controller.game.game()))
             self.controller.updateCurrentNode(chess.pgn.Game())
             self.openingWidget = None
             self.controller.openingGame = False
