@@ -114,18 +114,19 @@ class OpeningLabel(Label):
 
     def on_touch_up(self, touch: MotionEvent):
         if(touch.button == "left" and abs(touch.dx)+abs(touch.dy) == 0):
-            t_x, t_y = touch.x + self.parent.x, touch.y + self.parent.y
-            t_x -= self.parent.parent.center_x
-            t_y -= self.parent.parent.center_y
-            t_x, t_y = t_x/self.parent.getScalingFactor(), t_y/self.parent.getScalingFactor()
-            t_x += self.parent.parent.center_x
-            t_y += self.parent.parent.center_y
-            t_x, t_y = t_x - self.parent.x, t_y - self.parent.y
-            if(self.collide_point(t_x, t_y)):
-                self.selected = True
-                if(self.callback_on_select is not None):
-                    self.callback_on_select(self.actual_node)
-                return True  # stop spreading in widget tree
+            if("pos" in touch.profile and self.parent.parent.collide_point(touch.x, touch.y)):
+                t_x, t_y = touch.x + self.parent.x, touch.y + self.parent.y
+                t_x -= self.parent.parent.center_x
+                t_y -= self.parent.parent.center_y
+                t_x, t_y = t_x/self.parent.getScalingFactor(), t_y/self.parent.getScalingFactor()
+                t_x += self.parent.parent.center_x
+                t_y += self.parent.parent.center_y
+                t_x, t_y = t_x - self.parent.x, t_y - self.parent.y
+                if(self.collide_point(t_x, t_y)):
+                    self.selected = True
+                    if(self.callback_on_select is not None):
+                        self.callback_on_select(self.actual_node)
+                    return True  # stop spreading in widget tree
         return super().on_touch_up(touch)
 
 
