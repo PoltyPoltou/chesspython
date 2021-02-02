@@ -114,7 +114,8 @@ class OpeningLabel(Label):
 
     def on_touch_up(self, touch: MotionEvent):
         if(touch.button == "left" and abs(touch.dx)+abs(touch.dy) == 0):
-            if("pos" in touch.profile and self.parent.parent.collide_point(touch.x, touch.y)):
+            rx, ry = self.to_window(touch.x, touch.y, False)
+            if(self.parent.parent.collide_point(rx, ry)):
                 t_x, t_y = touch.x + self.parent.x, touch.y + self.parent.y
                 t_x -= self.parent.parent.center_x
                 t_y -= self.parent.parent.center_y
