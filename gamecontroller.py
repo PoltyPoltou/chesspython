@@ -136,7 +136,6 @@ class GameController():
             serialisationWrapper.saveGamesToDisk(self.savedGames)
             self.savedGames = serialisationWrapper.loadGamesFromDisk(username)
         reader = ChessComGameReader(username)
-        reader.setDate(1, 2021)
         game = reader.nextGame()
         while (game is not None and game in self.savedGames):
             game = reader.nextGame()

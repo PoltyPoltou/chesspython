@@ -1,7 +1,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from colors import BACKGROUND
 from keyboard import MyKeyboardListener
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.filechooser import FileChooserListView
@@ -41,6 +41,7 @@ class LoadDialog(FloatLayout):
 
 class ChessWindow(GridLayout):
     couleurBg = BACKGROUND
+    opening_color = BooleanProperty(None, allownone=True)
     boardGUI = ObjectProperty(None)
     progressBar = ObjectProperty(None)
     moveList: Optional[MoveList] = ObjectProperty(None)
@@ -143,9 +144,10 @@ class ChessWindow(GridLayout):
         self.loadGameButton.disabled = False
         self.analysisButton.disabled = False
 
-    def load_opening(self):
+    def load_opening(self, white_or_black_bool):
+        self.opening_color = white_or_black_bool
         self.controller.openingGame = True
-        with open("./data/WHITE_opening.txt") as openingFile:
+        with open("./data/WHITE_opening.txt"*white_or_black_bool + "./data/BLACK_opening.txt"*(not white_or_black_bool)) as openingFile:
             self.controller.loadGame(chess.pgn.read_game(openingFile))
         Window.size = Window.size[0] + 500, Window.size[1]
         self.openingWidget = openings.openingGraph.OpeningContainer(
@@ -155,12 +157,13 @@ class ChessWindow(GridLayout):
         self.openingWidget.toggleactivate()
         self.controller.openingWidget = self.openingWidget
 
-    def unload_opening(self):
-        if(self.controller.openingGame):
+    def unload_opening(self, white_or_black_bool):
+        if(self.opening_color is not None):
+            self.opening_color = None
             self.openingWidget.toggleactivate()
             self.remove_widget(self.openingWidget)
             Window.size = Window.size[0] - 500, Window.size[1]
-            with open("./data/WHITE_opening.txt", "w") as openingFile:
+            with open("./data/WHITE_opening.txt"*white_or_black_bool + "./data/BLACK_opening.txt"*(not white_or_black_bool), "w") as openingFile:
                 openingFile.write(str(self.controller.game.game()))
             self.controller.updateCurrentNode(chess.pgn.Game())
             self.openingWidget = None

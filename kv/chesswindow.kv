@@ -26,10 +26,24 @@
         BoxLayout:
             size_hint : (1,0.05)
             orientation : 'horizontal'
-            ToggleButton:
-                id:openingButton
-                text: 'show Opening'
-                on_state:  root.load_opening() if args[1] == "down" else  root.unload_opening()
+            GridLayout:
+                cols:2
+                ToggleButton:
+                    id:openingButton
+                    text: 'White Opening'
+                    text_size: self.size
+                    valign:"center"
+                    halign:"center"
+                    on_state:  root.load_opening(True) if args[1] == "down" else  root.unload_opening(True)
+                    disabled: not root.opening_color if root.opening_color is not None else False
+                ToggleButton:
+                    id:openingButton
+                    text: 'Black Opening'
+                    text_size: self.size
+                    valign:"center"
+                    halign:"center"
+                    on_state:  root.load_opening(False) if args[1] == "down" else  root.unload_opening(False)
+                    disabled: root.opening_color if root.opening_color is not None else False
             Button :
                 id : button
                 text: 'Load from file'
