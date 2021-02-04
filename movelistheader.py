@@ -26,9 +26,18 @@ class HeadMoveList(BoxLayout):
     def on_updateGameNode(self, gameNode: GameNode):
         if(self.moveQualityDict is not None):
             if(gameNode in self.moveQualityDict):
-                self.txt = "[size=20][b][color=30a090]" + \
-                    self.moveQualityDict[gameNode].sanBestMove + \
-                    "[/color][/b] was the best move [/size]"
+                if(self.moveQualityDict[gameNode].theoric):
+                    self.txt = "[size=20][b][color=0066cc]" + \
+                        self.moveQualityDict[gameNode].sanMove + \
+                        "[/color][/b] was theoric[/size]"
+                else:
+                    strMove = "[b][color=" + \
+                        self.moveQualityDict[gameNode].getHexColor(
+                        )+"]"+self.moveQualityDict[gameNode].sanMove+"[/color][/b] was "+str(self.moveQualityDict[gameNode])
+                    self.txt = "[size=20][b][color=30a090]" + \
+                        self.moveQualityDict[gameNode].sanBestMove + \
+                        "[/color][/b] was best \n" + strMove * (
+                            self.moveQualityDict[gameNode].sanMove != self.moveQualityDict[gameNode].sanBestMove)+"[/size]"
         pass
 
     def postAnalysis(self, moveQualityDict):

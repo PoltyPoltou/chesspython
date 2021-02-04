@@ -7,7 +7,8 @@ import chess.pgn
 
 class GameAndAnalysisStorage:
     def __init__(self, usrname) -> None:
-        self.storageDict: dict[chess.pgn.Game, list[MoveQuality]] = {}
+        self.storageDict: dict[chess.pgn.Game,
+                               dict[chess.pgn.GameNode, MoveQuality]] = {}
         self.username = usrname
 
     def __contains__(self, elem):
@@ -22,6 +23,12 @@ def loadGamesFromDisk(username: str) -> GameAndAnalysisStorage:
         file = open("data/lastdata.txt", "w")
         file.write(username)
         file.close()
+        # compatibility issue with stored infos, we must add
+        # the theoric attribute to every MoveQuality object
+        for lst_quality in result.storageDict.values():
+            for q in lst_quality.values():
+                if(not hasattr(q, "theoric")):
+                    q.theoric = False
         return result
     else:
         return GameAndAnalysisStorage(username)

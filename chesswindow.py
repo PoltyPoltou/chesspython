@@ -146,10 +146,10 @@ class ChessWindow(GridLayout):
 
     def load_opening(self, white_or_black_bool):
         self.opening_color = white_or_black_bool
-        self.controller.openingGame = True
-        with open("./data/WHITE_opening.txt"*white_or_black_bool + "./data/BLACK_opening.txt"*(not white_or_black_bool)) as openingFile:
+        with open(self.getOpeningFile(white_or_black_bool)) as openingFile:
             self.controller.loadGame(chess.pgn.read_game(openingFile))
         Window.size = Window.size[0] + 500, Window.size[1]
+        self.controller.openingGame = True
         self.openingWidget = openings.openingGraph.OpeningContainer(
             self.controller.game.game(), self.controller.updateCurrentNode,
             size=(500, Window.size[1]))
@@ -163,7 +163,7 @@ class ChessWindow(GridLayout):
             self.openingWidget.toggleactivate()
             self.remove_widget(self.openingWidget)
             Window.size = Window.size[0] - 500, Window.size[1]
-            with open("./data/WHITE_opening.txt"*white_or_black_bool + "./data/BLACK_opening.txt"*(not white_or_black_bool), "w") as openingFile:
+            with open(self.getOpeningFile(white_or_black_bool), "w") as openingFile:
                 openingFile.write(str(self.controller.game.game()))
             self.controller.updateCurrentNode(chess.pgn.Game())
             self.openingWidget = None
@@ -171,3 +171,6 @@ class ChessWindow(GridLayout):
             self.controller.openingWidget = None
         else:
             print("Unloading opening but none were opened")
+
+    def getOpeningFile(self, white_or_black_bool):
+        return "./data/WHITE_opening.txt" * white_or_black_bool + "./data/BLACK_opening.txt" * (not white_or_black_bool)

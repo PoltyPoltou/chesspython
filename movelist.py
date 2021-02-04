@@ -196,18 +196,7 @@ class MoveList(ScrollView):
                     index = len(self.getFullMoveEntry(full_move).children) - 2
 
                 label = self.getFullMoveEntry(full_move).children[index]
-                if quality.isPerfect():
-                    label.moveColor = (50/256, 161/256, 144/256, 1)
-                elif quality.isGood():
-                    label.moveColor = (105/256, 163/256, 38/256, 1)
-                elif quality.isOk():
-                    label.moveColor = (0.75, 0.75, 0.75, 1)
-                elif quality.isImprecision():
-                    label.moveColor = (255/256, 213/256, 0, 1)
-                elif quality.isError():
-                    label.moveColor = (214/256, 137/256, 4/256, 1)
-                elif quality.isBlunder():
-                    label.moveColor = (105/256, 15/256, 12/256, 1)
+                label.moveColor = quality.getColor()
 
             index -= 1
             color = not color

@@ -114,32 +114,55 @@ class BoardAnalysisWrapper():
 
 
 class MoveQuality:
-    def __init__(self, move, quality, bestMove, sanMove, sanBestMove):
+    def __init__(self, move, quality=None, bestMove=None, sanMove=None, sanBestMove=None, theoric=False):
         self.move: chess.Move = move
         self.bestMove: Optional[chess.Move] = bestMove
         self.quality = quality
         self.sanMove = sanMove
         self.sanBestMove = sanBestMove
+        self.theoric = theoric
 
     def isPerfect(self):
-        return self.quality >= 0
+        return (not self.theoric) and self.quality >= 0
 
     def isGood(self):
-        return self.quality >= -20 and self.quality < 0
+        return (not self.theoric) and self.quality >= -20 and self.quality < 0
 
     def isOk(self):
-        return self.quality >= -75 and self.quality < -20
+        return (not self.theoric) and self.quality >= -75 and self.quality < -20
 
     def isImprecision(self):
-        return self.quality >= -150 and self.quality < -75
+        return (not self.theoric) and self.quality >= -150 and self.quality < -75
 
     def isError(self):
-        return self.quality >= -400 and self.quality < -150
+        return (not self.theoric) and self.quality >= -400 and self.quality < -150
 
     def isBlunder(self):
-        return self.quality < -400
+        return (not self.theoric) and self.quality < -400
+
+    def getColor(self):
+        if self.isPerfect():
+            return (50/256, 161/256, 144/256, 1)
+        elif self.isGood():
+            return (105/256, 163/256, 38/256, 1)
+        elif self.isOk():
+            return (0.75, 0.75, 0.75, 1)
+        elif self.isImprecision():
+            return (255/256, 213/256, 0, 1)
+        elif self.isError():
+            return (214/256, 137/256, 4/256, 1)
+        elif self.isBlunder():
+            return (105/256, 15/256, 12/256, 1)
+        elif self.theoric:
+            return (0, 102/255, 204/255, 1)
+
+    def getHexColor(self):
+        color = self.getColor()
+        return ('%02x%02x%02x' % (int(color[0] * 255), int(color[1] * 255), int(color[2] * 255)))
 
     def __str__(self):
+        if(self.theoric):
+            return "Theoric"  # dans le cahier
         if(self.isPerfect()):
             return "Perfect"
         if(self.isGood()):
@@ -168,21 +191,47 @@ class GameAnalysis(threading.Thread):
         if(game is not game.end()):
             evalList = []
             curGame = game
+            size = game.end().board().ply()
             board = curGame.board()
+
+            with open(self.controller.chessWindow.getOpeningFile(True)) as pgn:
+                white_open_game = chess.pgn.read_game(pgn)
+            is_white_opening = game.headers["White"].lower(
+            ) == white_open_game.headers["White"].lower()
+
+            with open(self.controller.chessWindow.getOpeningFile(False)) as pgn:
+                black_open_game = chess.pgn.read_game(pgn)
+            is_black_opening = game.headers["Black"].lower(
+            ) == black_open_game.headers["Black"].lower()
+            opening_game = white_open_game if is_white_opening else (
+                black_open_game if is_black_opening else None)
+            theory_info_dict = {"theoric": True,
+                                "score": chess.engine.PovScore(chess.engine.Cp(0), chess.WHITE)}
             self.wrapper = BoardAnalysisWrapper(board)
             self.wrapper.start()
-            size = curGame.end().board().ply()
+
             self.controller.progressBar.newEval()
             self.controller.progressBar.progressDelta = 1/size
+
             while curGame is not None and not self.stopFlag:
-                self.wrapper.update(curGame.board())
-                while not self.wrapper.hasFinished() and not self.stopFlag:
-                    time.sleep(0.1)
-                if(self.wrapper.bestMove() is not None):
-                    evalList.append(
-                        (curGame.move, self.wrapper.getEngineAnalysis()))
-                curGame = curGame.next()
+                # equivalent to : opening_game is not None and ...
+                if((is_white_opening or is_black_opening) and opening_game.next() is not None and curGame.next().move is not None and (opening_game.next().move == curGame.next().move)):
+                    evalList.append((curGame.move, theory_info_dict))
+                    opening_game = opening_game.next()
+                else:
+                    self.wrapper.update(curGame.board())
+                    while not self.wrapper.hasFinished() and not self.stopFlag:
+                        time.sleep(0.1)
+                    if(self.wrapper.bestMove() is not None):
+                        info_dict = self.wrapper.getEngineAnalysis()
+                        # the last theory move need to have analysis (to qualify next move)
+                        if(is_white_opening or is_black_opening):
+                            info_dict.update([("theoric", True)])
+                        evalList.append((curGame.move, info_dict))
+                    is_white_opening = False  # the opening has ended we don't check anymore
+                    is_black_opening = False  # the opening has ended we don't check anymore
                 self.controller.progressBar.addEval(evalList[-1][1])
+                curGame = curGame.next()
             self.wrapper.stop()
             return evalList
         else:
@@ -193,37 +242,42 @@ class GameAnalysis(threading.Thread):
         evalPrev = None
         gameNode: chess.pgn.GameNode = self.game.game()
         color = chess.BLACK
-        for move, eval in evalList:
-            if evalPrev is not None:
-                bestMove = evalPrev.get('pv')[0]
-                sanMove = gameNode.board().san(move)
-                sanBestMove = gameNode.board().san(bestMove)
-                gameNode = gameNode.next()
-                if(move == bestMove):
-                    nodeToMoveQualityMap.update([(gameNode, MoveQuality(
-                        move, 0, bestMove, sanMove, sanBestMove))])
+        for i in range(len(evalList)):
+            if(not isinstance(gameNode, chess.pgn.Game)):
+                move, eval = evalList[i]
+                if("theoric" in eval):
+                    nodeToMoveQualityMap.update(
+                        [(gameNode, MoveQuality(move, 0, sanMove=gameNode.san(), theoric=True))])
                 else:
-                    score = eval["score"].white(
-                    ) if color else eval["score"].black()
-                    prevScore = evalPrev["score"].white(
-                    ) if color else evalPrev["score"].black()
-                    if score.score() is not None and prevScore.score() is not None:
+                    bestMove = evalPrev.get('pv')[0]
+                    sanMove = gameNode.san()
+                    sanBestMove = gameNode.parent.board().san(bestMove)
+                    if(move == bestMove):
                         nodeToMoveQualityMap.update([(gameNode, MoveQuality(
-                            move, score.score() - prevScore.score(), bestMove, sanMove, sanBestMove))])
-                    elif prevScore.is_mate() != score.is_mate():
-                        nodeToMoveQualityMap.update([
-                            (gameNode, MoveQuality(move, -100, bestMove, sanMove, sanBestMove))])
-                    elif prevScore.is_mate() and score.is_mate():
-                        if prevScore.mate() <= score.mate():
-                            nodeToMoveQualityMap.update([
-                                (gameNode, MoveQuality(move, -0.5, bestMove, sanMove, sanBestMove))])
-                        if prevScore.mate() > score.mate():
-                            nodeToMoveQualityMap.update([
-                                (gameNode, MoveQuality(move, 0, bestMove, sanMove, sanBestMove))])
+                            move, 0, bestMove, sanMove, sanBestMove))])
                     else:
-                        raise exception("tout cassé")
+                        score = eval["score"].white(
+                        ) if color else eval["score"].black()
+                        prevScore = evalPrev["score"].white(
+                        ) if color else evalPrev["score"].black()
+                        if score.score() is not None and prevScore.score() is not None:
+                            nodeToMoveQualityMap.update([(gameNode, MoveQuality(
+                                move, score.score() - prevScore.score(), bestMove, sanMove, sanBestMove))])
+                        elif prevScore.is_mate() != score.is_mate():
+                            nodeToMoveQualityMap.update([
+                                (gameNode, MoveQuality(move, -100, bestMove, sanMove, sanBestMove))])
+                        elif prevScore.is_mate() and score.is_mate():
+                            if prevScore.mate() <= score.mate():
+                                nodeToMoveQualityMap.update([
+                                    (gameNode, MoveQuality(move, -0.5, bestMove, sanMove, sanBestMove))])
+                            if prevScore.mate() > score.mate():
+                                nodeToMoveQualityMap.update([
+                                    (gameNode, MoveQuality(move, 0, bestMove, sanMove, sanBestMove))])
+                        else:
+                            raise exception("tout cassé")
+            gameNode = gameNode.next()
             color = not color
-            evalPrev = eval
+            evalPrev = evalList[i][1]
         return nodeToMoveQualityMap
 
     def run(self):

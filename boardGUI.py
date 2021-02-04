@@ -227,9 +227,10 @@ class BoardWidget(GridLayout):
         # On a une analyse de la partie en cours, alors on affiche le meilleur coup précedant
         self.arrowManager.removeOneArrow(self.analysisArrow)
         if(self.controller.game in self.controller.moveQualityDict):
-            bestMove: chess.Move = self.controller.moveQualityDict[
-                self.controller.game].bestMove
-            self.analysisArrow = self.arrowManager.directAddArrow(self.findTileWidgetFromSquare(
-                bestMove.from_square), self.findTileWidgetFromSquare(bestMove.to_square), (6/255, 101/255, 22/255, 0.8))
-            pass
+            if(not self.controller.moveQualityDict[self.controller.game].theoric):
+                bestMove: chess.Move = self.controller.moveQualityDict[
+                    self.controller.game].bestMove
+                self.analysisArrow = self.arrowManager.directAddArrow(self.findTileWidgetFromSquare(
+                    bestMove.from_square), self.findTileWidgetFromSquare(bestMove.to_square), (6/255, 101/255, 22/255, 0.8))
+
     pass
