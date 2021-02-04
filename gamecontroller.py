@@ -61,7 +61,7 @@ class GameController():
             self.game.remove_variation(old_game)
             if(self.openingWidget is not None):
                 self.openingWidget.remove_node_and_children(old_game)
-        title = "Delete node ? " + str(self.game.ply()//2) + "." + \
+        title = "Delete node ? " + str((self.game.ply()+1)//2) + "." + \
             (".." * ((self.game.ply() - 1) % 2)) + " " + self.game.san()
         self.chessWindow.confirmPopup(title, confirmDeleteNode)
 
