@@ -1,6 +1,7 @@
 import math
 from typing import Optional
 import chess
+import chess.engine
 from chess.pgn import GameNode
 from kivy.animation import Animation
 from kivy.uix.boxlayout import BoxLayout
@@ -69,6 +70,16 @@ class EvaluationBar(Widget):
                 eval = 10
             if(eval < -10):
                 eval = -10
+        elif(engineEval.mate() == 0 and povScore.turn == chess.WHITE):
+            # Black won
+            textEval = "0-1"
+            eval = -10
+            pass
+        elif(engineEval.mate() == 0 and povScore.turn == chess.BLACK):
+            # White won
+            textEval = "1-0"
+            eval = 10
+            pass
         elif(povScore.is_mate()):
             if(engineEval.mate() > 0):
                 eval = 10
