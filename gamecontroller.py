@@ -74,7 +74,7 @@ class GameController():
                 self.savedGames.storageDict[game] = dictQuality.copy()
 
     def loadGame(self, game):
-        if (self.game.game() not in self.savedGames):
+        if (self.game.game() not in self.savedGames and self.game.game() is not self.game.end() and self.openingGame is None):
             self.addGame(self.game.game(), {})
         self.updateCurrentNode(game.end())
         if game.game() in self.savedGames.storageDict:
@@ -121,7 +121,6 @@ class GameController():
         self.moveList.postAnalysis(moveQualityDict.values())
         self.moveListHeader.postAnalysis(moveQualityDict)
         self.moveQualityDict = moveQualityDict
-        self.addGame(game, moveQualityDict)
         self.chessWindow.unlockLoad()
         self.updateCurrentNode(game.end())
 
