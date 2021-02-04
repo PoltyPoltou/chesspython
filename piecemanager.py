@@ -119,8 +119,10 @@ class PieceManager:
                     self.pieceFactory(pieceKey, square)
         for pieceKey in self.pieceDict.keys():
             if(pieceKey not in boardPieceDict.keys()):
-                for asset in self.pieceDict[pieceKey]:
+                copy_dict = list(self.pieceDict[pieceKey])
+                for asset in copy_dict:
                     self.pieceDestroyer(pieceKey, asset)
+        pass
 
 
 def getDictOfBoard(board: chess.Board) -> dict[chess.Piece,
