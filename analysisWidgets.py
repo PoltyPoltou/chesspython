@@ -16,7 +16,7 @@ Builder.load_file("./kv/analysis.kv")
 
 def getHeight(instance, eval):
     return 0.5 * instance.height * \
-        (1 + instance.sign * eval/10)
+        (1 + instance.sign * eval / 10)
 
 
 class EvaluationBar(Widget):
@@ -48,7 +48,7 @@ class EvaluationBar(Widget):
             self.evalWrapper.addEvalEventListener(self)
 
     def stop(self):
-        if(self.evalWrapper != None and self.started):
+        if(self.evalWrapper is not None and self.started):
             self.evalWrapper = None
             self.started = False
 
@@ -57,7 +57,7 @@ class EvaluationBar(Widget):
 
     def parseEval(self, povScore: chess.engine.PovScore):
         engineEval = povScore.white()
-        if(self.board != None and self.board.is_game_over(claim_draw=True)):
+        if(self.board is not None and self.board.is_game_over(claim_draw=True)):
             textEval = self.board.result(claim_draw=True)
             if(povScore.is_mate()):
                 eval = 10 if textEval == "1-0" else -10
@@ -95,7 +95,7 @@ class EvaluationBar(Widget):
             povScore: chess.engine.PovScore = self.evalWrapper.getEngineAnalysis()[
                 "score"]
             evalLinear, self.textEval = self.parseEval(povScore)
-            eval = 10*math.tanh(evalLinear/4)
+            eval = 10 * math.tanh(evalLinear / 4)
             if(evalLinear > 10):
                 eval = 10
             if(not self.animRunning):
@@ -141,25 +141,25 @@ class AnalysisProgressBar(Widget):
             refPos = lastPos if refHeight == lastHeight else newPos
             biggestPos = lastPos if biggestHeight == lastHeight else newPos
 
-            trianglePts += [self.x + self.width*lastPos,
+            trianglePts += [self.x + self.width * lastPos,
                             self.y + 0.5 * self.height, 0, 0,
-                            self.x + self.width*lastPos,
+                            self.x + self.width * lastPos,
                             self.y + refHeight, 0, 0,
-                            self.x + self.width*newPos,
+                            self.x + self.width * newPos,
                             self.y + 0.5 * self.height, 0, 0,
 
-                            self.x + self.width*lastPos,
+                            self.x + self.width * lastPos,
                             self.y + refHeight, 0, 0,
-                            self.x + self.width*newPos,
+                            self.x + self.width * newPos,
                             self.y + 0.5 * self.height, 0, 0,
-                            self.x + self.width*newPos,
+                            self.x + self.width * newPos,
                             self.y + refHeight, 0, 0,
 
-                            self.x + self.width*refPos,
+                            self.x + self.width * refPos,
                             self.y + refHeight, 0, 0,
-                            self.x + self.width*biggestPos,
+                            self.x + self.width * biggestPos,
                             self.y + refHeight, 0, 0,
-                            self.x + self.width*biggestPos,
+                            self.x + self.width * biggestPos,
                             self.y + biggestHeight, 0, 0
                             ]
         baseColor = 0.65 if baseWhite else 0.35
@@ -168,7 +168,7 @@ class AnalysisProgressBar(Widget):
             Color(baseColor, baseColor, baseColor)
             if len(trianglePts) > 0:
                 Mesh(vertices=trianglePts, mode="triangles",
-                     indices=range(int(len(trianglePts)/4)))
+                     indices=range(int(len(trianglePts) / 4)))
 
     def addEval(self, eval):
         if(not self.reconstruct):
@@ -179,9 +179,9 @@ class AnalysisProgressBar(Widget):
         pos = self.progress
         maxScale = 600
         lastHeight = min(max(self.lastScore, -maxScale), maxScale) / \
-            (2*maxScale) * self.height + 0.5 * self.height
-        newHeight = min(max(score, -maxScale), maxScale) / (2*maxScale) * \
-            self.height + 0.5 * self.height
+            (2 * maxScale) * self.height + 0.5 * self.height
+        newHeight = min(max(score, -maxScale), maxScale) / \
+            (2 * maxScale) * self.height + 0.5 * self.height
 
         alternate = lastHeight > 0.5 * self.height and newHeight < 0.5 * self.height \
             or lastHeight < 0.5 * self.height and newHeight > 0.5 * self.height
@@ -196,8 +196,18 @@ class AnalysisProgressBar(Widget):
 
         with self.canvas:
             Color(1., 1., 1.)
-            Line(points=[self.x + self.width*self.lastPos,
-                         self.y + lastHeight, self.x + self.width*pos, self.y + newHeight])
+            Line(
+                points=[
+                    self.x +
+                    self.width *
+                    self.lastPos,
+                    self.y +
+                    lastHeight,
+                    self.x +
+                    self.width *
+                    pos,
+                    self.y +
+                    newHeight])
 
         self.lastScore = score
         self.lastPos = pos

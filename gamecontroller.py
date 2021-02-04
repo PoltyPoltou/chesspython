@@ -13,6 +13,7 @@ from analysis import GameAnalysis, BoardAnalysisWrapper, MoveQuality
 import game_and_analysis_serialisation as serialisationWrapper
 from chesscomGameReader import ChessComGameReader
 import chess.pgn
+import chess.engine
 
 
 class GameController():
@@ -29,10 +30,25 @@ class GameController():
         self.game = chess.pgn.Game()
         self.board = self.game.board()
         self.moveQualityDict: dict[chess.pgn.GameNode, MoveQuality] = {}
+        self.localAnalyses: dict[chess.pgn.GameNode,
+                                 chess.engine.InfoDict] = {}
         self.evalWrapper = BoardAnalysisWrapper(self.board)
+        self.evalWrapper.addEvalEventListener(self)
         self.evalWrapper.start()
         self.dropdown = None
         self.openingGame = False
+
+    def newEngineEvalEvent(self):
+        '''
+        updates the dict of already analysed positions in this runtime
+        '''
+        eval = self.evalWrapper.getEngineAnalysis()
+        if("depth" in eval and self.evalWrapper.hasFinished()):
+            if(self.game in self.localAnalyses):
+                if(eval["depth"] > self.localAnalyses[self.game]["depth"]):
+                    self.localAnalyses[self.game] = eval
+            else:
+                self.localAnalyses.update([(self.game, eval)])
 
     def initSavedGames(self):
         self.savedGames = serialisationWrapper.loadLastSavedData()
@@ -61,7 +77,7 @@ class GameController():
             self.game.remove_variation(old_game)
             if(self.openingWidget is not None):
                 self.openingWidget.remove_node_and_children(old_game)
-        title = "Delete node ? " + str((self.game.ply()+1)//2) + "." + \
+        title = "Delete node ? " + str((self.game.ply() + 1) // 2) + "." + \
             (".." * ((self.game.ply() - 1) % 2)) + " " + self.game.san()
         self.chessWindow.confirmPopup(title, confirmDeleteNode)
 
@@ -74,7 +90,8 @@ class GameController():
                 self.savedGames.storageDict[game] = dictQuality.copy()
 
     def loadGame(self, game):
-        if (self.game.game() not in self.savedGames and self.game.game() is not self.game.end() and self.openingGame is None):
+        if (self.game.game() not in self.savedGames and self.game.game()
+                is not self.game.end() and self.openingGame is None):
             self.addGame(self.game.game(), {})
         self.updateCurrentNode(game.end())
         if game.game() in self.savedGames.storageDict:
@@ -82,17 +99,17 @@ class GameController():
                 self.postAnalysis(self.game, self.savedGames.storageDict[game])
 
     def computerPlay(self):
-        if(self.evalWrapper != None):
+        if(self.evalWrapper is not None):
             bestMove = self.evalWrapper.bestMove()
             if(self.board.is_legal(bestMove)):
                 self.playMove(bestMove)
 
     def prevNode(self):
-        if(self.game.parent != None):
+        if(self.game.parent is not None):
             self.updateCurrentNode(self.game.parent)
 
     def nextNode(self):
-        if(self.game.next() != None):
+        if(self.game.next() is not None):
             self.updateCurrentNode(self.game.next())
 
     def analyseFullGame(self):
@@ -111,7 +128,10 @@ class GameController():
             self.board = self.game.board()
             self.boardWidget.board = self.board
             self.boardWidget.update_board()
-            self.evalWrapper.update(self.board)
+            if(self.game not in self.localAnalyses or self.localAnalyses[self.game]["depth"] < self.evalWrapper.getDefaultDepth()):
+                self.evalWrapper.update(self.board)
+            else:
+                self.evalWrapper.setInfoDict(self.localAnalyses[self.game])
             self.moveList.new_move(self.game, self)
             self.moveListHeader.on_updateGameNode(game)
             if(self.openingWidget is not None):

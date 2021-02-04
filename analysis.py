@@ -55,7 +55,7 @@ class BoardAnalysisWrapper():
         self._evalThread = self.ThreadContinuousEvaluation(self)
         self.listenerList = []
         self.dispatcher = Clock.create_trigger(
-            self.notifyListener, interval=True, timeout=1/30)
+            self.notifyListener, interval=True, timeout=1 / 30)
 
     def update(self, board):
         self.board = board
@@ -70,8 +70,13 @@ class BoardAnalysisWrapper():
     def getEngineAnalysis(self):
         return self._evalThread.infoMove.copy()
 
+    def setInfoDict(self, infoDict):
+        self._evalThread.infoMove = infoDict
+        self.notifyListener(0)
+
     def bestMove(self):
-        if 'pv' in self._evalThread.infoMove and len(self._evalThread.infoMove.get('pv')) > 0:
+        if 'pv' in self._evalThread.infoMove and len(
+                self._evalThread.infoMove.get('pv')) > 0:
             return self._evalThread.infoMove.get('pv')[0]
         return None
 
@@ -110,11 +115,18 @@ class BoardAnalysisWrapper():
             self.listenerList.append(listener)
         else:
             raise Exception(
-                "Listener added to ThreadContinuousEvaluation without newEngineEvalEvent(dt) attribute")
+                "Listener added to ThreadContinuousEvaluation without newEngineEvalEvent function")
 
 
 class MoveQuality:
-    def __init__(self, move, quality=None, bestMove=None, sanMove=None, sanBestMove=None, theoric=False):
+    def __init__(
+            self,
+            move,
+            quality=None,
+            bestMove=None,
+            sanMove=None,
+            sanBestMove=None,
+            theoric=False):
         self.move: chess.Move = move
         self.bestMove: Optional[chess.Move] = bestMove
         self.quality = quality
@@ -129,36 +141,40 @@ class MoveQuality:
         return (not self.theoric) and self.quality >= -20 and self.quality < 0
 
     def isOk(self):
-        return (not self.theoric) and self.quality >= -75 and self.quality < -20
+        return (not self.theoric) and self.quality >= - \
+            75 and self.quality < -20
 
     def isImprecision(self):
-        return (not self.theoric) and self.quality >= -150 and self.quality < -75
+        return (not self.theoric) and self.quality >= - \
+            150 and self.quality < -75
 
     def isError(self):
-        return (not self.theoric) and self.quality >= -400 and self.quality < -150
+        return (not self.theoric) and self.quality >= - \
+            400 and self.quality < -150
 
     def isBlunder(self):
         return (not self.theoric) and self.quality < -400
 
     def getColor(self):
         if self.isPerfect():
-            return (50/256, 161/256, 144/256, 1)
+            return (50 / 256, 161 / 256, 144 / 256, 1)
         elif self.isGood():
-            return (105/256, 163/256, 38/256, 1)
+            return (105 / 256, 163 / 256, 38 / 256, 1)
         elif self.isOk():
             return (0.75, 0.75, 0.75, 1)
         elif self.isImprecision():
-            return (255/256, 213/256, 0, 1)
+            return (255 / 256, 213 / 256, 0, 1)
         elif self.isError():
-            return (214/256, 137/256, 4/256, 1)
+            return (214 / 256, 137 / 256, 4 / 256, 1)
         elif self.isBlunder():
-            return (105/256, 15/256, 12/256, 1)
+            return (105 / 256, 15 / 256, 12 / 256, 1)
         elif self.theoric:
-            return (0, 102/255, 204/255, 1)
+            return (0, 102 / 255, 204 / 255, 1)
 
     def getHexColor(self):
         color = self.getColor()
-        return ('%02x%02x%02x' % (int(color[0] * 255), int(color[1] * 255), int(color[2] * 255)))
+        return ('%02x%02x%02x' %
+                (int(color[0] * 255), int(color[1] * 255), int(color[2] * 255)))
 
     def __str__(self):
         if(self.theoric):
@@ -205,13 +221,16 @@ class GameAnalysis(threading.Thread):
             ) == black_open_game.headers["Black"].lower()
             opening_game = white_open_game if is_white_opening else (
                 black_open_game if is_black_opening else None)
-            theory_info_dict = {"theoric": True,
-                                "score": chess.engine.PovScore(chess.engine.Cp(0), chess.WHITE)}
+            theory_info_dict = {
+                "theoric": True,
+                "score": chess.engine.PovScore(
+                    chess.engine.Cp(0),
+                    chess.WHITE)}
             self.wrapper = BoardAnalysisWrapper(board)
             self.wrapper.start()
 
             self.controller.progressBar.newEval()
-            self.controller.progressBar.progressDelta = 1/size
+            self.controller.progressBar.progressDelta = 1 / size
 
             while curGame is not None and not self.stopFlag:
                 # equivalent to : opening_game is not None and ...
@@ -224,7 +243,8 @@ class GameAnalysis(threading.Thread):
                         time.sleep(0.1)
                     if(self.wrapper.bestMove() is not None):
                         info_dict = self.wrapper.getEngineAnalysis()
-                        # the last theory move need to have analysis (to qualify next move)
+                        # the last theory move need to have analysis (to
+                        # qualify next move)
                         if(is_white_opening or is_black_opening):
                             info_dict.update([("theoric", True)])
                         evalList.append((curGame.move, info_dict))
