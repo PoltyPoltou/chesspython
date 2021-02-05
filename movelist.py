@@ -12,7 +12,8 @@ Builder.load_file("./kv/movelist.kv")
 
 
 def loadNode(self, touch):
-    if self.node is not None and self.controller is not None and self.collide_point(touch.pos[0], touch.pos[1]):
+    if self.node is not None and self.controller is not None and self.collide_point(
+            touch.pos[0], touch.pos[1]):
         self.controller.updateCurrentNode(self.node)
 
 
@@ -62,6 +63,10 @@ class MoveList(ScrollView):
                         newValue: oldValue == int(newValue))
     y = NumericProperty(0, comparator=lambda oldValue,
                         newValue: oldValue == int(newValue))
+
+    def on_kv_post(self, base_widget):
+        self.scroll_wheel_distance *= 3
+        return super().on_kv_post(base_widget)
 
     def on_x(self, instance, x):
         self.x = int(x)
@@ -147,8 +152,12 @@ class MoveList(ScrollView):
                 fullMoveCount = board.fullmove_number - \
                     1 if color == chess.WHITE else board.fullmove_number - 2
 
-                self.add_variation(fullMoveCount, color ==
-                                   chess.WHITE, gameNode, controller, variation)
+                self.add_variation(
+                    fullMoveCount,
+                    color == chess.WHITE,
+                    gameNode,
+                    controller,
+                    variation)
 
             if self.mapMove.get(gameNode, None) is not None:
                 widget = self.mapMove[gameNode]
@@ -204,7 +213,7 @@ class MoveList(ScrollView):
     def addMainFullMoveEntry(self, fullMoveCount, controller):
         entry = GridLayoutMinHeight(
             cols=3)
-        entry.add_widget(MoveLabel("   " + str(fullMoveCount+1) +
+        entry.add_widget(MoveLabel("   " + str(fullMoveCount + 1) +
                                    ". ", None, None, markup=True))
         self.gridLayoutRef.add_widget(entry)
         self.listFullMoveEntry.append(entry)
@@ -221,7 +230,7 @@ class MoveList(ScrollView):
 
     def remove_variation(self, var):
         self.gridLayoutRef.size = (
-            0, self.gridLayoutRef.size[1]-var.size[1])
+            0, self.gridLayoutRef.size[1] - var.size[1])
         self.gridLayoutRef.remove_widget(var)
 
     def create_variation(self, variation, controller):
@@ -231,8 +240,8 @@ class MoveList(ScrollView):
 
         prevBoard = variation.parent.board()
 
-        text = " " + str(prevBoard.fullmove_number) + "." + (" ... " if prevBoard.turn == chess.BLACK else " ") + \
-            prevBoard.san(variation.move)
+        text = " " + str(prevBoard.fullmove_number) + "." + (" ... " if prevBoard.turn ==
+                                                             chess.BLACK else " ") + prevBoard.san(variation.move)
 
         label = VariationLabel(text, variation, controller, markup=True)
         label.bind(on_touch_down=loadNode)
@@ -243,7 +252,13 @@ class MoveList(ScrollView):
 
         return box
 
-    def add_variation(self, fullmove_number, lastEntryComplete, variation, controller, originVariation):
+    def add_variation(
+            self,
+            fullmove_number,
+            lastEntryComplete,
+            variation,
+            controller,
+            originVariation):
 
         # start of variation from mainline
         if originVariation is None and variation.parent.is_mainline():
@@ -266,7 +281,8 @@ class MoveList(ScrollView):
             self.gridLayoutRef.add_widget(box, widx)
 
         # continue same variation than parent
-        if originVariation is not None and len(variation.parent.variations) == 1:
+        if originVariation is not None and len(
+                variation.parent.variations) == 1:
             stack = originVariation.children[-1]
 
             prevBoard = variation.parent.board()
@@ -287,7 +303,8 @@ class MoveList(ScrollView):
             self.mapMove[variation] = label
             self.mapVariation[variation] = originVariation
 
-        if originVariation is not None and len(variation.parent.variations) > 1:
+        if originVariation is not None and len(
+                variation.parent.variations) > 1:
             stack = originVariation.children[-1]
             base = self.mapMove[variation.parent]
             base_next = base.next
@@ -296,7 +313,8 @@ class MoveList(ScrollView):
                 base_next.prev = None
                 base.next = None
                 # remove all label in original variation
-                while len(stack.children) > 0 and stack.children[0] is not base:
+                while len(
+                        stack.children) > 0 and stack.children[0] is not base:
                     stack.remove_widget(stack.children[0])
                 # create old variation
                 box = self.create_variation(base_next.node, controller)
