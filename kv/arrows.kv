@@ -99,8 +99,8 @@
     horizontalFlip : (self.tileFrom.x > self.tileTo.x) if self.nullTest else False
     verticalFlip : (self.tileFrom.y > self.tileTo.y) if self.nullTest else False
     tileSize : self.tileFrom.width if self.nullTest else 0
-    delta_x : (not self.rotated - self.rotated)*round((self.tileTo.x - self.tileFrom.x)/self.tileFrom.width) if self.nullTest else 0
-    delta_y : (not self.rotated - self.rotated)*round((self.tileTo.y - self.tileFrom.y)/self.tileFrom.width) if self.nullTest else 0
+    delta_x : (not self.rotated - self.rotated)*round((self.tileTo.x - self.tileFrom.x)/self.tileFrom.width) if self.nullTest and self.tileFrom.width != 0 else 0
+    delta_y : (not self.rotated - self.rotated)*round((self.tileTo.y - self.tileFrom.y)/self.tileFrom.height) if self.nullTest and self.tileFrom.height != 0 else 0
     canvas.before:
         PushMatrix
         Rotate:

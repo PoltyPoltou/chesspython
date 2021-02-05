@@ -54,6 +54,24 @@ class GameController():
         self.savedGames = serialisationWrapper.loadLastSavedData()
         for game in self.savedGames.storageDict.keys():
             self.chessWindow.dropdown.createButtonForGame(self, game)
+        purged_games = {}
+        for game in self.savedGames.storageDict:
+            is_present = self.is_game_already_saved(purged_games, game)
+            if(not is_present):
+                purged_games.update(
+                    [(game, self.savedGames.storageDict[game])])
+        self.savedGames.storageDict = purged_games
+
+    def is_game_already_saved(self, mapping, game):
+        if("Date" in game.headers and "StartTime" in game.headers):
+            for g in mapping:
+                if(g is game):
+                    return True
+                if("Date" in g.headers and "StartTime" in g.headers):
+                    if(g.headers["Date"] == game.headers["Date"] and
+                            g.headers["StartTime"] == game.headers["StartTime"]):
+                        return True
+        return False
 
     def playMove(self, move: chess.Move):
         if self.game.next() is None:
@@ -94,6 +112,7 @@ class GameController():
                 is not self.game.end() and self.openingGame is None):
             self.addGame(self.game.game(), {})
         self.updateCurrentNode(game.end())
+        self.moveList.scroll_y = 0
         if game.game() in self.savedGames.storageDict:
             if len(self.savedGames.storageDict[game]) > 0:
                 self.postAnalysis(self.game, self.savedGames.storageDict[game])
@@ -161,7 +180,10 @@ class GameController():
         prev = None
         while game is not None:
             if(game not in self.savedGames):
-                self.addGame(game, {})
+                is_present = self.is_game_already_saved(
+                    self.savedGames.storageDict, game)
+                if(not is_present):
+                    self.addGame(game, {})
             prev = game
             game = reader.nextGame()
         if prev is not None:
