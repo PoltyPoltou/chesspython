@@ -38,6 +38,9 @@ class GameController():
         self.dropdown = None
         self.openingGame = False
 
+    def post_init_controller(self):
+        self.updateCurrentNode(self.game)
+
     def newEngineEvalEvent(self):
         '''
         updates the dict of already analysed positions in this runtime
@@ -110,7 +113,7 @@ class GameController():
     def loadGame(self, game):
         if (self.game.game() not in self.savedGames and self.game.game()
                 is not self.game.end() and self.openingGame is None):
-            self.addGame(self.game.game(), {})
+            self.addGame(self.game.game(), self.moveQualityDict)
         self.updateCurrentNode(game.end())
         self.moveList.scroll_y = 0
         if game.game() in self.savedGames.storageDict:
@@ -142,7 +145,8 @@ class GameController():
     def updateCurrentNode(self, game):
         with self.lock:
             if self.game.game() is not game.game():
-                self.moveQualityDict.clear()
+                self.moveQualityDict = self.savedGames.storageDict.get(
+                    self.game.game(), {})
             self.game = game
             self.board = self.game.board()
             self.boardWidget.board = self.board
@@ -157,9 +161,11 @@ class GameController():
                 self.openingWidget.select_node(game)
 
     def postAnalysis(self, game, moveQualityDict):
+        self.moveQualityDict = moveQualityDict
         self.moveList.postAnalysis(moveQualityDict.values())
         self.moveListHeader.postAnalysis(moveQualityDict)
         self.moveQualityDict = moveQualityDict
+        self.savedGames.storageDict.update([(game.game(), moveQualityDict)])
         self.chessWindow.unlockLoad()
         self.updateCurrentNode(game.end())
 

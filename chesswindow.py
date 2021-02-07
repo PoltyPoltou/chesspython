@@ -65,7 +65,6 @@ class ChessWindow(GridLayout):
         self.keyboard.bind_key('l', self.controller.nextNode)
         self.keyboard.bind_key('a', self.controller.analyseFullGame)
         self.keyboard.bind_key('delete', self.controller.deleteNode)
-
         super().__init__(**kwargs)
 
     def text_lost_focus(self, focus):
@@ -84,6 +83,7 @@ class ChessWindow(GridLayout):
         self.moveListHeader.threadEngine = self.controller.evalWrapper
         self.inputText.text = self.controller.savedGames.username
         self.boardGUI.setup(self.controller)
+        self.controller.post_init_controller()
         return super().on_kv_post(base_widget)
 
     def rotate(self):
@@ -173,4 +173,5 @@ class ChessWindow(GridLayout):
             print("Unloading opening but none were opened")
 
     def getOpeningFile(self, white_or_black_bool):
-        return "./data/WHITE_opening.txt" * white_or_black_bool + "./data/BLACK_opening.txt" * (not white_or_black_bool)
+        return "./data/WHITE_opening.txt" * white_or_black_bool + \
+            "./data/BLACK_opening.txt" * (not white_or_black_bool)
