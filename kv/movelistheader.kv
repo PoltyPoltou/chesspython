@@ -2,11 +2,32 @@
 
 <HeadMoveList>:
     orientation:"vertical"
+    computer_variation_widget:computer_variation_widget
     Label:
         text:root.txt
         markup:True
-    DepthTracker:
-        threadEngine:root.threadEngine
+    VariationStack:
+        id:computer_variation_widget
+        size_hint:1,1
+    BoxLayout:
+        orientation:"horizontal"
+        DepthTracker:
+            threadEngine:root.threadEngine
+
+<ComputerVariationLabel>:
+    size_hint:None,None
+    text_size:(None, None)
+    size:self.texture_size
+    font_size:'12sp'
+<ScoreLabel>:
+    bold:True
+    valign:"middle"
+    canvas.before:
+        Color:
+            rgb:self.bgColor
+        Rectangle:
+            pos:self.pos
+            size:self.size
 <ButtonDepth@Button>:
     canvas.before:
         Color:
