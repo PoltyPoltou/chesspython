@@ -56,39 +56,9 @@ class EvaluationBar(Widget):
         self.board = board
 
     def parseEval(self, povScore: chess.engine.PovScore):
-        engineEval = povScore.white()
-        if(self.board is not None and self.board.is_game_over(claim_draw=True)):
-            textEval = self.board.result(claim_draw=True)
-            if(povScore.is_mate()):
-                eval = 10 if textEval == "1-0" else -10
-            else:
-                eval = 0
-        elif(engineEval.score() is not None):
-            eval = engineEval.score() / 100
-            textEval = str(eval)
-            if(eval > 10):
-                eval = 10
-            if(eval < -10):
-                eval = -10
-        elif(engineEval.mate() == 0 and povScore.turn == chess.WHITE):
-            # Black won
-            textEval = "0-1"
-            eval = -10
-            pass
-        elif(engineEval.mate() == 0 and povScore.turn == chess.BLACK):
-            # White won
-            textEval = "1-0"
-            eval = 10
-            pass
-        elif(povScore.is_mate()):
-            if(engineEval.mate() > 0):
-                eval = 10
-                textEval = "+M" + str(abs(engineEval.mate()))
-            else:
-                eval = -10
-                textEval = "-M" + str(abs(engineEval.mate()))
+        return parseEvalFromScore(povScore)
 
-        return (eval, textEval)
+        return parseEvalFromScore()
 
     def newEngineEvalEvent(self):
         if(self.evalWrapper.hasAnalysis()):
@@ -112,6 +82,38 @@ class EvaluationBar(Widget):
                 anim.start(self.animWidget)
 
     pass
+
+
+def parseEvalFromScore(povScore: chess.engine.PovScore):
+    engineEval = povScore.white()
+    eval = 0
+    textEval = ""
+    if(engineEval.score() is not None):
+        eval = engineEval.score() / 100
+        textEval = str(eval)
+        if(eval > 10):
+            eval = 10
+        if(eval < -10):
+            eval = -10
+    elif(engineEval.mate() == 0 and povScore.turn == chess.WHITE):
+        # Black won
+        textEval = "0-1"
+        eval = -10
+        pass
+    elif(engineEval.mate() == 0 and povScore.turn == chess.BLACK):
+        # White won
+        textEval = "1-0"
+        eval = 10
+        pass
+    elif(povScore.is_mate()):
+        if(engineEval.mate() > 0):
+            eval = 10
+            textEval = "+M" + str(abs(engineEval.mate()))
+        else:
+            eval = -10
+            textEval = "-M" + str(abs(engineEval.mate()))
+
+    return (eval, textEval)
 
 
 class AnalysisProgressBar(Widget):
