@@ -1,4 +1,5 @@
 #:kivy 2.0.0
+#:import eff kivy.effects.scroll
 <MoveLabel>:
     size_hint:(1, None)
     font_size:'20sp'
@@ -69,7 +70,7 @@
 <MoveList>:
     gridLayoutRef:gridref
     do_scroll_y:True
-
+    effect_cls: eff.ScrollEffect
     canvas.before:
         Color:
             rgba : (39/255,37/255,34/255,1)

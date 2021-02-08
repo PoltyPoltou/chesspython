@@ -1,14 +1,19 @@
 #:kivy 2.0.0
-
+#:import eff kivy.effects.scroll
 <HeadMoveList>:
     orientation:"vertical"
     computer_variation_widget:computer_variation_widget
     Label:
         text:root.txt
         markup:True
-    VariationStack:
-        id:computer_variation_widget
-        size_hint:1,1
+    ScrollView:
+        do_scroll_x : False
+        do_scroll_y : True
+        effect_cls: eff.ScrollEffect
+        VariationStack:
+            size_hint : 1,None
+            height : self.minimum_height
+            id : computer_variation_widget
     BoxLayout:
         orientation:"horizontal"
         DepthTracker:
