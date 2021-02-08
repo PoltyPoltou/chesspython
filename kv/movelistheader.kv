@@ -13,6 +13,16 @@
         orientation:"horizontal"
         DepthTracker:
             threadEngine:root.threadEngine
+        BoxLayout:
+            orientation:"vertical"
+            ToggleButton:
+                text:"analysis arrow"
+                state:"down"
+                on_state:root.controller.boardWidget.analysis_arrow = (self.state == "down")
+            ToggleButton:
+                text:"report arrow"
+                state:"down"
+                on_state:root.controller.boardWidget.report_arrow = (self.state == "down")
 
 <ComputerVariationLabel>:
     size_hint:None,None

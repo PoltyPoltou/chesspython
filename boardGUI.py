@@ -52,8 +52,19 @@ class BoardWidget(GridLayout):
     pov = StringProperty('WHITE')
     imageDir = "images/"
     imageStyleDir = "std/"
-    imageDict = {"r": "br.webp", "n": "bn.webp", "b": "bb.webp", "k": "bk.webp", "q": "bq.webp", "p": "bp.webp",
-                 "R": "wr.webp", "N": "wn.webp", "B": "wb.webp", "K": "wk.webp", "Q": "wq.webp", "P": "wp.webp"}
+    imageDict = {
+        "r": "br.webp",
+        "n": "bn.webp",
+        "b": "bb.webp",
+        "k": "bk.webp",
+        "q": "bq.webp",
+        "p": "bp.webp",
+        "R": "wr.webp",
+        "N": "wn.webp",
+        "B": "wb.webp",
+        "K": "wk.webp",
+        "Q": "wq.webp",
+        "P": "wp.webp"}
     selectedTile: Optional[Tile] = None
     board: Optional[chess.Board] = ObjectProperty(None, rebind=True)
     evalBarWidget: Optional[EvaluationBar] = ObjectProperty(None)
@@ -64,6 +75,8 @@ class BoardWidget(GridLayout):
         self.board = None
         self.analysisArrow = None
         self.oldBoardfen = ""
+        self.analysis_arrow = True
+        self.report_arrow = True
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -84,7 +97,7 @@ class BoardWidget(GridLayout):
             self.startEval()
 
     def hasEval(self):
-        return self.evalBarWidget != None
+        return self.evalBarWidget is not None
 
     def startEval(self):
         self.evalBarWidget.start()
@@ -95,13 +108,15 @@ class BoardWidget(GridLayout):
         pass
 
     def newEngineEvalEvent(self):
-        if(self.controller.evalWrapper.hasAnalysis()):
+        if(self.controller.evalWrapper.hasAnalysis() and self.analysis_arrow):
             bestMove = self.controller.evalWrapper.bestMove()
             if(bestMove is not None):
                 tileFrom = self.findTileWidgetFromSquare(bestMove.from_square)
                 tileTo = self.findTileWidgetFromSquare(bestMove.to_square)
-                if(self.board.is_legal(bestMove)):
+                if(self.board.is_legal(bestMove) and self):
                     self.arrowManager.addEngineArrow(tileFrom, tileTo)
+        elif(not self.analysis_arrow):
+            self.arrowManager.removeEngineArrow()
 
     def findTile(self, coords) -> Tile:
         for row in self.children:
@@ -122,10 +137,10 @@ class BoardWidget(GridLayout):
 
     def on_touch_down(self, touch: MotionEvent):
         tileTouched, row = self.findTileTouched(touch)
-        if(tileTouched != None and row != None):
+        if(tileTouched is not None and row is not None):
             if(touch.button == "left"):
-                print(tileTouched.coords, self.children.index(row), row.children.index(tileTouched), "WHITE" *
-                      self.board.turn + "BLACK" * (not self.board.turn))
+                print(tileTouched.coords, self.children.index(row), row.children.index(
+                    tileTouched), "WHITE" * self.board.turn + "BLACK" * (not self.board.turn))
                 self.handleSelection(tileTouched)
                 self.arrowManager.removeArrows()
             else:
@@ -139,12 +154,12 @@ class BoardWidget(GridLayout):
         if(touch.button == "right" and touch.grab_current is self):
             tileTouched, row = self.findTileTouched(touch)
             touch.ungrab(self)
-            if(tileTouched != None and row != None):
+            if(tileTouched is not None and row is not None):
                 self.arrowManager.addArrow(self.lastTouchedTile, tileTouched)
         return super().on_touch_up(touch)
 
     def handleSelection(self, tile: Tile):
-        if(self.selectedTile != None):
+        if(self.selectedTile is not None):
             if(tile.coords == self.selectedTile.coords):
                 self.unselectCase()
             else:
@@ -160,8 +175,8 @@ class BoardWidget(GridLayout):
                     if(isPromoteLegal and not self.board.is_game_over(claim_draw=True)):
                         color = self.board.piece_at(
                             self.selectedTile.square).color
-                        promotebb = PromotionBubble(self,
-                                                    color, self.imageDir + self.imageStyleDir)
+                        promotebb = PromotionBubble(
+                            self, color, self.imageDir + self.imageStyleDir)
 
                         def playMove(promoteChar):
                             moveToPlay = chess.Move.from_uci(
@@ -177,11 +192,11 @@ class BoardWidget(GridLayout):
                         self.unselectCase()
                         self.handleSelection(tile)
         else:
-            if(self.board.piece_at(tile.square) != None and self.board.piece_at(tile.square).color == self.board.turn):
+            if(self.board.piece_at(tile.square) is not None and self.board.piece_at(tile.square).color == self.board.turn):
                 self.selectCase(tile)
 
     def unselectCase(self):
-        if(self.selectedTile != None):
+        if(self.selectedTile is not None):
             self.selectedTile.selected = False
         for row in self.children:
             for tile in row.children:
@@ -197,8 +212,13 @@ class BoardWidget(GridLayout):
             for t in row.children:
                 if(tile.coords != t.coords):
                     t.movableTo = self.board.is_legal(
-                        chess.Move.from_uci(tile.coords + t.coords)) or self.board.is_legal(
-                        chess.Move.from_uci(tile.coords + t.coords + 'q'))
+                        chess.Move.from_uci(
+                            tile.coords +
+                            t.coords)) or self.board.is_legal(
+                        chess.Move.from_uci(
+                            tile.coords +
+                            t.coords +
+                            'q'))
                     if(t.movableTo and self.board.piece_at(t.square) is not None):
                         t.canBeTaken = True
                         t.movableTo = False
@@ -224,13 +244,16 @@ class BoardWidget(GridLayout):
             for tile in row.children:
                 if(isinstance(tile, Tile) and tile.square < 64):
                     tile.played = tile.square in lastMoveIndexList
-        # On a une analyse de la partie en cours, alors on affiche le meilleur coup précedant
+        # On a une analyse de la partie en cours, alors on affiche le meilleur
+        # coup précedant
         self.arrowManager.removeOneArrow(self.analysisArrow)
-        if(self.controller.game in self.controller.moveQualityDict):
+        if(self.controller.game in self.controller.moveQualityDict and self.report_arrow):
             if(not self.controller.moveQualityDict[self.controller.game].theoric):
                 bestMove: chess.Move = self.controller.moveQualityDict[
                     self.controller.game].bestMove
-                self.analysisArrow = self.arrowManager.directAddArrow(self.findTileWidgetFromSquare(
-                    bestMove.from_square), self.findTileWidgetFromSquare(bestMove.to_square), (6/255, 101/255, 22/255, 0.8))
+                self.analysisArrow = self.arrowManager.directAddArrow(
+                    self.findTileWidgetFromSquare(
+                        bestMove.from_square), self.findTileWidgetFromSquare(
+                        bestMove.to_square), (6 / 255, 101 / 255, 22 / 255, 0.8))
 
     pass
