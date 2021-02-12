@@ -1,97 +1,108 @@
-Sun Jan  3 20:58:45 2021    stats.txt
+Fri Feb 12 01:47:52 2021    ./profiling/stats.txt
 
-         4968019 function calls (4953771 primitive calls) in 16.763 seconds
+         2000208 function calls (1971386 primitive calls) in 23.165 seconds
 
    Ordered by: internal time
-   List reduced from 1499 to 10 due to restriction <'movelist.py'>
+   List reduced from 1398 to 20 due to restriction <'movelist.py'>
 
    ncalls  tottime  percall  cumtime  percall filename:lineno(function)
-        1    0.000    0.000    0.109    0.109 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:15(loadVariationNode)
-      162    0.000    0.000    0.000    0.000 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:30(on_kv_post)
-       83    0.000    0.000    0.046    0.001 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:37(__init__)
-      515    0.001    0.000    0.001    0.000 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:232(getFullMoveEntry)
-      162    0.001    0.000    0.149    0.001 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:24(__init__)
-      428    0.004    0.000    0.011    0.000 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:176(remove_all_variation)
-      108    0.011    0.000    0.128    0.001 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:110(add_move_in_entry)
-       54    0.011    0.000    0.184    0.003 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:164(addMainFullMoveEntry)
-        6    0.024    0.004    6.974    1.162 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:50(update_moves)
-       83    0.092    0.001    4.875    0.059 c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:187(add_variation)
+        4    0.000    0.000    0.000    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:108(<lambda>)
+        4    0.000    0.000    0.000    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:110(<lambda>)
+        1    0.000    0.000    0.000    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:113(on_kv_post)
+        1    0.000    0.000    0.000    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:99(__init__)
+      4/2    0.000    0.000    0.000    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:117(on_x)
+      4/2    0.000    0.000    0.000    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:120(on_y)
+        1    0.000    0.000    0.001    0.001 C:\Users\poltg\Documents\python\kivyApp\movelist.py:123(__init__)
+        9    0.000    0.000    0.000    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:127(reset)
+        8    0.000    0.000    0.013    0.002 C:\Users\poltg\Documents\python\kivyApp\movelist.py:237(clearList)
+      122    0.000    0.000    0.060    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:15(loadNode)
+      676    0.001    0.000    0.001    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:383(getFullMoveEntry)
+        1    0.001    0.001    0.018    0.018 C:\Users\poltg\Documents\python\kivyApp\movelist.py:241(postAnalysis)
+      590    0.002    0.000    1.305    0.002 C:\Users\poltg\Documents\python\kivyApp\movelist.py:48(get_san)
+        8    0.010    0.001    5.836    0.729 C:\Users\poltg\Documents\python\kivyApp\movelist.py:145(update_moves)
+      887    0.010    0.000    0.011    0.000 C:\Users\poltg\Documents\python\kivyApp\movelist.py:68(on_kv_post)
+     14/7    0.017    0.001    1.303    0.186 C:\Users\poltg\Documents\python\kivyApp\movelist.py:25(get_board)
+      887    0.024    0.000    2.132    0.002 C:\Users\poltg\Documents\python\kivyApp\movelist.py:62(__init__)
+   608/10    0.047    0.000    5.844    0.584 C:\Users\poltg\Documents\python\kivyApp\movelist.py:162(new_move)
+      590    0.743    0.001    3.648    0.006 C:\Users\poltg\Documents\python\kivyApp\movelist.py:216(add_move_in_entry)
+      297    0.917    0.003    1.890    0.006 C:\Users\poltg\Documents\python\kivyApp\movelist.py:259(addMainFullMoveEntry)
 
 
    Ordered by: internal time
-   List reduced from 1499 to 10 due to restriction <'movelist.py'>
+   List reduced from 1398 to 20 due to restriction <'movelist.py'>
 
-Function                                                                               called...
-                                                                                           ncalls  tottime  cumtime
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:15(loadVariationNode)      ->       1    0.000    0.109  c:\Users\poltg\Documents\python_project\kivyApp\gamecontroller.py:62(updateCurrentNode)
-                                                                                                1    0.000    0.000  {method 'get' of 'dict' objects}
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:30(on_kv_post)             ->     162    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:570(on_kv_post)
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:37(__init__)               ->      83    0.002    0.045  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\label.py:316(__init__)
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:232(getFullMoveEntry)      -> 
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:24(__init__)               ->     162    0.004    0.148  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\label.py:316(__init__)
-                                                                                              162    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\label.py:351(_trigger_texture_update)
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:176(remove_all_variation)  ->      62    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:72(delayed_call_fn)
-                                                                                               62    0.000    0.002  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\layout.py:99(remove_widget)
-                                                                                               62    0.001    0.005  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\scrollview.py:515(_set_viewport_size)
-                                                                                                2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1084(get_right)
-                                                                                               62    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1099(get_top)
-                                                                                                2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1114(get_center_x)
-                                                                                               62    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1129(get_center_y)
-                                                                                              124    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\weakmethod.py:37(__call__)
-                                                                                              428    0.000    0.000  {method 'get' of 'dict' objects}
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:110(add_move_in_entry)     ->       2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:60(call_fn)
-                                                                                              108    0.000    0.002  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\layout.py:91(add_widget)
-                                                                                                1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\scrollview.py:297(_get_vbar)
-                                                                                              108    0.001    0.114  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:24(__init__)
-                                                                                              108    0.000    0.001  {method 'bind' of 'kivy._event.EventDispatcher' objects}
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:164(addMainFullMoveEntry)  ->       1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\_weakrefset.py:39(_remove)
-                                                                                               54    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:72(delayed_call_fn)
-                                                                                               54    0.000    0.004  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\gridlayout.py:277(__init__)
-                                                                                              108    0.000    0.002  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\layout.py:91(add_widget)
-                                                                                               54    0.001    0.004  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\scrollview.py:515(_set_viewport_size)
-                                                                                                1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1084(get_right)
-                                                                                               54    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1099(get_top)
-                                                                                                1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1114(get_center_x)
-                                                                                               54    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1129(get_center_y)
-                                                                                              108    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\weakmethod.py:37(__call__)
-                                                                                               54    0.000    0.035  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:24(__init__)
-                                                                                              108    0.011    0.128  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:110(add_move_in_entry)
-                                                                                               54    0.000    0.000  {method 'append' of 'list' objects}
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:50(update_moves)           ->     107    0.000    0.011  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\__init__.py:2771(san)
-                                                                                               14    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:229(game)
-                                                                                              507    0.008    0.008  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:262(is_mainline)
-                                                                                              432    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:352(next)
-                                                                                               10    0.000    1.063  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:545(__str__)
-                                                                                              428    0.044    0.796  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:584(board)
-                                                                                                4    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:727(board)
-                                                                                                2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:60(call_fn)
-                                                                                                2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:72(delayed_call_fn)
-                                                                                              107    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\label.py:351(_trigger_texture_update)
-                                                                                                1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\layout.py:99(remove_widget)
-                                                                                               54    0.011    0.184  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:164(addMainFullMoveEntry)
-                                                                                              428    0.004    0.011  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:176(remove_all_variation)
-                                                                                               83    0.092    4.875  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:187(add_variation)
-                                                                                              432    0.000    0.000  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:232(getFullMoveEntry)
-                                                                                              864    0.000    0.000  {built-in method builtins.len}
-c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:187(add_variation)         ->    1610    0.002    0.171  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\__init__.py:2771(san)
-                                                                                             1610    0.001    0.001  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:352(next)
-                                                                                             1776    0.249    4.232  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:584(board)
-                                                                                              110    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\context.py:35(__getattribute__)
-                                                                                               83    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:72(delayed_call_fn)
-                                                                                               83    0.001    0.001  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\label.py:351(_trigger_texture_update)
-                                                                                               83    0.005    0.323  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\label.py:376(texture_update)
-                                                                                               83    0.000    0.003  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\layout.py:91(add_widget)
-                                                                                               83    0.001    0.007  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\scrollview.py:515(_set_viewport_size)
-                                                                                               22    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:260(_widget_destructor)
-                                                                                                1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1084(get_right)
-                                                                                               83    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1099(get_top)
-                                                                                                1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1114(get_center_x)
-                                                                                               83    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1129(get_center_y)
-                                                                                              166    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\weakmethod.py:37(__call__)
-                                                                                               83    0.000    0.046  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:37(__init__)
-                                                                                               83    0.000    0.000  c:\Users\poltg\Documents\python_project\kivyApp\movelist.py:232(getFullMoveEntry)
-                                                                                               83    0.000    0.000  {method 'append' of 'list' objects}
-                                                                                               83    0.000    0.000  {method 'bind' of 'kivy._event.EventDispatcher' objects}
-                                                                                               83    0.000    0.000  {method 'index' of 'list' objects}
+Function                                                                       called...
+                                                                                   ncalls  tottime  cumtime
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:108(<lambda>)              -> 
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:110(<lambda>)              -> 
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:113(on_kv_post)            ->       1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:570(on_kv_post)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:99(__init__)               ->       1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\stacklayout.py:140(__init__)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:117(on_x)                  ->       6    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:60(call_fn)
+                                                                                        2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1084(get_right)
+                                                                                        2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1114(get_center_x)
+                                                                                        4    0.000    0.000  C:\Users\poltg\Documents\python\kivyApp\movelist.py:108(<lambda>)
+                                                                                        2    0.000    0.000  C:\Users\poltg\Documents\python\kivyApp\movelist.py:117(on_x)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:120(on_y)                  ->       6    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:60(call_fn)
+                                                                                        2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1099(get_top)
+                                                                                        2    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:1129(get_center_y)
+                                                                                        4    0.000    0.000  C:\Users\poltg\Documents\python\kivyApp\movelist.py:110(<lambda>)
+                                                                                        2    0.000    0.000  C:\Users\poltg\Documents\python\kivyApp\movelist.py:120(on_y)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:123(__init__)              ->       1    0.000    0.001  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\scrollview.py:525(__init__)
+                                                                                        1    0.000    0.000  C:\Users\poltg\Documents\python\kivyApp\movelist.py:127(reset)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:127(reset)                 -> 
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:237(clearList)             ->       8    0.001    0.013  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:677(clear_widgets)
+                                                                                        8    0.000    0.000  {method 'clear' of 'list' objects}
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:15(loadNode)               ->     122    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:470(collide_point)
+                                                                                        1    0.000    0.059  C:\Users\poltg\Documents\python\kivyApp\gamecontroller.py:170(updateCurrentNode)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:383(getFullMoveEntry)      -> 
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:241(postAnalysis)          ->      45    0.015    0.017  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:60(call_fn)
+                                                                                       45    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:72(delayed_call_fn)
+                                                                                       57    0.001    0.001  C:\Users\poltg\Documents\python\kivyApp\analysis.py:160(getColor)
+                                                                                       86    0.000    0.000  C:\Users\poltg\Documents\python\kivyApp\movelist.py:383(getFullMoveEntry)
+                                                                                       86    0.000    0.000  {built-in method builtins.len}
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:48(get_san)                ->       7    0.017    1.303  C:\Users\poltg\Documents\python\kivyApp\movelist.py:25(get_board)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:145(update_moves)          ->       8    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:228(game)
+                                                                                     1786    0.002    0.002  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:351(next)
+                                                                                        8    0.000    0.000  C:\Users\poltg\Documents\python\kivyApp\movelist.py:127(reset)
+                                                                                      598    0.047    5.811  C:\Users\poltg\Documents\python\kivyApp\movelist.py:162(new_move)
+                                                                                        8    0.000    0.013  C:\Users\poltg\Documents\python\kivyApp\movelist.py:237(clearList)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:68(on_kv_post)             ->     887    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:570(on_kv_post)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:25(get_board)              ->       7    0.000    0.001  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\__init__.py:2115(push)
+                                                                                      590    0.015    0.021  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\__init__.py:2236(pop)
+                                                                                      590    0.004    0.264  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\__init__.py:2774(san)
+                                                                                      597    0.017    0.870  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\__init__.py:3619(copy)
+                                                                                       14    0.001    0.001  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:234(end)
+                                                                                       21    0.005    0.125  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:583(board)
+                                                                                       14    0.000    0.001  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:624(end)
+                                                                                        7    0.000    0.001  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:726(board)
+                                                                                        7    0.000    0.062  C:\Users\poltg\Documents\python\kivyApp\movelist.py:25(get_board)
+                                                                                       14    0.000    0.000  {built-in method builtins.isinstance}
+                                                                                     1194    0.002    0.002  {method 'update' of 'dict' objects}
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:62(__init__)               ->     887    0.062    2.096  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\label.py:316(__init__)
+                                                                                      887    0.011    0.012  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\label.py:351(_trigger_texture_update)
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:162(new_move)              ->     590    0.002    0.036  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:216(turn)
+                                                                                     1814    0.006    0.031  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:228(game)
+                                                                                      590    0.020    0.020  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:261(is_mainline)
+                                                                                      590    0.018    0.025  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\chess\pgn.py:598(ply)
+                                                                                     1177    0.065    0.119  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:60(call_fn)
+                                                                                     1177    0.001    0.001  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\lang\builder.py:72(delayed_call_fn)
+                                                                                        8    0.010    5.836  C:\Users\poltg\Documents\python\kivyApp\movelist.py:145(update_moves)
+                                                                                      590    0.743    3.648  C:\Users\poltg\Documents\python\kivyApp\movelist.py:216(add_move_in_entry)
+                                                                                      297    0.917    1.890  C:\Users\poltg\Documents\python\kivyApp\movelist.py:259(addMainFullMoveEntry)
+                                                                                      590    0.001    0.001  C:\Users\poltg\Documents\python\kivyApp\movelist.py:383(getFullMoveEntry)
+                                                                                     1182    0.000    0.000  {method 'get' of 'dict' objects}
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:216(add_move_in_entry)     ->    1838    0.001    0.002  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\context.py:35(__getattribute__)
+                                                                                      590    0.008    0.045  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\layout.py:91(add_widget)
+                                                                                      507    0.003    0.023  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:260(_widget_destructor)
+                                                                                      590    0.002    1.305  C:\Users\poltg\Documents\python\kivyApp\movelist.py:48(get_san)
+                                                                                      590    0.012    1.510  C:\Users\poltg\Documents\python\kivyApp\movelist.py:62(__init__)
+                                                                                      590    0.013    0.021  {method 'bind' of 'kivy._event.EventDispatcher' objects}
+C:\Users\poltg\Documents\python\kivyApp\movelist.py:259(addMainFullMoveEntry)  ->       1    0.000    0.000  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\_weakrefset.py:39(_remove)
+                                                                                     2003    0.002    0.002  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\context.py:35(__getattribute__)
+                                                                                      297    0.007    0.284  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\gridlayout.py:277(__init__)
+                                                                                      594    0.008    0.040  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\layout.py:91(add_widget)
+                                                                                      570    0.006    0.026  C:\Users\poltg\AppData\Local\Programs\Python\Python39\lib\site-packages\kivy\uix\widget.py:260(_widget_destructor)
+                                                                                      297    0.011    0.622  C:\Users\poltg\Documents\python\kivyApp\movelist.py:62(__init__)
+                                                                                      297    0.000    0.000  {method 'append' of 'list' objects}
 
 
