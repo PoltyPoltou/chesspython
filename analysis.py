@@ -126,13 +126,15 @@ class MoveQuality:
             bestMove=None,
             sanMove=None,
             sanBestMove=None,
-            theoric=False):
+            theoric=False,
+            evalDict=None):
         self.move: chess.Move = move
         self.bestMove: Optional[chess.Move] = bestMove
         self.quality = quality
         self.sanMove = sanMove
         self.sanBestMove = sanBestMove
         self.theoric = theoric
+        self.evalDict = evalDict
 
     def isPerfect(self):
         return (not self.theoric) and self.quality >= 0
@@ -207,7 +209,7 @@ class GameAnalysis(threading.Thread):
         if(game is not game.end()):
             evalList = []
             curGame = game
-            size = game.end().board().ply()
+            size = game.end().ply()
             board = curGame.board()
 
             with open(self.controller.chessWindow.getOpeningFile(True)) as pgn:
@@ -267,14 +269,14 @@ class GameAnalysis(threading.Thread):
                 move, eval = evalList[i]
                 if("theoric" in eval):
                     nodeToMoveQualityMap.update(
-                        [(gameNode, MoveQuality(move, 0, sanMove=gameNode.san(), theoric=True))])
+                        [(gameNode, MoveQuality(move, 0, sanMove=gameNode.san(), theoric=True,evalDict=eval))])
                 else:
                     bestMove = evalPrev.get('pv')[0]
                     sanMove = gameNode.san()
                     sanBestMove = gameNode.parent.board().san(bestMove)
                     if(move == bestMove):
                         nodeToMoveQualityMap.update([(gameNode, MoveQuality(
-                            move, 0, bestMove, sanMove, sanBestMove))])
+                            move, 0, bestMove, sanMove, sanBestMove,evalDict=eval))])
                     else:
                         score = eval["score"].white(
                         ) if color else eval["score"].black()
@@ -282,17 +284,17 @@ class GameAnalysis(threading.Thread):
                         ) if color else evalPrev["score"].black()
                         if score.score() is not None and prevScore.score() is not None:
                             nodeToMoveQualityMap.update([(gameNode, MoveQuality(
-                                move, score.score() - prevScore.score(), bestMove, sanMove, sanBestMove))])
+                                move, score.score() - prevScore.score(), bestMove, sanMove, sanBestMove,evalDict=eval))])
                         elif prevScore.is_mate() != score.is_mate():
                             nodeToMoveQualityMap.update([
-                                (gameNode, MoveQuality(move, -100, bestMove, sanMove, sanBestMove))])
+                                (gameNode, MoveQuality(move, -100, bestMove, sanMove, sanBestMove,evalDict=eval))])
                         elif prevScore.is_mate() and score.is_mate():
                             if prevScore.mate() <= score.mate():
                                 nodeToMoveQualityMap.update([
-                                    (gameNode, MoveQuality(move, -0.5, bestMove, sanMove, sanBestMove))])
+                                    (gameNode, MoveQuality(move, -0.5, bestMove, sanMove, sanBestMove,evalDict=eval))])
                             if prevScore.mate() > score.mate():
                                 nodeToMoveQualityMap.update([
-                                    (gameNode, MoveQuality(move, 0, bestMove, sanMove, sanBestMove))])
+                                    (gameNode, MoveQuality(move, 0, bestMove, sanMove, sanBestMove,evalDict=eval))])
                         else:
                             raise exception("tout cassé")
             gameNode = gameNode.next()

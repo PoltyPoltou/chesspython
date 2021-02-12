@@ -177,7 +177,7 @@ class AnalysisProgressBar(Widget):
             self.evalList.append(eval)
         score = eval["score"].white().score()
         if score is None and eval["score"].white().is_mate():
-            score = eval["score"].white().moves * 1000
+            score = 100
         pos = self.progress
         maxScale = 600
         lastHeight = min(max(self.lastScore, -maxScale), maxScale) / \
@@ -221,6 +221,12 @@ class AnalysisProgressBar(Widget):
         for eval in self.evalList:
             self.addEval(eval)
         self.reconstruct = False
+
+    def drawAllMeshes_from_qualitymove(self, qualityDict):
+        self.newEval()
+        self.progressDelta = 1 / len(qualityDict)
+        self.evalList = [d.evalDict for d in qualityDict.values()]
+        self.drawAllMeshes()
 
     def resetBar(self):
         self.lastScore = 0

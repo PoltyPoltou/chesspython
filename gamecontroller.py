@@ -118,7 +118,9 @@ class GameController():
         self.moveList.scroll_y = 0
         if game.game() in self.savedGames.storageDict:
             if len(self.savedGames.storageDict[game]) > 0:
-                self.postAnalysis(self.game, self.savedGames.storageDict[game])
+                self.postAnalysis(self.game, self.savedGames.storageDict[game.game()])
+                self.progressBar.drawAllMeshes_from_qualitymove(
+                    self.savedGames.storageDict[game.game()])
 
     def computerPlay(self):
         if(self.evalWrapper is not None):
