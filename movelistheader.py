@@ -71,9 +71,10 @@ class HeadMoveList(BoxLayout):
             self.last_info_dict = temp_dict
 
     def redraw_engine_variation(self, dt):
+        board = self.gameNode.board()
         if(self.gameNode is not None and self.last_info_dict is not None and "pv" in self.last_info_dict and (self.info is None or self.last_info_dict["time"] != self.info["time"])):
-            if(self.gameNode.board().is_legal(self.last_info_dict["pv"][0])):
-                test_board = self.gameNode.board()
+            if(board.is_legal(self.last_info_dict["pv"][0])):
+                test_board = board.copy(stack=False)
                 legal_flag = True
                 for move in self.last_info_dict["pv"]:
                     if(test_board.is_legal(move)):
@@ -91,10 +92,9 @@ class HeadMoveList(BoxLayout):
                     self.computer_variation_widget.add_widget(lbl)
                     txt = " : " + str((self.gameNode.ply() + 1) // 2) + "."
                     txt += " .. " * (self.gameNode.turn == chess.BLACK)
-                    txt += self.gameNode.board().san(self.info["pv"][0]) + " "
+                    txt += board.san(self.info["pv"][0]) + " "
                     self.computer_variation_widget.add_widget(
                         ComputerVariationLabel(text=txt))
-                    board: chess.Board = self.gameNode.board()
                     board.push(self.info["pv"][0])
                     # we skip first move as it is different
                     for move in self.info["pv"][1:]:

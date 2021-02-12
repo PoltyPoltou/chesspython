@@ -79,6 +79,7 @@ class GameController():
     def playMove(self, move: chess.Move):
         if self.game.next() is None:
             new_node = self.game.add_main_variation(move)
+            self.moveList.go_to_bottom()
             if(self.openingWidget is not None):
                 self.openingWidget.actualize_node(self.game)
             self.updateCurrentNode(new_node)

@@ -1,4 +1,5 @@
 import chess
+import chess.pgn
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
@@ -15,6 +16,43 @@ def loadNode(self, touch):
     if self.node is not None and self.controller is not None and self.collide_point(
             touch.pos[0], touch.pos[1]):
         self.controller.updateCurrentNode(self.node)
+
+
+san_optimizer = {}
+dict_optimizer = {}
+
+
+def get_board(node: chess.pgn.GameNode) -> chess.Board():
+    if(node in dict_optimizer):
+        return dict_optimizer[node]
+    else:
+        iter_board = node.end().board()
+        iter_node = node.end()
+        while(iter_board.move_stack != [] and iter_node not in dict_optimizer and iter_node is not None):
+            dict_optimizer.update([(iter_node, iter_board.copy())])
+            move = iter_board.pop()
+            if(iter_node is not None and move is not None):
+                san_optimizer.update([(iter_node, iter_board.san(move))])
+            pass
+            iter_node = iter_node.parent
+        if(isinstance(node, chess.pgn.Game)):
+            dict_optimizer.update([(node, node.board())])
+        else:
+            prev_board = get_board(node.parent)
+            board: chess.Board = prev_board.copy()
+            board.push(node.move)
+            dict_optimizer.update([(node, node.board())])
+        return dict_optimizer[node]
+
+
+def get_san(node: chess.pgn.ChildNode) -> str:
+    if(node in san_optimizer):
+        return san_optimizer[node]
+    else:
+        # trick to generate san as we define it when we want the relevant board
+        get_board(node)
+        return san_optimizer[node]
+    pass
 
 
 class MoveLabel(Label):
@@ -49,6 +87,9 @@ class VariationBox(BoxLayout):
         return varBox
 
 
+class GridLayoutMinHeight(GridLayout):
+    pass
+
 class VariationStack(StackLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -79,7 +120,6 @@ class MoveList(ScrollView):
         self.reset()
 
     def reset(self):
-        self.gameStr = ""
         self.game = None
         self.listFullMoveEntry = []
         self.mapVariationPerEntry = {}
@@ -101,21 +141,15 @@ class MoveList(ScrollView):
         self.reset()
         self.clearList()
         self.game = controller.game.game()
-        self.gameStr = str(self.game)
 
         curGame = self.game
         while(curGame is not None):
             self.new_move(curGame, controller)
+            for variation in curGame.variations[1:]:
+                self.addFullVariation(variation, controller)
             curGame = curGame.next()
 
-        curGame = self.game
-        while(curGame is not None):
-            for variation in curGame.variations:
-                if variation is not curGame.next():
-                    self.addFullVariation(variation, controller)
-            curGame = curGame.next()
-
-    def new_move(self, gameNode, controller):
+    def new_move(self, gameNode: chess.pgn.GameNode, controller):
         # if game is completely different we update every move
         if self.game is None or self.game.game() is not gameNode.game():
             self.update_moves(controller)
@@ -132,10 +166,10 @@ class MoveList(ScrollView):
             # check if mainline
             if gameNode.is_mainline():
 
-                board = gameNode.board()
-                color = not board.turn
-                fullMoveCount = board.fullmove_number - \
-                    1 if color == chess.WHITE else board.fullmove_number - 2
+                color = not gameNode.turn()
+                fullmove_number = (gameNode.ply()) // 2 + 1
+                fullMoveCount = fullmove_number - \
+                    1 if color == chess.WHITE else fullmove_number - 2
 
                 if color == chess.WHITE:
                     # add entry
@@ -147,10 +181,10 @@ class MoveList(ScrollView):
                 # find variation from parent
                 variation = self.mapVariation.get(gameNode.parent, None)
 
-                board = gameNode.board()
-                color = not board.turn
-                fullMoveCount = board.fullmove_number - \
-                    1 if color == chess.WHITE else board.fullmove_number - 2
+                color = not gameNode.turn()
+                fullmove_number = (gameNode.ply()) // 2 + 1
+                fullMoveCount = fullmove_number - \
+                    1 if color == chess.WHITE else fullmove_number - 2
 
                 self.add_variation(
                     fullMoveCount,
@@ -169,20 +203,22 @@ class MoveList(ScrollView):
             self.oldMove = widget
             self.oldMove.highlighted = True
 
-    def add_move_in_entry(self, gameNode, controller, entry):
-        san = ""
-        if gameNode is not None:
-            board = gameNode.parent.board()
-            move = gameNode.move
-            san = board.san(move)
+    def add_move_in_entry(
+            self,
+            gameNode: chess.pgn.GameNode,
+            controller,
+            entry):
+        san = get_san(gameNode)
 
-        moveWidget = MoveLabel(san, gameNode, controller, markup=True)
+        moveWidget = MoveLabel(san, gameNode, controller)
         moveWidget.bind(on_touch_down=loadNode)
         entry.add_widget(moveWidget)
-        if(self.gridLayoutRef.height > self.height):
-            self.scroll_y = 0
         self.mapMove[gameNode] = moveWidget
         return moveWidget
+
+    def go_to_bottom(self):
+        if(self.gridLayoutRef.height > self.height):
+            self.scroll_y = 0
 
     def remove_move(self):
         self.gridLayoutRef.remove_widget(self.gridLayoutRef.children[0])
@@ -214,7 +250,7 @@ class MoveList(ScrollView):
         entry = GridLayoutMinHeight(
             cols=3)
         entry.add_widget(MoveLabel("   " + str(fullMoveCount + 1) +
-                                   ". ", None, None, markup=True))
+                                   ". ", None, None))
         self.gridLayoutRef.add_widget(entry)
         self.listFullMoveEntry.append(entry)
         return entry
@@ -238,10 +274,10 @@ class MoveList(ScrollView):
         stack = VariationStack()
         box.add_widget(stack)
 
-        prevBoard = variation.parent.board()
+        prevNode = variation.parent
 
-        text = " " + str(prevBoard.fullmove_number) + "." + (" ... " if prevBoard.turn ==
-                                                             chess.BLACK else " ") + prevBoard.san(variation.move)
+        text = " " + str((prevNode.ply() + 1) // 2) + "." + (
+            " ... " if prevNode.turn == chess.BLACK else " ") + get_san(variation)
 
         label = VariationLabel(text, variation, controller, markup=True)
         label.bind(on_touch_down=loadNode)
@@ -285,13 +321,12 @@ class MoveList(ScrollView):
                 variation.parent.variations) == 1:
             stack = originVariation.children[-1]
 
-            prevBoard = variation.parent.board()
-
+            prevNode = variation.parent
             text = " "
-            if prevBoard.turn == chess.WHITE:
-                text += str(prevBoard.fullmove_number) + ". "
+            if prevNode.turn == chess.WHITE:
+                text += str((prevNode.ply() + 1) // 2) + ". "
 
-            text += prevBoard.san(variation.move)
+            text += get_san(variation)
 
             label = VariationLabel(text, variation, controller, markup=True)
             label.bind(on_touch_down=loadNode)
@@ -337,7 +372,3 @@ class MoveList(ScrollView):
 
     def getFullMoveEntry(self, fullMoveCount):
         return self.listFullMoveEntry[fullMoveCount]
-
-
-class GridLayoutMinHeight(GridLayout):
-    pass
