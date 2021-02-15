@@ -1,3 +1,4 @@
+from scrollview_no_blur import BetterScrollView
 import chess
 import chess.pgn
 from kivy.uix.anchorlayout import AnchorLayout
@@ -95,7 +96,7 @@ class VariationStack(StackLayout):
         super().__init__(**kwargs)
 
 
-class MoveList(ScrollView):
+class MoveList(BetterScrollView):
     gridLayoutRef = ObjectProperty(None)
     # WARNING THIS IS HORRIBLE CODE
     # if the old coord is the same as the new but rounded we don't care and we do not update

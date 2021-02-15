@@ -1,0 +1,10 @@
+#:kivy 2.0.0
+#:import eff kivy.effects.scroll
+<BetterScrollView>:
+    real_scroll_widget : scroller
+    ScrollView:
+        id:scroller
+        size:tuple(map(int,self.parent.size))
+        pos:tuple(map(int,self.parent.pos))
+        scroll_whell_distance : 80
+        effect_cls: eff.ScrollEffect

@@ -5,6 +5,7 @@ import chess
 from kivy.uix.widget import Widget
 from tile import Tile
 import kivy.animation
+from typing import List, Dict, Tuple
 from kivy.properties import NumericProperty, ObjectProperty, BooleanProperty, StringProperty
 imageDir = "images/"
 imageStyleDir = "std/"
@@ -49,7 +50,7 @@ class ChessPieceWidget(Image):
 
 
 class PieceManager:
-    def __init__(self, chessTileList: list[Tile], widgetToAdd: Widget) -> None:
+    def __init__(self, chessTileList: List[Tile], widgetToAdd: Widget) -> None:
         self.pieceDict: dict[chess.Piece, list[ChessPieceWidget]] = {}
         self.board: chess.Board = None
         self._chessTileList: list[Tile] = list(chessTileList)
@@ -125,8 +126,8 @@ class PieceManager:
         pass
 
 
-def getDictOfBoard(board: chess.Board) -> dict[chess.Piece,
-                                               list[(int, int, int)]]:
+def getDictOfBoard(board: chess.Board) -> Dict[chess.Piece,
+                                               List[Tuple[int, int, int]]]:
     result = {}
     chess
     for square in range(64):

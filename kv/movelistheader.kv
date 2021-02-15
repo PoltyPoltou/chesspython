@@ -1,15 +1,14 @@
 #:kivy 2.0.0
-#:import eff kivy.effects.scroll
+
 <HeadMoveList>:
     orientation:"vertical"
     computer_variation_widget:computer_variation_widget
     Label:
         text:root.txt
         markup:True
-    ScrollView:
+    BetterScrollView:
         do_scroll_x : False
         do_scroll_y : True
-        effect_cls: eff.ScrollEffect
         VariationStack:
             size_hint : 1,None
             height : self.minimum_height
@@ -33,7 +32,7 @@
     size_hint:None,None
     text_size:(None, None)
     size:self.texture_size
-    font_size:'12sp'
+    font_size:'14sp'
 <ScoreLabel>:
     bold:True
     valign:"middle"

@@ -9,6 +9,7 @@ from kivy.properties import StringProperty, ObjectProperty, NumericProperty, Col
 import analysis
 import chess
 from analysisWidgets import parseEvalFromScore
+import scrollview_no_blur
 from kivy.base import Builder
 Builder.load_file("./kv/movelistheader.kv")
 
@@ -34,6 +35,7 @@ class HeadMoveList(BoxLayout):
         self.info = None
         self.gameNode = None
         self.computer_variation_widget: movelist.VariationStack = None
+        self.last_info_dict = None
         super().__init__(**kwargs)
         self.redraw_trigger = Clock.create_trigger(
             self.redraw_engine_variation,
@@ -86,7 +88,7 @@ class HeadMoveList(BoxLayout):
                     self.info = self.last_info_dict
                     self.computer_variation_widget.clear_widgets()
                     sc, t = parseEvalFromScore(self.info["score"])
-                    lbl = ScoreLabel(text=t)
+                    lbl = ScoreLabel(text=" " + t + " ")
                     lbl.color = (0, 0, 0, 1) if sc > 0 else (1, 1, 1, 1)
                     lbl.bgColor = (0, 0, 0) if sc < 0 else (1, 1, 1)
                     self.computer_variation_widget.add_widget(lbl)
