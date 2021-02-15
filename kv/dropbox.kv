@@ -1,14 +1,19 @@
 #:kivy 2.0.0
 <GameButton>:
-    text_size: self.size
-    halign:"center"
-    valign:"middle"
-    canvas.before:
-        Color:
-            rgba:0,0,1,0.5
-        Rectangle:
-            size:self.size if self.selected else (0,0)
-            pos:self.pos
+    text:""
+    Label:
+        text:root.text
+        text_size: self.size
+        size:tuple(map(int,self.parent.size))
+        pos:tuple(map(int,self.parent.pos))
+        halign:"center"
+        valign:"middle"
+        canvas.before:
+            Color:
+                rgba:0,0,1,0.5
+            Rectangle:
+                size:self.size if root.selected else (0,0)
+                pos:self.pos
 <GameMenu>:
     canvas.before:
         Color:

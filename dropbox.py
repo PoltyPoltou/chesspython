@@ -3,14 +3,15 @@ from chess.pgn import GameNode
 from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
-from kivy.uix.label import Label
+from kivy.uix.widget import Widget
 from kivy.base import Builder
-from kivy.properties import BooleanProperty
+from kivy.properties import BooleanProperty,StringProperty
 Builder.load_file("./kv/dropbox.kv")
 
 
-class GameButton(ButtonBehavior, Label):
+class GameButton(ButtonBehavior, Widget):
     selected = BooleanProperty(False)
+    text = StringProperty("")
     instances = set()
 
     def __init__(self, game, controller, dropdown, **kwargs):
