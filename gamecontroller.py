@@ -165,7 +165,7 @@ class GameController():
 
     def postAnalysis(self, game, moveQualityDict):
         self.moveQualityDict = moveQualityDict
-        self.moveList.postAnalysis(moveQualityDict.values())
+        self.moveList.postAnalysis(moveQualityDict)
         self.moveListHeader.postAnalysis(moveQualityDict)
         self.moveQualityDict = moveQualityDict
         self.savedGames.storageDict.update([(game.game(), moveQualityDict)])
