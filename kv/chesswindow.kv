@@ -54,14 +54,15 @@
                 id : buttonAnalysis
                 text: 'analyse'
                 on_release: root.controller.analyseFullGame()
-            Widget:
             Button :
-                    size:tuple(map(int,self.parent.size))
-                    pos:tuple(map(int,self.parent.pos))
                 id : buttonGame
                 text : 'chooseGame'
-                on_release : root.dropdown.open(self)
-
+                on_release : root.dropdown.open(int_widget)
+                Widget:
+                    id:int_widget
+                    size:tuple(map(int,self.parent.size))
+                    pos:tuple(map(int,self.parent.pos))
+                    
         GridLayout:
             cols : 2
             padding : (10,10)
@@ -93,10 +94,9 @@
                 HeadMoveList:
                     id:hdMoveLst
                     controller:root.controller
-                    size_hint : (1,0.2)
-                    text: "azd"
+                    size_hint : (1,0.3)
                 MoveList:
-                    size_hint : (1,0.8)
+                    size_hint : 1,0.7
                     id:mvlst
 
             AnalysisProgressBar:
