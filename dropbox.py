@@ -4,6 +4,7 @@ from kivy.uix.behaviors.button import ButtonBehavior
 from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
+import kivy.effects.scroll
 from kivy.base import Builder
 from kivy.properties import BooleanProperty,StringProperty
 Builder.load_file("./kv/dropbox.kv")
@@ -21,7 +22,6 @@ class GameButton(ButtonBehavior, Widget):
         self.controller = controller
         self.dropdown = dropdown
         GameButton.instances.add(self)
-
     def loadGame(self, instance):
         self.dropdown.dismiss()
         self.controller.loadGame(self.game)
@@ -34,8 +34,10 @@ class GameMenu(DropDown):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.localCount = 1
-
+        self.localCount = 1 
+    def on_kv_post(self, base_widget):
+        self.effect_cls = kivy.effects.scroll.ScrollEffect
+        return super().on_kv_post(base_widget)
     def createButtonForGame(self, controller, gameIn):
         game = gameIn.game()
         button = GameButton(game, controller, self,

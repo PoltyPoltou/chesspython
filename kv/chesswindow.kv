@@ -54,7 +54,10 @@
                 id : buttonAnalysis
                 text: 'analyse'
                 on_release: root.controller.analyseFullGame()
+            Widget:
             Button :
+                    size:tuple(map(int,self.parent.size))
+                    pos:tuple(map(int,self.parent.pos))
                 id : buttonGame
                 text : 'chooseGame'
                 on_release : root.dropdown.open(self)
