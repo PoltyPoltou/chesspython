@@ -122,6 +122,7 @@ class GameController():
                 self.postAnalysis(self.game, self.savedGames.storageDict[game.game()])
                 self.progressBar.drawAllMeshes_from_qualitymove(
                     self.savedGames.storageDict[game.game()])
+        self.chessWindow.rotate_defined(game.game().headers["White"].lower() == self.chessWindow.get_input_text())
 
     def computerPlay(self):
         if(self.evalWrapper is not None):
@@ -147,6 +148,7 @@ class GameController():
 
     def updateCurrentNode(self, game):
         with self.lock:
+            if(game is not self.game):
             if self.game.game() is not game.game():
                 self.moveQualityDict = self.savedGames.storageDict.get(
                     self.game.game(), {})
@@ -160,6 +162,7 @@ class GameController():
                 self.evalWrapper.setInfoDict(self.localAnalyses[self.game])
             self.moveList.new_move(self.game, self)
             self.moveListHeader.on_updateGameNode(game)
+                self.moveListHeader.redraw_engine_variation(0)
             if(self.openingWidget is not None):
                 self.openingWidget.select_node(game)
 
@@ -170,6 +173,11 @@ class GameController():
         self.moveQualityDict = moveQualityDict
         self.savedGames.storageDict.update([(game.game(), moveQualityDict)])
         self.chessWindow.unlockLoad()
+        analysisDict = {}
+        for key in moveQualityDict:
+            if not moveQualityDict[key].theoric:
+                analysisDict.update([(key,moveQualityDict[key].evalDict)])
+        self.localAnalyses.update(analysisDict)
         self.updateCurrentNode(game.end())
 
     def analysisRunning(self):

@@ -77,6 +77,7 @@ class BoardWidget(GridLayout):
         self.oldBoardfen = ""
         self.analysis_arrow = True
         self.report_arrow = True
+        self.anim = True
         super().__init__(**kwargs)
 
     def on_kv_post(self, base_widget):
@@ -84,7 +85,7 @@ class BoardWidget(GridLayout):
         tileList = []
         for row in self.children:
             tileList.extend(row.children)
-        self.pieceManager = PieceManager(tileList, self.parent)
+        self.pieceManager = PieceManager(tileList, self.parent, self)
         if(self.evalBarWidget is not None):
             self.bestMove = None
         return super().on_kv_post(base_widget)
@@ -138,6 +139,14 @@ class BoardWidget(GridLayout):
     def on_touch_down(self, touch: MotionEvent):
         tileTouched, row = self.findTileTouched(touch)
         if(tileTouched is not None and row is not None):
+            if(touch.button == 'right'):
+                touch.grab(self)
+                self.lastTouchedTile = tileTouched
+        return super().on_touch_down(touch)
+
+    def on_touch_up(self, touch: MotionEvent):
+        tileTouched, row = self.findTileTouched(touch)
+        if(tileTouched is not None and row is not None):
             if(touch.button == "left"):
                 print(tileTouched.coords, self.children.index(row), row.children.index(
                     tileTouched), "WHITE" * self.board.turn + "BLACK" * (not self.board.turn))
@@ -145,12 +154,6 @@ class BoardWidget(GridLayout):
                 self.arrowManager.removeArrows()
             else:
                 self.unselectCase()
-            if(touch.button == 'right'):
-                touch.grab(self)
-                self.lastTouchedTile = tileTouched
-        return super().on_touch_down(touch)
-
-    def on_touch_up(self, touch: MotionEvent):
         if(touch.button == "right" and touch.grab_current is self):
             tileTouched, row = self.findTileTouched(touch)
             touch.ungrab(self)
@@ -158,10 +161,11 @@ class BoardWidget(GridLayout):
                 self.arrowManager.addArrow(self.lastTouchedTile, tileTouched)
         return super().on_touch_up(touch)
 
-    def handleSelection(self, tile: Tile):
+    def handleSelection(self, tile: Tile)->bool: #true if a move has been done
         if(self.selectedTile is not None):
             if(tile.coords == self.selectedTile.coords):
                 self.unselectCase()
+                return False
             else:
                 move = chess.Move.from_uci(
                     self.selectedTile.coords + tile.coords)
@@ -171,6 +175,7 @@ class BoardWidget(GridLayout):
                 if(self.board.is_legal(move) and not self.board.is_game_over(claim_draw=True)):
                     self.controller.playMove(move)
                     self.unselectCase()
+                    return True
                 else:
                     if(isPromoteLegal and not self.board.is_game_over(claim_draw=True)):
                         color = self.board.piece_at(
@@ -188,12 +193,15 @@ class BoardWidget(GridLayout):
 
                         promotebb.promotePlay = playMove
                         promotebb.open()
+                        return True # a move will be made
                     else:
                         self.unselectCase()
                         self.handleSelection(tile)
+                        return False
         else:
             if(self.board.piece_at(tile.square) is not None and self.board.piece_at(tile.square).color == self.board.turn):
                 self.selectCase(tile)
+            return False
 
     def unselectCase(self):
         if(self.selectedTile is not None):
@@ -239,7 +247,8 @@ class BoardWidget(GridLayout):
         if(self.board.move_stack != []):
             lastMoveIndexList.append(self.board.move_stack[-1].from_square)
             lastMoveIndexList.append(self.board.move_stack[-1].to_square)
-        self.pieceManager.updatePiecesOnBoard(self.board)
+        self.pieceManager.updatePiecesOnBoard(self.board, self.anim)
+        self.anim = True
         for row in self.children:
             for tile in row.children:
                 if(isinstance(tile, Tile) and tile.square < 64):

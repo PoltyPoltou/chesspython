@@ -1,8 +1,10 @@
 from kivy.base import Builder
 from typing import Optional
 from kivy.uix.image import Image
+from kivy.uix.behaviors.button import ButtonBehavior
 import chess
 from kivy.uix.widget import Widget
+from kivy.uix.scatter import Scatter
 from tile import Tile
 import kivy.animation
 from typing import List, Dict, Tuple
@@ -22,15 +24,22 @@ def setsize(instance, size):
     instance.size = size
 
 
-class ChessPieceWidget(Image):
+class ChessPieceWidget(Scatter):
     linkedTile: Optional[Tile] = ObjectProperty(allownone=True, rebind=True)
     source: Optional[str] = StringProperty()
 
-    def __init__(self, linkedTile, src, **kwargs):
+    def __init__(self, linkedTile, src, boardwidget, **kwargs):
         self.linkedTile = linkedTile
         super().__init__(**kwargs)
         self.source = src
         self.bindLinkedTile()
+        self.boardwidget = boardwidget
+        self.grabbed = False
+
+    def on_kv_post(self, base_widget):
+        self.do_scale = False
+        self.do_rotation = False
+        return super().on_kv_post(base_widget)
 
     def unbindLinkedTile(self):
         self.linkedTile.unbind(pos=setpos)
@@ -46,16 +55,43 @@ class ChessPieceWidget(Image):
     def getColumn(self):
         return ord(self.linkedTile.column) - ord('a')
 
+    def on_touch_down(self, touch):
+        if(self.collide_point(touch.x,touch.y)):
+            touch.grab(self)
+        super().on_touch_down(touch)
+        return False # continue the spreading of the event
+
+    def on_touch_up(self, touch):
+        if(touch.grab_current is self and touch.button == "left"):
+            touch.ungrab(self)
+            tile, _ = self.boardwidget.findTileTouched(touch)
+            move_made = self.boardwidget.handleSelection(tile)
+            #desactivate animation for next board update
+            self.boardwidget.anim = False
+            if(not move_made):
+                self.pos = self.linkedTile.pos
+                if(self.linkedTile is not tile):
+                    self.boardwidget.selectCase(self.linkedTile)
+        super().on_touch_up(touch)
+        return False
+
+    def on_transform_with_touch(self, touch):
+        self.center = touch.pos
+        if(not self.linkedTile.selected):
+            self.boardwidget.selectCase(self.linkedTile)
+            pass
+        return super().on_transform_with_touch(touch)
     pass
 
 
 class PieceManager:
-    def __init__(self, chessTileList: List[Tile], widgetToAdd: Widget) -> None:
+    def __init__(self, chessTileList: List[Tile], widgetToAdd: Widget, boardWidget) -> None:
         self.pieceDict: dict[chess.Piece, list[ChessPieceWidget]] = {}
         self.board: chess.Board = None
         self._chessTileList: list[Tile] = list(chessTileList)
         self._chessTileList.sort(key=lambda t: t.square)
         self.widgetToAdd = widgetToAdd
+        self.boardWidget = boardWidget
 
     def getTile(self, sq: int) -> Tile:
         if(self._chessTileList[0].square == 0):
@@ -65,7 +101,7 @@ class PieceManager:
 
     def pieceFactory(self, piece: chess.Piece, square: int):
         result = ChessPieceWidget(self.getTile(square),
-                                  imageDir + imageStyleDir + imageDict[piece.symbol()])
+                                  imageDir + imageStyleDir + imageDict[piece.symbol()],self.boardWidget)
         addToDictList(self.pieceDict, piece, result)
         self.widgetToAdd.add_widget(result)
 

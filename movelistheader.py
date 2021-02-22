@@ -73,6 +73,7 @@ class HeadMoveList(BoxLayout):
             self.last_info_dict = temp_dict
 
     def redraw_engine_variation(self, dt):
+        if self.gameNode is not None:
         board = self.gameNode.board()
         if(self.gameNode is not None and self.last_info_dict is not None and "pv" in self.last_info_dict and (self.info is None or self.last_info_dict["time"] != self.info["time"])):
             if(board.is_legal(self.last_info_dict["pv"][0])):
