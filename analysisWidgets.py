@@ -177,7 +177,7 @@ class AnalysisProgressBar(Widget):
             self.evalList.append(eval)
         score = eval["score"].white().score()
         if score is None and eval["score"].white().is_mate():
-            score = 100
+            score = eval["score"].white().moves * 1000
         pos = self.progress
         maxScale = 600
         lastHeight = min(max(self.lastScore, -maxScale), maxScale) / \
