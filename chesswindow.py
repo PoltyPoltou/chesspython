@@ -93,6 +93,16 @@ class ChessWindow(GridLayout):
             self.boardGUI.pov = 'WHITE'
         self.boardGUI.arrowManager.rotateBoard()
         self.boardGUI.update_board()
+    def rotate_defined(self, bool_white):
+        if(bool_white):
+            self.boardGUI.pov = 'WHITE'
+        else:
+            self.boardGUI.pov = 'BLACK'
+        self.boardGUI.arrowManager.rotateBoard()
+        self.boardGUI.update_board()
+        
+    def watch_chess_com(self):
+        self.controller.watch_chess_com()
 
     def show_load(self):
         content = LoadDialog(
@@ -113,6 +123,9 @@ class ChessWindow(GridLayout):
     def load_from_chess_com(self):
         username = self.inputText.text
         self.controller.loadChessComGames(username)
+
+    def get_input_text(self):
+        return self.inputText.text
 
     def confirmPopup(self, title, fun_on_accept):
         content = BoxLayout(orientation='horizontal')

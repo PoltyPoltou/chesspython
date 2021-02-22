@@ -74,42 +74,42 @@ class HeadMoveList(BoxLayout):
 
     def redraw_engine_variation(self, dt):
         if self.gameNode is not None:
-        board = self.gameNode.board()
-        if(self.gameNode is not None and self.last_info_dict is not None and "pv" in self.last_info_dict and (self.info is None or self.last_info_dict["time"] != self.info["time"])):
-            if(board.is_legal(self.last_info_dict["pv"][0])):
-                test_board = board.copy(stack=False)
-                legal_flag = True
-                for move in self.last_info_dict["pv"]:
-                    if(test_board.is_legal(move)):
-                        test_board.push(move)
-                    else:
-                        legal_flag = False
-                        break
-                if(legal_flag):
-                    self.info = self.last_info_dict
-                    self.computer_variation_widget.clear_widgets()
-                    sc, t = parseEvalFromScore(self.info["score"])
-                    lbl = ScoreLabel(text=" " + t + " ")
-                    lbl.color = (0, 0, 0, 1) if sc > 0 else (1, 1, 1, 1)
-                    lbl.bgColor = (0, 0, 0) if sc < 0 else (1, 1, 1)
-                    self.computer_variation_widget.add_widget(lbl)
-                    txt = " : " + str((self.gameNode.ply() + 1) // 2) + "."
-                    txt += " .. " * (self.gameNode.turn == chess.BLACK)
-                    txt += board.san(self.info["pv"][0]) + " "
-                    self.computer_variation_widget.add_widget(
-                        ComputerVariationLabel(text=txt))
-                    board.push(self.info["pv"][0])
-                    # we skip first move as it is different
-                    for move in self.info["pv"][1:]:
-                        if(board.turn == chess.WHITE):
-                            txt = str(board.fullmove_number) + \
-                                "." + board.san(move)
+            board = self.gameNode.board()
+            if(self.gameNode is not None and self.last_info_dict is not None and "pv" in self.last_info_dict and (self.info is None or self.last_info_dict["time"] != self.info["time"])):
+                if(board.is_legal(self.last_info_dict["pv"][0])):
+                    test_board = board.copy(stack=False)
+                    legal_flag = True
+                    for move in self.last_info_dict["pv"]:
+                        if(test_board.is_legal(move)):
+                            test_board.push(move)
                         else:
-                            txt = board.san(move)
-                        txt += " "
+                            legal_flag = False
+                            break
+                    if(legal_flag):
+                        self.info = self.last_info_dict
+                        self.computer_variation_widget.clear_widgets()
+                        sc, t = parseEvalFromScore(self.info["score"])
+                        lbl = ScoreLabel(text=" " + t + " ")
+                        lbl.color = (0, 0, 0, 1) if sc > 0 else (1, 1, 1, 1)
+                        lbl.bgColor = (0, 0, 0) if sc < 0 else (1, 1, 1)
+                        self.computer_variation_widget.add_widget(lbl)
+                        txt = " : " + str((self.gameNode.ply() + 1) // 2) + "."
+                        txt += " .. " * (self.gameNode.turn == chess.BLACK)
+                        txt += board.san(self.info["pv"][0]) + " "
                         self.computer_variation_widget.add_widget(
                             ComputerVariationLabel(text=txt))
-                        board.push(move)
+                        board.push(self.info["pv"][0])
+                        # we skip first move as it is different
+                        for move in self.info["pv"][1:]:
+                            if(board.turn == chess.WHITE):
+                                txt = str(board.fullmove_number) + \
+                                    "." + board.san(move)
+                            else:
+                                txt = board.san(move)
+                            txt += " "
+                            self.computer_variation_widget.add_widget(
+                                ComputerVariationLabel(text=txt))
+                            board.push(move)
 
 
 class DepthTracker(BoxLayout):

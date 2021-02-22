@@ -42,6 +42,10 @@
                     halign:"center"
                     on_state:  root.load_opening(False) if args[1] == "down" else  root.unload_opening(False)
                     disabled: root.opening_color if root.opening_color is not None else False
+            ToggleButton:
+                id:watch
+                text:"Watch ChessCom"
+                on_state: root.watch_chess_com()
             Button :
                 id : button
                 text: 'Load from file'

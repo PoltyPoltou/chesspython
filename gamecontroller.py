@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
+
+from kivy.clock import Clock
 if(TYPE_CHECKING):
     from typing import List, Optional
     from movelist import MoveList
@@ -37,6 +39,29 @@ class GameController():
         self.evalWrapper.start()
         self.dropdown = None
         self.openingGame = False
+        self.watching = False
+        self.watch_chesscom_reader = None
+        self.watching_trigger = Clock.create_trigger(
+            self.watch_new_game, interval=True, timeout=60)
+
+    def watch_chess_com(self):
+        self.watching = not self.watching
+        if(self.watching):
+            self.loadGame(self.chessWindow.dropdown.get_top_game())
+            self.watching_trigger()
+            self.watch_chesscom_reader = ChessComGameReader(self.chessWindow.get_input_text())
+            while(self.watch_chesscom_reader.nextGame() is not None):
+                pass #iterates over the games available to be at the last one
+        else:
+            self.watching_trigger.cancel()
+
+    def watch_new_game(self, dt):
+        if(not self.analysisRunning()):
+            new_game = self.watch_chesscom_reader.nextGame()
+            if(new_game is not None):
+                self.updateCurrentNode(new_game.end())
+                self.analyseFullGame()
+        pass
 
     def post_init_controller(self):
         self.updateCurrentNode(self.game)
@@ -66,14 +91,9 @@ class GameController():
         self.savedGames.storageDict = purged_games
 
     def is_game_already_saved(self, mapping, game):
-        if("Date" in game.headers and "StartTime" in game.headers):
-            for g in mapping:
-                if(g is game):
-                    return True
-                if("Date" in g.headers and "StartTime" in g.headers):
-                    if(g.headers["Date"] == game.headers["Date"] and
-                            g.headers["StartTime"] == game.headers["StartTime"]):
-                        return True
+        for g in mapping:
+            if(game_headers_equality(g,game)):
+                return True
         return False
 
     def playMove(self, move: chess.Move):
@@ -119,7 +139,7 @@ class GameController():
         self.moveList.scroll_y = 0
         if game.game() in self.savedGames.storageDict:
             if len(self.savedGames.storageDict[game]) > 0:
-                self.postAnalysis(self.game, self.savedGames.storageDict[game.game()])
+                self.postAnalysis(self.game, self.savedGames.storageDict[game.game()])  
                 self.progressBar.drawAllMeshes_from_qualitymove(
                     self.savedGames.storageDict[game.game()])
         self.chessWindow.rotate_defined(game.game().headers["White"].lower() == self.chessWindow.get_input_text())
@@ -149,22 +169,22 @@ class GameController():
     def updateCurrentNode(self, game):
         with self.lock:
             if(game is not self.game):
-            if self.game.game() is not game.game():
-                self.moveQualityDict = self.savedGames.storageDict.get(
-                    self.game.game(), {})
-            self.game = game
-            self.board = self.game.board()
-            self.boardWidget.board = self.board
-            self.boardWidget.update_board()
-            if(self.game not in self.localAnalyses or self.localAnalyses[self.game]["depth"] < self.evalWrapper.getDefaultDepth()):
-                self.evalWrapper.update(self.board)
-            else:
-                self.evalWrapper.setInfoDict(self.localAnalyses[self.game])
-            self.moveList.new_move(self.game, self)
-            self.moveListHeader.on_updateGameNode(game)
+                if self.game.game() is not game.game():
+                    self.moveQualityDict = self.savedGames.storageDict.get(
+                        self.game.game(), {})
+                self.game = game
+                self.board = self.game.board()
+                self.boardWidget.board = self.board
+                self.boardWidget.update_board()
+                if(self.game not in self.localAnalyses or self.localAnalyses[self.game]["depth"] < self.evalWrapper.getDefaultDepth()):
+                    self.evalWrapper.update(self.board)
+                else:
+                    self.evalWrapper.setInfoDict(self.localAnalyses[self.game])
+                self.moveList.new_move(self.game, self)
+                self.moveListHeader.on_updateGameNode(game)
                 self.moveListHeader.redraw_engine_variation(0)
-            if(self.openingWidget is not None):
-                self.openingWidget.select_node(game)
+                if(self.openingWidget is not None):
+                    self.openingWidget.select_node(game)
 
     def postAnalysis(self, game, moveQualityDict):
         self.moveQualityDict = moveQualityDict
@@ -205,3 +225,23 @@ class GameController():
             game = reader.nextGame()
         if prev is not None:
             self.loadGame(prev)
+
+
+def game_headers_equality(
+        g1: chess.pgn.Game,
+        g2: chess.pgn.Game) -> bool:
+    '''
+     is not suitable to detect changes between g1 and g2
+    '''
+    if(g1 is g2):
+        return True
+    h1: chess.pgn.Headers = g1.game().headers
+    h2: chess.pgn.Headers = g2.game().headers
+    if(h1["White"] != "?" and h2["White"] != "?" and h1["Black"] != "?" and h2["Black"] != "?"):
+        return h1["White"] ==  h2["White"] and \
+                h1["Black"] ==  h2["Black"] and \
+                (not ("StartTime" in h1 and "StartTime" in h2)  or h1["StartTime"] == h1["StartTime"]) and \
+                (not ("Date" in h1 and "Date" in h2)  or h1["Date"] == h1["Date"]) and\
+                g1.end().board().fen() == g2.end().board().fen() 
+    else:
+        return g1.end().board().fen() == g2.end().board().fen() 
